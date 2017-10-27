@@ -1,0 +1,45 @@
+\documentclass[11pt, a4paper, leqno]{article}
+\usepackage[italian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{libertine} % font bello
+\usepackage[paper=a4paper,top=1.1in,bottom=1.1in,right=1.1in,left=1.1in]{geometry} % margini
+
+\usepackage{enumitem} % liste più compatte (se ce ne saranno)
+\setlist[enumerate]{itemsep=0.0em}
+\setlist[itemize]{itemsep=0.0em}
+\usepackage[compact]{titlesec}
+
+\newcommand{\nome}[2]{
+\begin{minipage}[t]{0.18\linewidth}
+	\centering #1\par
+	\centering\small (#2)\par
+	%\vspace{2em}
+	%\rule{\textwidth}{0.6pt} % riga per la firma (nelle relazioni di elettronica serviva)
+\end{minipage}
+}
+
+% Questo era utile per evidenziare le cose "dubbie e da correggere"
+% Poi si elimina il comando cosi' non restano \boh{} in giro
+%\usepackage{xcolor}
+%\newcommand{\boh}[1]{\textcolor{red}{#1}}
+
+\begin{document}	
+	\begin{center}
+		{\huge\textbf{OMA cose boh}}\par
+		\vspace{0.3em}
+		{\large\textbf{Gruppo 9}}\par
+		\vspace{1em}
+		\nome{Nome Cognome}{s123456}
+		\nome{Nome Cognome}{s123456}
+		\nome{Nome Cognome}{s123456}
+		\nome{Nome Cognome}{s123456}
+		\nome{Nome Cognome}{s123456}
+	\end{center}
+	
+	\section{The problem}
+	
+	Bla bla bla
+	
+\end{document}
