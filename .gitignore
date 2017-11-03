@@ -2,3 +2,8 @@
 *.log
 *.synctex.gz
 *.pdf
+.idea
+*.slo
+*.stu
+*.dat
+*.exm
