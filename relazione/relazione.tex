@@ -1,0 +1,141 @@
+\documentclass[11pt, a4paper, leqno]{article}
+\usepackage[italian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{libertine} % font bello
+\usepackage[paper=a4paper,top=1in,bottom=1.1in,right=1in,left=1in]{geometry} % margini
+
+\usepackage{enumitem} % liste più compatte (se ce ne saranno)
+\setlist[enumerate]{itemsep=0.0em}
+\setlist[itemize]{itemsep=0.0em}
+\usepackage[compact]{titlesec}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\newcommand{\nome}[2]{
+\begin{minipage}[t]{0.185\linewidth}
+	\centering #1\par
+	\centering\small (#2)\par
+	%\vspace{2em}
+	%\rule{\textwidth}{0.6pt} % riga per la firma (nelle relazioni di elettronica serviva)
+\end{minipage}
+}
+
+% Questo era utile per evidenziare le cose "dubbie e da correggere"
+% Poi si elimina il comando cosi' non restano \boh{} in giro
+%\usepackage{xcolor}
+%\newcommand{\boh}[1]{\textcolor{red}{#1}}
+
+\begin{document}	
+	\begin{center}
+		{\huge\textbf{OMA Assignment}}\par
+		\vspace{0.3em}
+		{\large\textbf{Group 9}}\par
+		\vspace{1em}
+		\nome{Piero Macaluso}{s252894}
+		\nome{Lorenzo Manicone}{s217189}
+		\nome{Donato Tortoriello}{s205639}
+		\nome{Ludovico Pavesi}{s246422}
+		\nome{Alberto Romano}{s164371}
+	\end{center}
+	
+	\section{Notation}
+	
+	\subsection{Data}
+	
+	\paragraph{$n_{e,e'}$} Number of conflicting students between exam $e$ and $e'$
+	
+	\subsection{Variables}
+	
+	\paragraph{$cal_{t,e}$} ``Calendar'': boolean that is 1 when exam $e$ is placed in timeslot $t$, and 0 otherwise
+	
+	\paragraph{$y_{e,e',k}$} Boolean that is 1 when exams $e$ and $e'$ are $k$ timeslots apart, 0 otherwise $k \in \{1,\dots,5\}$
+	
+	\paragraph{$\tau_{e,e'}$} Boolean indicating when there's a conflict between exam $e$ and $e'$
+	
+	\paragraph{$B_{e,e'}$} Boolean indicating when distance between exam $e$ and $e'$ is positive or negative
+	
+	\paragraph{$i_{e,e'}$} Distance between two exams between exam $e$ and $e'$
+	
+	\paragraph{$w_{e,e',k}$} Boolean indicating that distance between exam $e$ and $e'$ is greater than or equal to $k \in \{1,\dots,5\}$ % TODO: prevenire line break
+	
+	\paragraph{$z_{e,e',k}$} Boolean indicating that distance between exam $e$ and $e'$ is less than or equal to $k \in \{1,\dots,5\}$
+	
+	\section{LP formulation}
+	
+	\subsection{Objective function}
+	
+	\[
+		\min\frac{1}{\mid S\mid}\sum_{e,e'} n_{e,e'}\left(16y_{e,e',1}+8y_{e,e',2}+4y_{e,e',3}+2y_{e,e',4}+y_{e,e',5}\right)
+	\]
+	
+	\subsection{Constraints}
+	
+	\subsubsection{Apply exam}
+	
+	\[
+		\sum_{t} cal_{t,e} = 1 \qquad\forall e
+	\]
+	
+	\subsubsection{Conflict avoid}
+	
+	\begin{align*}
+		n_{e,e'} \leq M\tau_{e,e'} &\qquad \forall e,e' \\
+		n_{e,e'} \geq \varepsilon\tau_{e,e'} &\qquad \forall e,e'
+	\end{align*}
+
+	\[
+		cal_{t,e}+cal_{t,e'} \leq 2 - \tau \qquad \forall t,e,e'
+	\]
+	
+	\subsubsection{Distance}
+	
+	\begin{align*}
+		a_e :=& \sum_{t} t\cdot cal_{t,e} \\
+		b_{e'} :=& \sum_{t'} t'\cdot cal_{t',e'}
+	\end{align*}
+	
+	\[
+	\begin{cases}
+		i_{e,e'} \geq a_e-b_{e'}&\quad \forall e,e'\\
+		i_{e,e'} \geq b_{e'}-a_e&\quad \forall e,e'
+	\end{cases}
+	\]
+	
+	\[
+	\begin{cases}
+	a_e-b_{e'} + MB \geq i_{e,e'}&\quad \forall e,e'\\
+	b_{e'}-a_e + M(1-B) \geq i_{e,e'}&\quad \forall e,e'\\
+	a_e-b_{e'} \leq M(1-B)&\quad \forall e,e'\\
+	b_{e'}-a_e \leq MB&\quad \forall e,e'
+	\end{cases}
+	\]
+	
+	\subsubsection{Penality function}
+	
+	\begin{align*}
+		i_{e,e'} \geq k w_{e,e',k} &\qquad\forall k \in \{1,\dots,5\},e,e'\\
+		i_{e,e'} \leq (k-1) + M  w_{e,e',k} &\qquad\forall k \in \{1,\dots,5\},e,e'
+	\end{align*}
+	
+	\begin{align*}
+		i_{e,e'} \geq \left(k+1\right)\left(1-z_{e,e',k}\right) &\qquad\forall k \in \{1,\dots,5\},e,e'\\
+		i_{e,e'} \leq k + M  (1-z_{e,e',k}) &\qquad\forall k \in \{1,\dots,5\},e,e'
+	\end{align*}
+	
+	\begin{align*}
+		w_{e,e',k} + z_{e,e',k} \leq y_{e,e',k} + 1 &\qquad\forall k \in \{1,\dots,5\},e,e'\\
+		w_{e,e',k} + z_{e,e',k} \geq 2y_{e,e',k} &\qquad\forall k \in \{1,\dots,5\},e,e'
+	\end{align*}
+	
+	\subsubsection{Domain}
+	
+	\[
+		i_{e,e'} \in \mathbb{Z}^{+}
+	\]
+	
+	\[
+		cal_{t,e},\ y_{e,e',k},\ \tau_{e,e'},\ B_{e,e'},\ w_{e,e',k},\ z_{e,e',k} \in \{0,1\}
+	\]
+\end{document}
