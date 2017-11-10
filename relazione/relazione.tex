@@ -46,6 +46,8 @@
 	
 	\paragraph{$n_{e,e'}$} Number of conflicting students between exam $e$ and $e'$
 	
+	\paragraph{$\mid S \mid$} Total number of students
+	
 	\subsection{Variables}
 	
 	\paragraph{$cal_{t,e}$} ``Calendar'': boolean that is 1 when exam $e$ is placed in timeslot $t$, and 0 otherwise
@@ -78,23 +80,32 @@
 		\sum_{t} cal_{t,e} = 1 \qquad\forall e
 	\]
 	
+	This is necessary to be sure that every exam is scheduled to exactly one time slot.
+	
 	\subsubsection{Conflict avoid}
 	
 	\begin{align*}
-		n_{e,e'} \leq M\tau_{e,e'} &\qquad \forall e,e' \\
-		n_{e,e'} \geq \varepsilon\tau_{e,e'} &\qquad \forall e,e'
+		n_{e,e'} \leq M_1\tau_{e,e'} &\qquad \forall e,e' \\
+		n_{e,e'} \geq \tau_{e,e'} &\qquad \forall e,e'
 	\end{align*}
+	
+	$M_1$ is an upper bound, for instance $2\cdot\mid S\mid$. This constraint make sure $\tau$ is set correctly.
 
 	\[
 		cal_{t,e}+cal_{t,e'} \leq 2 - \tau \qquad \forall t,e,e'
 	\]
 	
+	Two ``conflicting'' exams cannot be placed in the same time slot.
+	
 	\subsubsection{Distance}
 	
+	Defining:
 	\begin{align*}
 		a_e :=& \sum_{t} t\cdot cal_{t,e} \\
 		b_{e'} :=& \sum_{t'} t'\cdot cal_{t',e'}
 	\end{align*}
+	
+	there are these constraints:
 	
 	\[
 	\begin{cases}
@@ -102,6 +113,8 @@
 		i_{e,e'} \geq b_{e'}-a_e&\quad \forall e,e'
 	\end{cases}
 	\]
+	
+	
 	
 	\[
 	\begin{cases}
