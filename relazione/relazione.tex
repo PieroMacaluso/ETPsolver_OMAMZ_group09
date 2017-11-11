@@ -85,14 +85,14 @@
 	\subsubsection{Conflict avoid}
 	
 	\begin{align*}
-		n_{e,e'} \leq M_1\tau_{e,e'} &\qquad \forall e,e' \\
-		n_{e,e'} \geq \tau_{e,e'} &\qquad \forall e,e'
+		n_{e,e'} \leq M_1\tau_{e,e'} &\qquad \forall e,e'<e \\
+		n_{e,e'} \geq \tau_{e,e'} &\qquad \forall e,e'<e
 	\end{align*}
 	
 	$M_1$ is an upper bound, for instance $2\cdot\mid S\mid$. This constraint make sure $\tau$ is set correctly.
 
 	\[
-		cal_{t,e}+cal_{t,e'} \leq 2 - \tau \qquad \forall t,e,e'
+		cal_{t,e}+cal_{t,e'} \leq 2 - \tau \qquad \forall t,e,e'<e
 	\]
 	
 	Two ``conflicting'' exams cannot be placed in the same time slot.
@@ -109,8 +109,8 @@
 	
 	\[
 	\begin{cases}
-		i_{e,e'} \geq a_e-b_{e'}&\quad \forall e,e'\\
-		i_{e,e'} \geq b_{e'}-a_e&\quad \forall e,e'
+		i_{e,e'} \geq a_e-b_{e'}&\quad \forall e,e'<e\\
+		i_{e,e'} \geq b_{e'}-a_e&\quad \forall e,e'<e
 	\end{cases}
 	\]
 	
@@ -118,28 +118,28 @@
 	
 	\[
 	\begin{cases}
-	a_e-b_{e'} + MB \geq i_{e,e'}&\quad \forall e,e'\\
-	b_{e'}-a_e + M(1-B) \geq i_{e,e'}&\quad \forall e,e'\\
-	a_e-b_{e'} \leq M(1-B)&\quad \forall e,e'\\
-	b_{e'}-a_e \leq MB&\quad \forall e,e'
+	a_e-b_{e'} + MB \geq i_{e,e'}&\quad \forall e,e'<e\\
+	b_{e'}-a_e + M(1-B) \geq i_{e,e'}&\quad \forall e,e'<e\\
+	a_e-b_{e'} \leq M(1-B)&\quad \forall e,e<e'\\
+	b_{e'}-a_e \leq MB&\quad \forall e,e'<e
 	\end{cases}
 	\]
 	
 	\subsubsection{Penality function}
 	
 	\begin{align*}
-		i_{e,e'} \geq k w_{e,e',k} &\qquad\forall k \in \{1,\dots,5\},e,e'\\
-		i_{e,e'} \leq (k-1) + M  w_{e,e',k} &\qquad\forall k \in \{1,\dots,5\},e,e'
+		i_{e,e'} \geq k w_{e,e',k} &\qquad\forall k \in \{1,\dots,5\},e,e'<e\\
+		i_{e,e'} \leq (k-1) + M  w_{e,e',k} &\qquad\forall k \in \{1,\dots,5\},e,e'<e
 	\end{align*}
 	
 	\begin{align*}
-		i_{e,e'} \geq \left(k+1\right)\left(1-z_{e,e',k}\right) &\qquad\forall k \in \{1,\dots,5\},e,e'\\
-		i_{e,e'} \leq k + M  (1-z_{e,e',k}) &\qquad\forall k \in \{1,\dots,5\},e,e'
+		i_{e,e'} \geq \left(k+1\right)\left(1-z_{e,e',k}\right) &\qquad\forall k \in \{1,\dots,5\},e,e'<e\\
+		i_{e,e'} \leq k + M  (1-z_{e,e',k}) &\qquad\forall k \in \{1,\dots,5\},e,e'<e
 	\end{align*}
 	
 	\begin{align*}
-		w_{e,e',k} + z_{e,e',k} \leq y_{e,e',k} + 1 &\qquad\forall k \in \{1,\dots,5\},e,e'\\
-		w_{e,e',k} + z_{e,e',k} \geq 2y_{e,e',k} &\qquad\forall k \in \{1,\dots,5\},e,e'
+		w_{e,e',k} + z_{e,e',k} \leq y_{e,e',k} + 1 &\qquad\forall k \in \{1,\dots,5\},e,e'<e\\
+		w_{e,e',k} + z_{e,e',k} \geq 2y_{e,e',k} &\qquad\forall k \in \{1,\dots,5\},e,e'<e
 	\end{align*}
 	
 	\subsubsection{Domain}
