@@ -2,7 +2,7 @@
 \usepackage[italian]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-
+\usepackage{parskip}
 \usepackage{libertine} % font bello
 \usepackage[paper=a4paper,top=1in,bottom=1.1in,right=1in,left=1in]{geometry} % margini
 
@@ -99,13 +99,20 @@
 	
 	\subsubsection{Distance}
 	
+	In order to define $i$, this constraint must be linearized:
+	
+	\[
+	i_{e,e'} = \left|\sum_{t} t\cdot cal_{t,e} - \sum_{t} t\cdot cal_{t,e'}\right|
+	\]
+	
 	Defining:
+	
 	\begin{align*}
 		a_e :=& \sum_{t} t\cdot cal_{t,e} \\
 		b_{e'} :=& \sum_{t'} t'\cdot cal_{t',e'}
 	\end{align*}
 	
-	there are these constraints:
+	after linearization, these constraints are obtained:
 	
 	\[
 	\begin{cases}
@@ -113,8 +120,6 @@
 		i_{e,e'} \geq b_{e'}-a_e&\quad \forall e,e'<e
 	\end{cases}
 	\]
-	
-	
 	
 	\[
 	\begin{cases}
@@ -132,15 +137,21 @@
 		i_{e,e'} \leq (k-1) + M  w_{e,e',k} &\qquad\forall k \in \{1,\dots,5\},e,e'<e
 	\end{align*}
 	
+	This is in order to apply values to $w$.
+	
 	\begin{align*}
 		i_{e,e'} \geq \left(k+1\right)\left(1-z_{e,e',k}\right) &\qquad\forall k \in \{1,\dots,5\},e,e'<e\\
 		i_{e,e'} \leq k + M  (1-z_{e,e',k}) &\qquad\forall k \in \{1,\dots,5\},e,e'<e
 	\end{align*}
 	
+	This is in order to apply values to $z$.
+	
 	\begin{align*}
 		w_{e,e',k} + z_{e,e',k} \leq y_{e,e',k} + 1 &\qquad\forall k \in \{1,\dots,5\},e,e'<e\\
 		w_{e,e',k} + z_{e,e',k} \geq 2y_{e,e',k} &\qquad\forall k \in \{1,\dots,5\},e,e'<e
 	\end{align*}
+	
+	This is in order to apply values to $y$, which is needed in the objective function, using $w$ and $z$.
 	
 	\subsubsection{Domain}
 	
