@@ -27,6 +27,9 @@
 %\usepackage{xcolor}
 %\newcommand{\boh}[1]{\textcolor{red}{#1}}
 
+\newcommand{\eqp}[1]{\textit{(eq. \ref{#1})}}
+\newcommand{\eq}[1]{\textit{\ref{#1}}}
+
 \begin{document}	
 	\begin{center}
 		{\huge\textbf{OMA Assignment}}\par
@@ -39,6 +42,75 @@
 		\nome{Ludovico Pavesi}{s246422}
 		\nome{Alberto Romano}{s164371}
 	\end{center}
+
+	\section{LP Formulation}
+
+	\begin{equation}
+		\tag{Objective function}
+		\label{of}
+		\min\frac{1}{\left|S\right|
+		}\sum_{e,e'} n_{e,e'}\left(16y_{e,e',1}+8y_{e,e',2}+4y_{e,e',3}+2y_{e,e',4}+y_{e,e',5}\right)
+	\end{equation}	
+	\begin{equation}
+		\label{apply}
+		\sum_{t} cal_{t,e} = 1 \qquad\forall\ e
+	\end{equation}
+	\begin{equation}
+	\label{conflict1}
+	\begin{aligned}
+	n_{e,e'} \leq M\tau_{e,e'} &\qquad \forall\ e,e'<e \\
+	n_{e,e'} \geq \tau_{e,e'} &\qquad \forall\ e,e'<e
+	\end{aligned}
+	\end{equation}
+	\begin{equation}
+	\label{conflict2}
+	cal_{t,e}+cal_{t,e'} \leq 2 - \tau \qquad \forall\ t,e,e'<e
+	\end{equation}
+	\begin{equation}
+	\label{distance1}
+	\begin{cases}
+	i_{e,e'} \geq a_e-b_{e'}&\quad \forall\ e,e'<e\\
+	i_{e,e'} \geq b_{e'}-a_e&\quad \forall\ e,e'<e
+	\end{cases}
+	\end{equation}
+	\begin{equation}
+	\begin{cases}
+	\label{distance2}
+	a_e-b_{e'} + NB \geq i_{e,e'}&\quad \forall\ e,e'<e\\
+	b_{e'}-a_e + N(1-B) \geq i_{e,e'}&\quad \forall\ e,e'<e\\
+	a_e-b_{e'} \leq N(1-B)&\quad \forall\ e,e'<e\\
+	b_{e'}-a_e \leq NB&\quad \forall\ e,e'<e
+	\end{cases}
+	\end{equation}
+	\begin{equation}
+	\label{penaltyw}
+	\begin{aligned}
+	i_{e,e'} \geq k w_{e,e',k} &\qquad\forall\ k \in \{1,\dots,5\},e,e'<e\\
+	i_{e,e'} \leq (k-1) + N  w_{e,e',k} &\qquad\forall\ k \in \{1,\dots,5\},e,e'<e
+	\end{aligned}
+	\end{equation}
+	\begin{equation}
+	\label{penaltyz}
+	\begin{aligned}
+	i_{e,e'} \geq \left(k+1\right)\left(1-z_{e,e',k}\right) &\qquad\forall\ k \in \{1,\dots,5\},e,e'<e\\
+	i_{e,e'} \leq k + N  (1-z_{e,e',k}) &\qquad\forall\ k \in \{1,\dots,5\},e,e'<e
+	\end{aligned}
+	\end{equation}
+	\begin{equation}
+	\label{penaltyy}
+	\begin{aligned}
+	w_{e,e',k} + z_{e,e',k} \leq y_{e,e',k} + 1 &\qquad\forall\ k \in \{1,\dots,5\},e,e'<e\\
+	w_{e,e',k} + z_{e,e',k} \geq 2y_{e,e',k} &\qquad\forall\ k \in \{1,\dots,5\},e,e'<e
+	\end{aligned}
+	\end{equation}
+	\begin{equation}
+	\label{domain1}
+	i_{e,e'} \in \mathbb{Z}^{+}
+	\end{equation}
+	\begin{equation}
+	\label{domain2}
+	cal_{t,e},\ y_{e,e',k},\ \tau_{e,e'},\ B_{e,e'},\ w_{e,e',k},\ z_{e,e',k} \in \{0,1\}
+	\end{equation}
 	
 	\section{Notation}
 	
@@ -46,7 +118,7 @@
 	
 	\paragraph{$n_{e,e'}$} Number of conflicting students between exam $e$ and $e'$
 	
-	\paragraph{$\mid S \mid$} Total number of students
+	\paragraph{$\left|S\right|$} Total number of students
 	
 	\subsection{Variables}
 	
@@ -60,106 +132,36 @@
 	
 	\paragraph{$i_{e,e'}$} Distance between two exams between exam $e$ and $e'$
 	
-	\paragraph{$w_{e,e',k}$} Boolean indicating that distance between exam $e$ and $e'$ is greater than or equal to $k \in \{1,\dots,5\}$ % TODO: prevenire line break
+	\paragraph{$w_{e,e',k}$} Boolean indicating that distance between exam $e$ and $e'$ is greater than or equal to \mbox{$k \in \{1,\dots,5\}$}
 	
 	\paragraph{$z_{e,e',k}$} Boolean indicating that distance between exam $e$ and $e'$ is less than or equal to $k \in \{1,\dots,5\}$
 	
-	\section{LP formulation}
 	
-	\subsection{Objective function}
+	\section{Explanation}
 	
-	\[
-		\min\frac{1}{\mid S\mid}\sum_{e,e'} n_{e,e'}\left(16y_{e,e',1}+8y_{e,e',2}+4y_{e,e',3}+2y_{e,e',4}+y_{e,e',5}\right)
-	\]
+	Objective function is obvious.
 	
-	\subsection{Constraints}
+	Constraint \eq{apply} is needed to be sure that every exam is scheduled to exactly one time slot.
 	
-	\subsubsection{Apply exam}
+	Constraint \eq{conflict1} applies values to $\tau$, and constraint \eq{conflict2} prevents two ``conflicting'' exams from being placed in the same time slot. $M$ is an upper bound, for instance $2\cdot\left|S\right|$.
 	
-	\[
-		\sum_{t} cal_{t,e} = 1 \qquad\forall e
-	\]
-	
-	This is necessary to be sure that every exam is scheduled to exactly one time slot.
-	
-	\subsubsection{Conflict avoid}
-	
-	\begin{align*}
-		n_{e,e'} \leq M_1\tau_{e,e'} &\qquad \forall e,e'<e \\
-		n_{e,e'} \geq \tau_{e,e'} &\qquad \forall e,e'<e
-	\end{align*}
-	
-	$M_1$ is an upper bound, for instance $2\cdot\mid S\mid$. This constraint make sure $\tau$ is set correctly.
-
-	\[
-		cal_{t,e}+cal_{t,e'} \leq 2 - \tau \qquad \forall t,e,e'<e
-	\]
-	
-	Two ``conflicting'' exams cannot be placed in the same time slot.
-	
-	\subsubsection{Distance}
-	
-	In order to define $i$, this constraint must be linearized:
-	
+	Constraints \eq{distance1} and \eq{distance2} arise from this definition of $i$ (distance between each two exams), which must be linearized:
 	\[
 	i_{e,e'} = \left|\sum_{t} t\cdot cal_{t,e} - \sum_{t} t\cdot cal_{t,e'}\right|
 	\]
-	
-	Defining:
-	
-	\begin{align*}
-		a_e :=& \sum_{t} t\cdot cal_{t,e} \\
-		b_{e'} :=& \sum_{t'} t'\cdot cal_{t',e'}
-	\end{align*}
-	
-	after linearization, these constraints are obtained:
-	
+	In order to do so, first it had to be split into two inequations:
 	\[
-	\begin{cases}
-		i_{e,e'} \geq a_e-b_{e'}&\quad \forall e,e'<e\\
-		i_{e,e'} \geq b_{e'}-a_e&\quad \forall e,e'<e
-	\end{cases}
+		i_{e,e'} \geq \left|\sum_{t} t\cdot cal_{t,e} - \sum_{t} t\cdot cal_{t,e'}\right| \quad \land \quad i_{e,e'} \leq \left|\sum_{t} t\cdot cal_{t,e} - \sum_{t} t\cdot cal_{t,e'}\right|
 	\]
-	
+	then, after defining:
 	\[
-	\begin{cases}
-	a_e-b_{e'} + MB \geq i_{e,e'}&\quad \forall e,e'<e\\
-	b_{e'}-a_e + M(1-B) \geq i_{e,e'}&\quad \forall e,e'<e\\
-	a_e-b_{e'} \leq M(1-B)&\quad \forall e,e<e'\\
-	b_{e'}-a_e \leq MB&\quad \forall e,e'<e
-	\end{cases}
+	a_e := \sum_{t} t\cdot cal_{t,e} \qquad\text{and}\qquad b_{e'} := \sum_{t'} t'\cdot cal_{t',e'}
 	\]
+	the aforementioned inequations were linearized to get rid of the modulus, obtaining system of inequations \eq{distance1} from the first and \eq{distance2} from the second. $N$ is an upper bound, for instance \mbox{$2\cdot\text{\textit{number of time slots}}$}.
+
+	Constraint \eq{penaltyw} is needed in order to apply values to $w$ and constraint \eq{penaltyz} to $z$.
 	
-	\subsubsection{Penality function}
+	Constaint \eq{penaltyz} is then used apply values to $y$, which is needed in the objective function, using $w$ and $z$.
 	
-	\begin{align*}
-		i_{e,e'} \geq k w_{e,e',k} &\qquad\forall k \in \{1,\dots,5\},e,e'<e\\
-		i_{e,e'} \leq (k-1) + M  w_{e,e',k} &\qquad\forall k \in \{1,\dots,5\},e,e'<e
-	\end{align*}
-	
-	This is in order to apply values to $w$.
-	
-	\begin{align*}
-		i_{e,e'} \geq \left(k+1\right)\left(1-z_{e,e',k}\right) &\qquad\forall k \in \{1,\dots,5\},e,e'<e\\
-		i_{e,e'} \leq k + M  (1-z_{e,e',k}) &\qquad\forall k \in \{1,\dots,5\},e,e'<e
-	\end{align*}
-	
-	This is in order to apply values to $z$.
-	
-	\begin{align*}
-		w_{e,e',k} + z_{e,e',k} \leq y_{e,e',k} + 1 &\qquad\forall k \in \{1,\dots,5\},e,e'<e\\
-		w_{e,e',k} + z_{e,e',k} \geq 2y_{e,e',k} &\qquad\forall k \in \{1,\dots,5\},e,e'<e
-	\end{align*}
-	
-	This is in order to apply values to $y$, which is needed in the objective function, using $w$ and $z$.
-	
-	\subsubsection{Domain}
-	
-	\[
-		i_{e,e'} \in \mathbb{Z}^{+}
-	\]
-	
-	\[
-		cal_{t,e},\ y_{e,e',k},\ \tau_{e,e'},\ B_{e,e'},\ w_{e,e',k},\ z_{e,e',k} \in \{0,1\}
-	\]
+	Constraints \eq{domain1} and \eq{domain2} represent the domain of each variable that is used in the problem formulation.
 \end{document}
