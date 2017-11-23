@@ -1,7 +1,7 @@
 #!/bin/php
 <?php
 
-define('INPUT', 'test.stu');
+define('INPUT', 'instance.stu');
 
 $data = file_get_contents(INPUT);
 if($data === false) {
