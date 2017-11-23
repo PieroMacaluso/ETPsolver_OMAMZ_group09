@@ -9,25 +9,33 @@ public class Main {
     public static void main(String[] args) {
 	    System.out.println("Hello wooooorld");
 
-        int n = 5;
-        int m = 7;
-        int i, j;
+        // TODO: fare 1 iterazione di genetic, tot di swap o altre ottimizzazioni, piu' si va avanti piu' farne di swap (bisogna misurare il teeeeempo)
+    }
 
-        int[][] cose = new int[n][m];
+    /**
+     * Crea una soluzione iniziale fattibile, in qualche modo greedy.
+     *
+     * @param data Dati di partenza
+     * @return soluzione feasible ma che fa schifo
+     */
+    public static Solution greedyStart(Data data) {
+        return null;
+    }
 
-        for(i = 0; i < n; i++) {
-            for(j = 0; j < m; j++) {
-                cose[i][j] = i*j;
-            }
-        }
+    /**
+     * Applica l'algoritmo genetico
+     *
+     * @param p1 parent 1
+     * @param p2 parent 2
+     */
+    public void genetic(Solution p1, Solution p2) {
+    }
 
-
-        for(i = 0; i < n; i++) {
-            for(j = 0; j < m; j++) {
-                System.out.print(cose[i][j]);
-                System.out.print(", ");
-            }
-            System.out.println("");
-        }
+    /**
+     * Effettua swap "a caso" per migliorare la soluzione, restando nel neighborhood
+     *
+     * @param sol una soluzione
+     */
+    public void optimize(Solution sol) {
     }
 }
