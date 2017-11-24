@@ -1,0 +1,167 @@
+\documentclass[11pt, a4paper, leqno]{article}
+\usepackage[italian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{parskip}
+\usepackage{libertine} % font bello
+\usepackage[paper=a4paper,top=1in,bottom=1.1in,right=1in,left=1in]{geometry} % margini
+
+\usepackage{enumitem} % liste più compatte (se ce ne saranno)
+\setlist[enumerate]{itemsep=0.0em}
+\setlist[itemize]{itemsep=0.0em}
+\usepackage[compact]{titlesec}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\newcommand{\nome}[2]{
+\begin{minipage}[t]{0.185\linewidth}
+	\centering #1\par
+	\centering\small (#2)\par
+	%\vspace{2em}
+	%\rule{\textwidth}{0.6pt} % riga per la firma (nelle relazioni di elettronica serviva)
+\end{minipage}
+}
+
+% Questo era utile per evidenziare le cose "dubbie e da correggere"
+% Poi si elimina il comando cosi' non restano \boh{} in giro
+%\usepackage{xcolor}
+%\newcommand{\boh}[1]{\textcolor{red}{#1}}
+
+\newcommand{\eqp}[1]{\textit{(eq. \ref{#1})}}
+\newcommand{\eq}[1]{\textit{\ref{#1}}}
+
+\begin{document}	
+	\begin{center}
+		{\huge\textbf{OMA Assignment}}\par
+		\vspace{0.3em}
+		{\large\textbf{Group 9}}\par
+		\vspace{1em}
+		\nome{Piero Macaluso}{s252894}
+		\nome{Lorenzo Manicone}{s217189}
+		\nome{Donato Tortoriello}{s205639}
+		\nome{Ludovico Pavesi}{s246422}
+		\nome{Alberto Romano}{s254036} % 164371
+	\end{center}
+
+	\section{LP Formulation}
+
+	\begin{equation}
+		\tag{Objective function}
+		\label{of}
+		\min\frac{1}{\left|S\right|
+		}\sum_{e,e'} n_{e,e'}\left(16y_{e,e',1}+8y_{e,e',2}+4y_{e,e',3}+2y_{e,e',4}+y_{e,e',5}\right)
+	\end{equation}
+	\begin{equation}
+		\label{apply}
+		\sum_{t} cal_{t,e} = 1 \qquad\forall\ e
+	\end{equation}
+	\begin{equation}
+	\label{conflict1}
+	\begin{aligned}
+	n_{e,e'} \leq M\tau_{e,e'} &\qquad \forall\ e,e'<e \\
+	n_{e,e'} \geq \tau_{e,e'} &\qquad \forall\ e,e'<e
+	\end{aligned}
+	\end{equation}
+	\begin{equation}
+	\label{conflict2}
+	cal_{t,e}+cal_{t,e'} \leq 2 - \tau \qquad \forall\ t,e,e'<e
+	\end{equation}
+	\begin{equation}
+	\label{distance1}
+	\begin{cases}
+	i_{e,e'} \geq a_e-a_{e'}&\quad \forall\ e,e'<e\\
+	i_{e,e'} \geq a_{e'}-a_e&\quad \forall\ e,e'<e
+	\end{cases}
+	\end{equation}
+	\begin{equation}
+	\begin{cases}
+	\label{distance2}
+	a_e-a_{e'} + NB \geq i_{e,e'}&\quad \forall\ e,e'<e\\
+	a_{e'}-a_e + N(1-B) \geq i_{e,e'}&\quad \forall\ e,e'<e\\
+	a_e-a_{e'} \leq N(1-B)&\quad \forall\ e,e'<e\\
+	a_{e'}-a_e \leq NB&\quad \forall\ e,e'<e
+	\end{cases}
+	\end{equation}
+	\begin{equation}
+	\label{penaltyw}
+	\begin{aligned}
+	i_{e,e'} \geq k w_{e,e',k} &\qquad\forall\ k \in \{1,\dots,5\},e,e'<e\\
+	i_{e,e'} \leq (k-1) + N  w_{e,e',k} &\qquad\forall\ k \in \{1,\dots,5\},e,e'<e
+	\end{aligned}
+	\end{equation}
+	\begin{equation}
+	\label{penaltyz}
+	\begin{aligned}
+	i_{e,e'} \geq \left(k+1\right)\left(1-z_{e,e',k}\right) &\qquad\forall\ k \in \{1,\dots,5\},e,e'<e\\
+	i_{e,e'} \leq k + N  (1-z_{e,e',k}) &\qquad\forall\ k \in \{1,\dots,5\},e,e'<e
+	\end{aligned}
+	\end{equation}
+	\begin{equation}
+	\label{penaltyy}
+	\begin{aligned}
+	w_{e,e',k} + z_{e,e',k} \leq y_{e,e',k} + 1 &\qquad\forall\ k \in \{1,\dots,5\},e,e'<e\\
+	w_{e,e',k} + z_{e,e',k} \geq 2y_{e,e',k} &\qquad\forall\ k \in \{1,\dots,5\},e,e'<e
+	\end{aligned}
+	\end{equation}
+	\begin{equation}
+	\label{domain1}
+	i_{e,e'} \in \mathbb{Z}^{+}
+	\end{equation}
+	\begin{equation}
+	\label{domain2}
+	cal_{t,e},\ y_{e,e',k},\ \tau_{e,e'},\ B_{e,e'},\ w_{e,e',k},\ z_{e,e',k} \in \{0,1\}
+	\end{equation}
+	
+	\section{Notation}
+	
+	\subsection{Data}
+	
+	\paragraph{$n_{e,e'}$} Number of conflicting students between exam $e$ and $e'$
+	
+	\paragraph{$\left|S\right|$} Total number of students
+	
+	\subsection{Variables}
+	
+	\paragraph{$cal_{t,e}$} ``Calendar'': boolean that is 1 when exam $e$ is placed in timeslot $t$, and 0 otherwise
+	
+	\paragraph{$y_{e,e',k}$} Boolean that is 1 when exams $e$ and $e'$ are $k$ timeslots apart, 0 otherwise $k \in \{1,\dots,5\}$
+	
+	\paragraph{$\tau_{e,e'}$} Boolean indicating when there's a conflict between exam $e$ and $e'$
+	
+	\paragraph{$B_{e,e'}$} Boolean that is 1 when distance between exam $e$ and $e'$ is positive and 0 otherwise
+	
+	\paragraph{$i_{e,e'}$} Distance between two exams between exam $e$ and $e'$
+	
+	\paragraph{$w_{e,e',k}$} Boolean indicating that distance between exam $e$ and $e'$ is greater than or equal to \mbox{$k \in \{1,\dots,5\}$}
+	
+	\paragraph{$z_{e,e',k}$} Boolean indicating that distance between exam $e$ and $e'$ is less than or equal to $k \in \{1,\dots,5\}$
+	
+	
+	\section{Explanation}
+	
+	Objective function minimizes penalty, it is a linearized version of $2^{(5-i)}n_{e,e'}/\left|S\right|$.
+	
+	Constraint \eq{apply} is needed to be sure that every exam is scheduled to exactly one time slot.
+	
+	Constraint \eq{conflict1} applies values to $\tau$, and constraint \eq{conflict2} prevents two ``conflicting'' exams from being placed in the same time slot. $M$ is an upper bound, for instance $2\cdot\left|S\right|$.
+	
+	Constraints \eq{distance1} and \eq{distance2} arise from this definition of $i$ (distance between each two exams), which must be linearized:
+	\[
+	i_{e,e'} = \left|\sum_{t} t\cdot cal_{t,e} - \sum_{t} t\cdot cal_{t,e'}\right|
+	\]
+	In order to do so, first it had to be split into two inequations:
+	\[
+		i_{e,e'} \geq \left|\sum_{t} t\cdot cal_{t,e} - \sum_{t} t\cdot cal_{t,e'}\right| \quad \land \quad i_{e,e'} \leq \left|\sum_{t} t\cdot cal_{t,e} - \sum_{t} t\cdot cal_{t,e'}\right|
+	\]
+	then, after defining:
+	\[
+	a_e := \sum_{t} t\cdot cal_{t,e}
+	\]
+	the aforementioned inequations were linearized to get rid of the modulus, obtaining system of inequations \eq{distance1} from the first and \eq{distance2} from the second. $N$ is an upper bound, for instance \mbox{$2\cdot\text{\textit{number of time slots}}$}.
+
+	Constraint \eq{penaltyw} is needed in order to apply values to $w$ and constraint \eq{penaltyz} to $z$.
+	
+	Constaint \eq{penaltyz} is then used apply values to $y$, which is needed in the objective function, using $w$ and $z$.
+	
+	Constraints \eq{domain1} and \eq{domain2} represent the domain of each variable that is used in the problem formulation.
+\end{document}
