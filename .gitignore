@@ -8,3 +8,5 @@
 *.dat
 *.exm
 Java/out/
+Java-ga/out/
+Java-ga/target/
