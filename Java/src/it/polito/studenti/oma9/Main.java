@@ -8,6 +8,13 @@ public class Main {
 
     public static void main(String[] args) {
 	    System.out.println("Hello wooooorld");
+        System.out.println(new File(".").getAbsoluteFile());
+	    Data d = new Data();
+        try {
+            d.startRead();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
         // TODO: fare 1 iterazione di genetic, tot di swap o altre ottimizzazioni, piu' si va avanti piu' farne di swap (bisogna misurare il teeeeempo)
     }
