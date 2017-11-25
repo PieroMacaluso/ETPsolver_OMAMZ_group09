@@ -47,34 +47,12 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 
 			//System.out.println("Penalty: " + (penalty / (double) this.S));
 			return penalty / (double) this.S;
-
-			// Questo controllava la feasibility della soluzione, costruendo un elenco di esami per ogni timeslot e guardando se erano in conflitto
-//            for(exam = 0; feasible && exam < len; exam++) {
-//                if(!TimeslotConflicts.containsKey(exam)) {
-//                    TimeslotConflicts.put(exam, new TreeSet<>());
-//                }
-//            }
-//                TimeslotConflicts.get(exam).add(schedule[exam]);
-//                for(int eprime : TimeslotConflicts.get(exam)) {
-//                    if(eprime >= exam) {
-//                        break;
-//                    }
-//                    if(this.conflicts[e][eprime] > 0) {
-//                        feasible = false;
-//                        break;
-//                    }
-//                }
-//            }
-//            if(!feasible) {
-//                return Double.POSITIVE_INFINITY;
-//            }
 		};
 	}
 
-	// la documentazione di questa parte FA SCHIFO, è contraddittoria e caotica e sull'orlo dell'inesistenza, ci sono voluti 20 tentativi prima di trovare qualcosa di funzionante
+	// la documentazione di questa parte FA SCHIFO, è contraddittoria e caotica e sull'orlo dell'inesistenza,
+	// ci sono voluti 20 tentativi prima di trovare qualcosa di funzionante
 	public Codec<ISeq<IntegerGene>, IntegerGene> codec() {
-		// Genotype.of(new IntegerChromosome(0, this.ts, this.e);
-		// return Codecs.ofVector(IntRange.of(0, this.ts), this.e);
 		return Codec.of(
 				Genotype.of(IntegerChromosome.of(1, this.ts, this.e)),
 				gt -> gt.getChromosome().toSeq()
