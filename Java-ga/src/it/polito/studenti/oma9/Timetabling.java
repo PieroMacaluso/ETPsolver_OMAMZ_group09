@@ -14,7 +14,7 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 	private int S;
 	private int e;
 	private int ts;
-	public static int[][] conflicts;
+	private static int[][] conflicts;
 
 	Timetabling(int S, int e, int ts, int[][] conflicts) {
 		this.S = S;
@@ -39,12 +39,13 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 							// ...che non può essere 0 altrimenti il valdiatore sta sbagliando tutto
 							assert (distance > 0);
 							// calcola la penalità
-							penalty += Math.pow(2.0, 5.0 - (double) distance) * (double) this.conflicts[i][j];
+							penalty += Math.pow(2.0, 5.0 - (double) distance) * (double) conflicts[i][j];
 						}
 					}
 				}
 			}
 
+			//System.out.println("Penalty: " + (penalty / (double) this.S));
 			return penalty / (double) this.S;
 
 			// Questo controllava la feasibility della soluzione, costruendo un elenco di esami per ogni timeslot e guardando se erano in conflitto
@@ -81,13 +82,13 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 	}
 
 	static boolean validator(Genotype<IntegerGene> gt) {
-		Map<IntegerGene, Set<Integer>> TimeslotConflicts = new TreeMap<>();
+		Map<Integer, Set<Integer>> TimeslotConflicts = new TreeMap<>();
 		ISeq<IntegerGene> genes = gt.getChromosome().toSeq();
 
 		int len = genes.length();
 
 		for(int exam = 0; exam < len; exam++) {
-			IntegerGene timeslot = genes.get(exam);
+			Integer timeslot = genes.get(exam).intValue();
 
 			if(!TimeslotConflicts.containsKey(timeslot)) {
 				TimeslotConflicts.put(timeslot, new TreeSet<>());
@@ -97,16 +98,15 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 
 			for(int eprime : sovrapposti) {
 				assert(eprime != exam);
-				if(eprime > exam) {
-					break;
-				}
-				if(Timetabling.conflicts[exam][eprime] > 0) {
+				if(conflicts[exam][eprime] > 0) {
+					//System.out.println("Invalid: " + gt);
 					return false;
 				}
 			}
 
 			sovrapposti.add(exam);
 		}
+		//System.out.println("OK: " + gt);
 		return true;
 	}
 }

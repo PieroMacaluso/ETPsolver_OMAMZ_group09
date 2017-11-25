@@ -2,11 +2,8 @@ package it.polito.studenti.oma9;
 
 import static io.jenetics.engine.EvolutionResult.toBestPhenotype;
 
-import java.util.stream.IntStream;
-
 import io.jenetics.*;
 import io.jenetics.engine.*;
-import io.jenetics.util.CharSeq;
 
 public class Main {
 
@@ -16,46 +13,32 @@ public class Main {
 		int ts = 6;
 		int[][] conflicts = new int[e][e];
 
-		conflicts[1][2] = 2;
-		conflicts[2][1] = 2;
-		conflicts[1][3] = 2;
-		conflicts[3][1] = 2;
-		conflicts[2][3] = 3;
-		conflicts[3][2] = 3;
+		// si fa -1 di tutti gli indici, gli esami devono partire da 0
+		conflicts[0][1] = 2;
+		conflicts[1][0] = 2;
+		conflicts[0][2] = 2;
+		conflicts[2][0] = 2;
+		conflicts[1][2] = 3;
+		conflicts[2][1] = 3;
 
 		Timetabling problem = new Timetabling(S, e, ts, conflicts);
 
-		// Roba presa dagli esempi per avere una vaga idea di come funziona l'intero trabiccolo:
-
-//		final Problem<CharSequence, CharacterGene, Integer> PROBLEM =
-//				Problem.of(
-//						seq -> IntStream.range(0, TARGET_STRING.length())
-//								.map(i -> seq.charAt(i) == TARGET_STRING.charAt(i) ? 1 : 0)
-//								.sum(),
-//						Codec.of(
-//								Genotype.of(new CharacterChromosome(
-//										CharSeq.of("a-z"), TARGET_STRING.length()
-//								)),
-//								gt -> (CharSequence) gt.getChromosome()
-//						)
-//				);
-
 //	public static void main(final String[] args) {
 		final Engine<IntegerGene, Double> engine = Engine.builder(problem)
-				.populationSize(500)
-				.genotypeValidator(Timetabling::validator)
-				.survivorsSelector(new StochasticUniversalSelector<>())
-				.offspringSelector(new TournamentSelector<>(5))
+				.optimize(Optimize.MINIMUM) // minimizza la fitness function (funzione obiettivo)
+				.genotypeValidator(Timetabling::validator) // valuta feasibility delle soluzioni
+				//.populationSize(500)
+				//.survivorsSelector(new StochasticUniversalSelector<>())
+				//.offspringSelector(new TournamentSelector<>(5))
 				.alterers(
-						new Mutator<>(0.1),
+						//new Mutator<>(0.1), // se volete mutazioni...
 						new SinglePointCrossover<>(0.5))
 				.build();
 
 		final Phenotype<IntegerGene, Double> result = engine.stream()
-				.limit(100)
+				.limit(10) // numero di iterazioni
 				.collect(toBestPhenotype());
 
 		System.out.println(result);
 	}
-
 }
