@@ -43,6 +43,7 @@ public class Main {
 //	public static void main(final String[] args) {
 		final Engine<IntegerGene, Double> engine = Engine.builder(problem)
 				.populationSize(500)
+				.genotypeValidator(Timetabling::validator)
 				.survivorsSelector(new StochasticUniversalSelector<>())
 				.offspringSelector(new TournamentSelector<>(5))
 				.alterers(
