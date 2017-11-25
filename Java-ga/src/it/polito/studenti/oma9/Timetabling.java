@@ -14,13 +14,13 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 	private int S;
 	private int e;
 	private int ts;
-	private int[][] conflicts;
+	public static int[][] conflicts;
 
 	Timetabling(int S, int e, int ts, int[][] conflicts) {
 		this.S = S;
 		this.e = e;
 		this.ts = ts;
-		this.conflicts = conflicts;
+		Timetabling.conflicts = conflicts; // questo è LO SCHIFO, la classe è un singleton forzosamente ma non so che farci
 	}
 
 	public Function<ISeq<IntegerGene>, Double> fitness() {
@@ -32,7 +32,7 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 			for(int i = 0; i < this.e; i++) {
 				for(int j = 0; j < i; j++) {
 					// se 2 esami sono in conflitto
-					if(this.conflicts[i][j] > 0) {
+					if(Timetabling.conflicts[i][j] > 0) {
 						// calcola la distanza...
 						distance = Math.abs(schedule.get(i).intValue() - schedule.get(j).intValue());
 						if(distance <= 5) {
@@ -81,16 +81,31 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 	}
 
 	static boolean validator(Genotype<IntegerGene> gt) {
-		boolean feasible;
-		Map<Integer, Set<Integer>> TimeslotConflicts = new TreeMap<>();
+		Map<IntegerGene, Set<Integer>> TimeslotConflicts = new TreeMap<>();
 		ISeq<IntegerGene> genes = gt.getChromosome().toSeq();
 
 		int len = genes.length();
 
 		for(int exam = 0; exam < len; exam++) {
-			if(!TimeslotConflicts.containsKey(exam)) {
-				TimeslotConflicts.put(exam, new TreeSet<>());
+			IntegerGene timeslot = genes.get(exam);
+
+			if(!TimeslotConflicts.containsKey(timeslot)) {
+				TimeslotConflicts.put(timeslot, new TreeSet<>());
 			}
+
+			Set<Integer> sovrapposti = TimeslotConflicts.get(timeslot);
+
+			for(int eprime : sovrapposti) {
+				assert(eprime != exam);
+				if(eprime > exam) {
+					break;
+				}
+				if(Timetabling.conflicts[exam][eprime] > 0) {
+					return false;
+				}
+			}
+
+			sovrapposti.add(exam);
 		}
 		return true;
 	}

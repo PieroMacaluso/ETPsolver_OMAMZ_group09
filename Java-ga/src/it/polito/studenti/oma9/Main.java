@@ -20,8 +20,8 @@ public class Main {
 		conflicts[2][1] = 2;
 		conflicts[1][3] = 2;
 		conflicts[3][1] = 2;
-		conflicts[2][3] = 2;
-		conflicts[3][2] = 2;
+		conflicts[2][3] = 3;
+		conflicts[3][2] = 3;
 
 		Timetabling problem = new Timetabling(S, e, ts, conflicts);
 
