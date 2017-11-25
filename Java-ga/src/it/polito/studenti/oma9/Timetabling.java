@@ -4,66 +4,76 @@ import io.jenetics.*;
 import io.jenetics.engine.*;
 import io.jenetics.util.*;
 
-import java.util.*;
 import java.util.function.Function;
 
-public class Timetabling implements Problem<int[], IntegerGene, Double> {
+public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Double> {
     private int S;
     private int e;
+    private int ts;
     private int[][] conflicts;
-    private IntRange domain;
 
-    public Timetabling(int S, int e, int ts, int[][] conflicts) {
+    Timetabling(int S, int e, int ts, int[][] conflicts) {
         this.S = S;
         this.e = e;
+        this.ts = ts;
         this.conflicts = conflicts;
-        this.domain = IntRange.of(ts);
+        this.domain = IntRange.of(e);
     }
 
-    public Function<int[], Double> fitness() {
+    public Function<ISeq<IntegerGene>, Double> fitness() {
         return schedule -> {
-            int exam, len = schedule.length;
             int distance;
-            boolean feasible = true;
 
-            SortedMap<Integer, Set<Integer>> TimeslotConflicts = new TreeMap<>();
-
-            for(exam = 0; feasible && exam < len; exam++) {
-                if(!TimeslotConflicts.containsKey(exam)) {
-                    TimeslotConflicts.put(exam, new TreeSet<>());
-                }
-                TimeslotConflicts.get(exam).add(schedule[exam]);
-                for(int eprime : TimeslotConflicts.get(exam)) {
-                    if(eprime >= exam) {
-                        break;
-                    }
-                    if(this.conflicts[e][eprime] > 0) {
-                        feasible = false;
-                        break;
-                    }
-                }
-            }
-            if(!feasible) {
-                return Double.POSITIVE_INFINITY;
-            }
-
+            // calcola la penalità
             double penalty = 0;
             for(int i = 0; i < this.e; i++) {
                 for(int j = 0; j < i; j++) {
+                    // se 2 esami sono in conflitto
                     if(this.conflicts[i][j] > 0) {
-                        distance = Math.abs(schedule[i] - schedule[j]);
-                        if(distance < 5) {
+                        // calcola la distanza...
+                        distance = Math.abs(schedule.get(i).intValue() - schedule.get(j).intValue());
+                        if(distance <= 5) {
+                            // ...che non può essere 0 altrimenti il valdiatore sta sbagliando tutto
                             assert (distance > 0);
+                            // calcola la penalità
                             penalty += Math.pow(2.0, (double) distance) * (double) this.conflicts[i][j];
                         }
                     }
                 }
             }
+
             return penalty / (double) this.S;
+
+            // Questo controllava la feasibility della soluzione, costruendo un elenco di esami per ogni timeslot e guardando se erano in conflitto
+//            for(exam = 0; feasible && exam < len; exam++) {
+//                if(!TimeslotConflicts.containsKey(exam)) {
+//                    TimeslotConflicts.put(exam, new TreeSet<>());
+//                }
+//            }
+//                TimeslotConflicts.get(exam).add(schedule[exam]);
+//                for(int eprime : TimeslotConflicts.get(exam)) {
+//                    if(eprime >= exam) {
+//                        break;
+//                    }
+//                    if(this.conflicts[e][eprime] > 0) {
+//                        feasible = false;
+//                        break;
+//                    }
+//                }
+//            }
+//            if(!feasible) {
+//                return Double.POSITIVE_INFINITY;
+//            }
         };
     }
 
-    public Codec<int[], IntegerGene> codec() {
-        return Codecs.ofVector(domain, e);
+    // la documentazione di questa parte FA SCHIFO, è contraddittoria e caotica e sull'orlo dell'inesistenza, ci sono voluti 20 tentativi prima di trovare qualcosa di funzionante
+    public Codec<ISeq<IntegerGene>, IntegerGene> codec() {
+        // Genotype.of(new IntegerChromosome(0, this.ts, this.e);
+        // return Codecs.ofVector(IntRange.of(0, this.ts), this.e);
+        return Codec.of(
+                Genotype.of(IntegerChromosome.of(0, this.ts)),
+                gt -> gt.getChromosome().toSeq()
+        );
     }
 }
