@@ -17,7 +17,6 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
         this.e = e;
         this.ts = ts;
         this.conflicts = conflicts;
-        this.domain = IntRange.of(e);
     }
 
     public Function<ISeq<IntegerGene>, Double> fitness() {
@@ -36,7 +35,7 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
                             // ...che non può essere 0 altrimenti il valdiatore sta sbagliando tutto
                             assert (distance > 0);
                             // calcola la penalità
-                            penalty += Math.pow(2.0, (double) distance) * (double) this.conflicts[i][j];
+                            penalty += Math.pow(2.0, 5.0 - (double) distance) * (double) this.conflicts[i][j];
                         }
                     }
                 }
@@ -72,7 +71,7 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
         // Genotype.of(new IntegerChromosome(0, this.ts, this.e);
         // return Codecs.ofVector(IntRange.of(0, this.ts), this.e);
         return Codec.of(
-                Genotype.of(IntegerChromosome.of(0, this.ts)),
+                Genotype.of(IntegerChromosome.of(1, this.ts, this.e)),
                 gt -> gt.getChromosome().toSeq()
         );
     }

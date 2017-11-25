@@ -39,23 +39,22 @@ public class Main {
 //								gt -> (CharSequence) gt.getChromosome()
 //						)
 //				);
-	}
 
 //	public static void main(final String[] args) {
-//		final Engine<CharacterGene, Integer> engine = Engine.builder(PROBLEM)
-//				.populationSize(500)
-//				.survivorsSelector(new StochasticUniversalSelector<>())
-//				.offspringSelector(new TournamentSelector<>(5))
-//				.alterers(
-//						new Mutator<>(0.1),
-//						new SinglePointCrossover<>(0.5))
-//				.build();
-//
-//		final Phenotype<CharacterGene, Integer> result = engine.stream()
-//				.limit(100)
-//				.collect(toBestPhenotype());
-//
-//		System.out.println(result);
-//	}
+		final Engine<IntegerGene, Double> engine = Engine.builder(problem)
+				.populationSize(500)
+				.survivorsSelector(new StochasticUniversalSelector<>())
+				.offspringSelector(new TournamentSelector<>(5))
+				.alterers(
+						new Mutator<>(0.1),
+						new SinglePointCrossover<>(0.5))
+				.build();
+
+		final Phenotype<IntegerGene, Double> result = engine.stream()
+				.limit(100)
+				.collect(toBestPhenotype());
+
+		System.out.println(result);
+	}
 
 }
