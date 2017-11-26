@@ -10,11 +10,38 @@ import java.io.FileNotFoundException;
 public class Main {
 
 	public static void main(String[] args) {
-		Data d = new Data();
+		Data d;
+		boolean secondsIsNext = false;
+		int seconds = 0;
+		String instance = "";
+
+		for(String arg : args) {
+			if(secondsIsNext) {
+				seconds = Integer.parseInt(arg);
+				secondsIsNext = false;
+			} else if(arg.equals("-t")) {
+				secondsIsNext = true;
+			} else {
+				instance = arg;
+			}
+		}
+
+		if(seconds <= 0) {
+			System.out.println("Invalid number of seconds to run: " + seconds);
+			return;
+		}
+
+		if(instance.length() == 0) {
+			System.out.println("No instance name provided");
+			return;
+		}
+
 		try {
-			d.startRead();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			d = new Data(instance);
+		} catch(FileNotFoundException e) {
+			System.out.println("Missing files for instance " + instance);
+			return;
+			//e.printStackTrace();
 		}
 
 		int S = 8;
