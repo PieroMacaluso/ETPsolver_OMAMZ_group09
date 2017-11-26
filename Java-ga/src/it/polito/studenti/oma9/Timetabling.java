@@ -16,6 +16,14 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 	private int ts;
 	private static int[][] conflicts;
 
+	/**
+	 * Build problem representation
+	 *
+	 * @param S Total number of students
+	 * @param e Total number of exams
+	 * @param ts Total number of timeslots
+	 * @param conflicts e×e matrix with number of conflicting students
+	 */
 	Timetabling(int S, int e, int ts, int[][] conflicts) {
 		this.S = S;
 		this.e = e;

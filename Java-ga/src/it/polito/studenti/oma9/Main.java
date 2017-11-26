@@ -10,7 +10,7 @@ import java.io.FileNotFoundException;
 public class Main {
 
 	public static void main(String[] args) {
-		Data d;
+		Data data;
 		boolean secondsIsNext = false;
 		int seconds = 0;
 		String instance = "";
@@ -37,29 +37,18 @@ public class Main {
 		}
 
 		try {
-			d = new Data(instance);
+			// dalla cartella Java-ga, si può invocare "questo-file.jar ../instances/instance01 -t 30"
+			// (o mettere "../instances/instance01 -t 30" nei parametri della run configuration di Intellij...)
+			// e va a prendere l'istanza nella cartella giusta
+			data = new Data(instance);
 		} catch(FileNotFoundException e) {
 			System.out.println("Missing files for instance " + instance);
 			return;
 			//e.printStackTrace();
 		}
 
-		int S = 8;
-		int e = 4;
-		int ts = 6;
-		int[][] conflicts = new int[e][e];
+		Timetabling problem = new Timetabling(data.nStu, data.nExm, data.nSlo, data.conflictTable);
 
-		// si fa -1 di tutti gli indici, gli esami devono partire da 0
-		conflicts[0][1] = 2;
-		conflicts[1][0] = 2;
-		conflicts[0][2] = 2;
-		conflicts[2][0] = 2;
-		conflicts[1][2] = 3;
-		conflicts[2][1] = 3;
-
-		Timetabling problem = new Timetabling(S, e, ts, conflicts);
-
-//	public static void main(final String[] args) {
 		final Engine<IntegerGene, Double> engine = Engine.builder(problem)
 				.optimize(Optimize.MINIMUM) // minimizza la fitness function (funzione obiettivo)
 				.genotypeValidator(Timetabling::validator) // valuta feasibility delle soluzioni
