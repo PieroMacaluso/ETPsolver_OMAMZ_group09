@@ -3,10 +3,10 @@
 *.synctex.gz
 *.pdf
 .idea
-*.slo
-*.stu
-*.dat
-*.exm
+trasformatore/*.slo
+trasformatore/*.stu
+trasformatore/*.dat
+trasformatore/*.exm
 Java/out/
 Java/target/
 Java-ga/out/
