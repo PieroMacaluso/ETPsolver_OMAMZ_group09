@@ -10,13 +10,12 @@ import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
-import java.time.temporal.TemporalUnit;
 
 public class Main {
 
 	public static void main(String[] args) {
 		Temporal start = LocalTime.now();
-		Temporal end;
+		Duration duration;
 		Data data;
 		boolean secondsIsNext = false;
 		int seconds = 0;
@@ -43,8 +42,6 @@ public class Main {
 			return;
 		}
 
-		end = LocalTime.now().plus(seconds, ChronoUnit.SECONDS);
-
 		try {
 			// dalla cartella Java-ga, si può invocare "questo-file.jar ../instances/instance01 -t 30"
 			// (o mettere "../instances/instance01 -t 30" nei parametri della run configuration di Intellij...)
@@ -62,15 +59,20 @@ public class Main {
 				.optimize(Optimize.MINIMUM) // minimizza la fitness function (funzione obiettivo)
 				.genotypeValidator(Timetabling::validator) // valuta feasibility delle soluzioni
 				//.populationSize(500)
-				//.survivorsSelector(new StochasticUniversalSelector<>())
-				//.offspringSelector(new TournamentSelector<>(5))
+				.survivorsSelector(new StochasticUniversalSelector<>())
+				.offspringSelector(new TournamentSelector<>(5))
 				.alterers(
-						//new Mutator<>(0.1), // se volete mutazioni...
-						new SinglePointCrossover<>(0.5))
+						new Mutator<>(0.1), // se volete mutazioni...
+						new MultiPointCrossover<>(0.5, data.nExm/data.nSlo))
 				.build();
 
+
+		duration = Duration.between(LocalTime.now(), start.plus(seconds, ChronoUnit.SECONDS));
+		System.out.println("Starting NOW, reminaing: " + duration);
+
 		final Phenotype<IntegerGene, Double> result = engine.stream()
-				.limit(Limits.byExecutionTime(Duration.between(start, end))) // numero di iterazioni
+				.limit(Limits.byExecutionTime(duration))
+				//.limit(100) // numero di iterazioni
 				.collect(toBestPhenotype());
 
 		System.out.println(result);

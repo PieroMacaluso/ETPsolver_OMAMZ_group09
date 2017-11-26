@@ -62,14 +62,14 @@ class Data {
 			}
 		}
 
-		System.out.println("Exams: " + nExm + ", slots: " + nSlo + ", students: " + nStu + "\n\n");
-		// Stampa a video della tabella dei conflitti per verifica
-		for(int i = 0; i < nExm; i++) {
-			for(int j = 0; j < nExm; j++) {
-				System.out.print(conflictTable[i][j] + "\t");
-			}
-			System.out.print("\n");
-		}
+//		System.out.println("Exams: " + nExm + ", slots: " + nSlo + ", students: " + nStu + "\n\n");
+//		// Stampa a video della tabella dei conflitti per verifica
+//		for(int i = 0; i < nExm; i++) {
+//			for(int j = 0; j < nExm; j++) {
+//				System.out.print(conflictTable[i][j] + "\t");
+//			}
+//			System.out.print("\n");
+//		}
 
 //		 Stampa a video della tabella dei booleani per verifica
 //		for(int i = 1; i <= nStu; i++) {
