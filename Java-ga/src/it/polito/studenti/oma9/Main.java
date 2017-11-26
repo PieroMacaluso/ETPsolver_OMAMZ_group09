@@ -5,9 +5,18 @@ import static io.jenetics.engine.EvolutionResult.toBestPhenotype;
 import io.jenetics.*;
 import io.jenetics.engine.*;
 
+import java.io.FileNotFoundException;
+
 public class Main {
 
 	public static void main(String[] args) {
+		Data d = new Data();
+		try {
+			d.startRead();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+
 		int S = 8;
 		int e = 4;
 		int ts = 6;
