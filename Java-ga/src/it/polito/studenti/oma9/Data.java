@@ -111,7 +111,6 @@ class Data {
 	private void readStudents(Scanner sStu) {
 		Integer studentID;
 		Integer examID;
-		int counter = 0;
 
 		while(sStu.hasNextLine()) {
 			String line = sStu.nextLine();
@@ -132,10 +131,10 @@ class Data {
 				Exam exam = this.exams.get(examID);
 				student.addExam(exam);
 				exam.addStudent(student);
-				counter++; // È necessario il numero esatto, anche se ci sono buchi tra un ID e l'altro!
 			}
 		}
-		nStu = counter;
+		// È necessario il numero esatto, anche se ci sono buchi tra un ID e l'altro!
+		nStu = students.size();
 	}
 
 	private void readSlots(Scanner sSlo) {

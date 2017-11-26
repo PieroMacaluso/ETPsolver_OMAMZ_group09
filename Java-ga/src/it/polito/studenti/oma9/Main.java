@@ -6,10 +6,17 @@ import io.jenetics.*;
 import io.jenetics.engine.*;
 
 import java.io.FileNotFoundException;
+import java.time.Duration;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalUnit;
 
 public class Main {
 
 	public static void main(String[] args) {
+		Temporal start = LocalTime.now();
+		Temporal end;
 		Data data;
 		boolean secondsIsNext = false;
 		int seconds = 0;
@@ -36,6 +43,8 @@ public class Main {
 			return;
 		}
 
+		end = LocalTime.now().plus(seconds, ChronoUnit.SECONDS);
+
 		try {
 			// dalla cartella Java-ga, si può invocare "questo-file.jar ../instances/instance01 -t 30"
 			// (o mettere "../instances/instance01 -t 30" nei parametri della run configuration di Intellij...)
@@ -61,7 +70,7 @@ public class Main {
 				.build();
 
 		final Phenotype<IntegerGene, Double> result = engine.stream()
-				.limit(10) // numero di iterazioni
+				.limit(Limits.byExecutionTime(Duration.between(start, end))) // numero di iterazioni
 				.collect(toBestPhenotype());
 
 		System.out.println(result);
