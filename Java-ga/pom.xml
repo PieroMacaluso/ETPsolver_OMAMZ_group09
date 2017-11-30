@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>it.polito.studenti.oma9</groupId>
-    <artifactId>CosoConGA</artifactId>
+    <artifactId>OMA9</artifactId>
     <version>1.0</version>
     <build>
         <plugins>
