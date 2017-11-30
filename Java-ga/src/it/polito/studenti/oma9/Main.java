@@ -74,12 +74,17 @@ public class Main {
 		duration = Duration.between(LocalTime.now(), start.plus(seconds, ChronoUnit.SECONDS));
 		System.out.println("Starting NOW, reminaing: " + duration);
 
+		final EvolutionStatistics<Double, ?>
+				statistics = EvolutionStatistics.ofNumber();
+
 		final Phenotype<IntegerGene, Double> result = engine.stream()
 				.limit(Limits.byExecutionTime(duration))
 				//.limit(100) // numero di iterazioni
+				.peek(statistics)
 				.collect(toBestPhenotype());
 
 		Timetabling.printResult(result.getGenotype().getChromosome().toSeq(), instance);
 		System.out.println(result);
+		System.out.println(statistics);
 	}
 }
