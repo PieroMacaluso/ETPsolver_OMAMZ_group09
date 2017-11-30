@@ -48,7 +48,10 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 						distance = Math.abs(schedule.get(i).intValue() - schedule.get(j).intValue());
 						if(distance <= 5) {
 							// ...che non può essere 0 altrimenti il valdiatore sta sbagliando tutto
-							assert (distance > 0);
+							if(distance <= 0) {
+								//throw new RuntimeException("SOVRAPPOSTIIIIIIIIIIIIIIIIII");
+								return Double.POSITIVE_INFINITY;
+							}
 							// calcola la penalità
 							penalty += Math.pow(2.0, 5.0 - (double) distance) * (double) conflicts[i][j];
 						}

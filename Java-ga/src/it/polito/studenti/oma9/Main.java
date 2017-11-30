@@ -62,6 +62,7 @@ public class Main {
 		final Engine<IntegerGene, Double> engine = Engine.builder(problem)
 				.optimize(Optimize.MINIMUM) // minimizza la fitness function (funzione obiettivo)
 				.genotypeValidator(Timetabling::validator) // valuta feasibility delle soluzioni
+				//.individualCreationRetries(999999)
 				//.populationSize(500)
 				.survivorsSelector(new StochasticUniversalSelector<>())
 				.offspringSelector(new TournamentSelector<>(5))
@@ -78,8 +79,8 @@ public class Main {
 				statistics = EvolutionStatistics.ofNumber();
 
 		final Phenotype<IntegerGene, Double> result = engine.stream()
-				.limit(Limits.byExecutionTime(duration))
-				//.limit(100) // numero di iterazioni
+				//.limit(Limits.byExecutionTime(duration))
+				.limit(100) // numero di iterazioni
 				.peek(statistics)
 				.collect(toBestPhenotype());
 
