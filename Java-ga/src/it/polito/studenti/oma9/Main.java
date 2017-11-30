@@ -4,8 +4,12 @@ import static io.jenetics.engine.EvolutionResult.toBestPhenotype;
 
 import io.jenetics.*;
 import io.jenetics.engine.*;
+import io.jenetics.util.ISeq;
 
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -74,6 +78,20 @@ public class Main {
 				.limit(Limits.byExecutionTime(duration))
 				//.limit(100) // numero di iterazioni
 				.collect(toBestPhenotype());
+		ISeq<IntegerGene> cosa = result.getGenotype().getChromosome().toSeq();
+		try {
+			FileOutputStream file = new FileOutputStream(instance + ".sol");
+			PrintStream Output = new PrintStream(file);
+
+			for (int i = 0; i < cosa.length(); i++) {
+				Output.println((i+1) + " " + cosa.get(i).intValue());
+			}
+
+		} catch (IOException e) {
+			System.out.println("Errore: " + e);
+			System.exit(1);
+		}
+
 
 		System.out.println(result);
 	}
