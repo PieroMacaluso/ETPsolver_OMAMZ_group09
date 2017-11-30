@@ -78,21 +78,8 @@ public class Main {
 				.limit(Limits.byExecutionTime(duration))
 				//.limit(100) // numero di iterazioni
 				.collect(toBestPhenotype());
-		ISeq<IntegerGene> cosa = result.getGenotype().getChromosome().toSeq();
-		try {
-			FileOutputStream file = new FileOutputStream(instance + ".sol");
-			PrintStream Output = new PrintStream(file);
 
-			for (int i = 0; i < cosa.length(); i++) {
-				Output.println((i+1) + " " + cosa.get(i).intValue());
-			}
-
-		} catch (IOException e) {
-			System.out.println("Errore: " + e);
-			System.exit(1);
-		}
-
-
+		Timetabling.printResult(result.getGenotype().getChromosome().toSeq(), instance);
 		System.out.println(result);
 	}
 }

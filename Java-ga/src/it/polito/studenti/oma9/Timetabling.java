@@ -4,6 +4,9 @@ import io.jenetics.*;
 import io.jenetics.engine.*;
 import io.jenetics.util.*;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -94,5 +97,19 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 		}
 		//System.out.println("OK: " + gt);
 		return true;
+	}
+
+	static void printResult(ISeq<IntegerGene> result, String filename) {
+		try {
+			FileOutputStream file = new FileOutputStream(filename + ".sol");
+			PrintStream Output = new PrintStream(file);
+
+			for (int i = 0; i < result.length(); i++) {
+				Output.println((i + 1) + " " + result.get(i).intValue());
+			}
+		} catch (IOException e) {
+			System.out.println("Errore: " + e);
+			System.exit(1);
+		}
 	}
 }
