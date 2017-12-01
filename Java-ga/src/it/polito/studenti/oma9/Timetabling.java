@@ -90,11 +90,12 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 		// Collections.shuffle(solution)
 
 		// Will try each time slot in order exactly one time
-		int lastTimeslot = -1, timeslot = 1;
 		// For each exam
 		for(int exam = 0; exam < e; exam++) {
+			int timeslot = (Math.abs(new Random().nextInt()) % this.ts) + 1;
+			// System.out.println("Parto da " + timeslot);
 			// Try each time slot, give up after wrapping around
-			while(timeslot != lastTimeslot) {
+			do {
 				// any conflicts?
 				boolean conflicting = false;
 				Set<Integer> collisions = TimeslotConflicts.get(timeslot);
@@ -106,7 +107,6 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 				}
 				// If not conflicting with anything, place it right there
 				if(!conflicting) {
-					lastTimeslot = timeslot;
 					chromosome[exam] = geneFactory(timeslot);
 					collisions.add(exam);
 //				} else {
@@ -120,13 +120,11 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 				if(!conflicting) {
 					break;
 				}
-			}
+			} while(timeslot > 1);
 			// Pezza abnorme che produce soluzioni infeasible
-			if(timeslot == lastTimeslot) {
+			if(timeslot == 1) {
 				//System.out.println("Unsolvable conflict: " + exam + " :(");
-				lastTimeslot = timeslot;
 				chromosome[exam] = geneFactory(timeslot);
-				timeslot = (timeslot % this.ts) + 1;
 				feasible = false;
 			}
 		}
@@ -134,6 +132,7 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 			System.out.println("Toh, una soluzione fisicamente realizzabile");
 		} else {
 			System.out.println("Soluzione infeasible, maledizione!");
+			System.out.println(IntegerChromosome.of(chromosome)); // Se vogliamo provare a infilarla in un file e darla a ETPChecker per vedere se concorda...
 		}
 
 		// ------- Fine del greedy -------------------------------------------------------------------------------------
