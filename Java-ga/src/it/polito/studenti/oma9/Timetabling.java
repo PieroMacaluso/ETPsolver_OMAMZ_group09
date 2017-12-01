@@ -7,10 +7,7 @@ import io.jenetics.util.*;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Function;
 
 public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Double> {
@@ -77,10 +74,70 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 	private Genotype<IntegerGene> genotypeFactory() {
 		// TODO: "chromosome" è una soluzione di partenza, infilarci i geni con geneFactory(ts) (ts è il time slot, sono ordinati) tramite algoritmi greedy arditi
 		IntegerGene[] chromosome = new IntegerGene[this.e];
-		for(int i = 0; i < this.e; i++) {
-			int ts = (i % this.ts) +1;
-			chromosome[i] = geneFactory(ts);
+
+		// ------- Greedy che non funziona -----------------------------------------------------------------------------
+
+		boolean feasible = true;
+
+		SortedMap<Integer, Set<Integer>> TimeslotConflicts = new TreeMap<>();
+
+		// Create an empty conflict map
+		int tsPlusOne = ts + 1;
+		for(int i = 1; i < tsPlusOne; i++) {
+			TimeslotConflicts.put(i, new TreeSet<>());
 		}
+
+		// Collections.shuffle(solution)
+
+		// Will try each time slot in order exactly one time
+		int lastTimeslot = -1, timeslot = 1;
+		// For each exam
+		for(int exam = 0; exam < e; exam++) {
+			// Try each time slot, give up after wrapping around
+			while(timeslot != lastTimeslot) {
+				// any conflicts?
+				boolean conflicting = false;
+				Set<Integer> collisions = TimeslotConflicts.get(timeslot);
+				for(int eprime : collisions) {
+					if(conflicts[exam][eprime] > 0) {
+						conflicting = true;
+						break;
+					}
+				}
+				// If not conflicting with anything, place it right there
+				if(!conflicting) {
+					lastTimeslot = timeslot;
+					chromosome[exam] = geneFactory(timeslot);
+					collisions.add(exam);
+//				} else {
+//					System.out.println("Conflict: " + exam + " in TS " + timeslot);
+				}
+
+				// Slot to try next time
+				timeslot = (timeslot % this.ts) + 1;
+
+				// If a time slot has been assigned, go to next exam
+				if(!conflicting) {
+					break;
+				}
+			}
+			// Pezza abnorme che produce soluzioni infeasible
+			if(timeslot == lastTimeslot) {
+				//System.out.println("Unsolvable conflict: " + exam + " :(");
+				lastTimeslot = timeslot;
+				chromosome[exam] = geneFactory(timeslot);
+				timeslot = (timeslot % this.ts) + 1;
+				feasible = false;
+			}
+		}
+		if(feasible) {
+			System.out.println("Toh, una soluzione fisicamente realizzabile");
+		} else {
+			System.out.println("Soluzione infeasible, maledizione!");
+		}
+
+		// ------- Fine del greedy -------------------------------------------------------------------------------------
+
 		return Genotype.of(IntegerChromosome.of(chromosome));
 	}
 
