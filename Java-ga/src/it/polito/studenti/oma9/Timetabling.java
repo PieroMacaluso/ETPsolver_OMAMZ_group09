@@ -22,9 +22,9 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 	/**
 	 * Build problem representation
 	 *
-	 * @param S Total number of students
-	 * @param e Total number of exams
-	 * @param ts Total number of timeslots
+	 * @param S         Total number of students
+	 * @param e         Total number of exams
+	 * @param ts        Total number of timeslots
 	 * @param conflicts e×e matrix with number of conflicting students
 	 */
 	Timetabling(int S, int e, int ts, int[][] conflicts) {
@@ -68,10 +68,25 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 	// ci sono voluti 20 tentativi prima di trovare qualcosa di funzionante
 	public Codec<ISeq<IntegerGene>, IntegerGene> codec() {
 		return Codec.of(
-				Genotype.of(IntegerChromosome.of(1, this.ts, this.e)),
+				this::genotypeFactory,
 				gt -> gt.getChromosome().toSeq()
 		);
 	}
+
+	private Genotype<IntegerGene> genotypeFactory() {
+		// TODO: "chromosome" è una soluzione di partenza, infilarci i geni con geneFactory(ts) (ts è il time slot, sono ordinati) tramite algoritmi greedy arditi
+		IntegerGene[] chromosome = new IntegerGene[this.e];
+		for(int i = 0; i < this.e; i++) {
+			int ts = (i % this.ts) +1;
+			chromosome[i] = geneFactory(ts);
+		}
+		return Genotype.of(IntegerChromosome.of(chromosome));
+	}
+
+	private IntegerGene geneFactory(int value) {
+		return IntegerGene.of(value, 1, this.ts);
+	}
+
 
 	static boolean validator(Genotype<IntegerGene> gt) {
 		Map<Integer, Set<Integer>> TimeslotConflicts = new TreeMap<>();
