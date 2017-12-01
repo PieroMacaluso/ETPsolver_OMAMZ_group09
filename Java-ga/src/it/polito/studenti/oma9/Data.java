@@ -50,7 +50,7 @@ class Data {
 		for(int i = 0; i < nExm; i++) {
 			for(int j = i + 1; j < nExm; j++) {
 				// è già inizializzata a 0
-				// Se si vuole: assert(i < j);
+				// Se si vuole: assert(i < j); (magari non con assert visto che non si può usare...)
 				for(Integer student1 : exams.get(i + 1).students.keySet()) {
 					for(Integer student2 : exams.get(j + 1).students.keySet()) {
 						if(student1.equals(student2)) {

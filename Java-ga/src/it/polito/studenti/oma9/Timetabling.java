@@ -49,6 +49,7 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 						if(distance <= 5) {
 							// ...che non può essere 0 altrimenti il valdiatore sta sbagliando tutto
 							if(distance <= 0) {
+								// TODO: remove commented-out code
 								//throw new RuntimeException("SOVRAPPOSTIIIIIIIIIIIIIIIIII");
 								return Double.POSITIVE_INFINITY;
 							}
@@ -104,7 +105,10 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 			Set<Integer> sovrapposti = TimeslotConflicts.get(timeslot);
 
 			for(int eprime : sovrapposti) {
-				assert(eprime != exam);
+				if(eprime == exam) {
+					// TODO: replace with console.log or remove before consegnare il codice
+					throw new RuntimeException("L'ottimizzazione non è ottimizzata!");
+				}
 				if(conflicts[exam][eprime] > 0) {
 					//System.out.println("Invalid: " + gt);
 					return false;
