@@ -4,12 +4,8 @@ import static io.jenetics.engine.EvolutionResult.toBestPhenotype;
 
 import io.jenetics.*;
 import io.jenetics.engine.*;
-import io.jenetics.util.ISeq;
 
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;

@@ -11,4 +11,5 @@ Java/out/
 Java/target/
 Java-ga/out/
 Java-ga/target/
+Java-ga/dependency-reduced-pom.xml
 instances/*.sol
