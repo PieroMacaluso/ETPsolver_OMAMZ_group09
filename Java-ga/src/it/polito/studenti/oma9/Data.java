@@ -163,7 +163,7 @@ class Data {
      * C1 - timeslot available: priority to exam that has less timeslot available
      * C2 - conflict with others: priority to exams with more conflict
      */
-    public boolean createFFS() {
+    public boolean createFFS2() {
         List<Exam> order;
         order = exams.values().stream().filter(e -> !e.isScheluded()).sorted(Comparator.comparing(Exam::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
 
@@ -178,10 +178,65 @@ class Data {
                 return false;
             }
             scheduleRand(e, slo);
+            for (Map.Entry<Integer, Exam> entry : e.exmConflict.entrySet()) {
+                slo = entry.getValue().timeslotAvailable(timeslots);
+                if (slo.isEmpty()) {
+                    System.out.println("NOOO");
+                    return false;
+                }
+                scheduleRand(entry.getValue(), slo);
+            }
             order = exams.values().stream().filter(ex -> !ex.isScheluded()).sorted(Comparator.comparing(Exam::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
         }
 
         System.out.println("FFS created");
+        return true;
+    }
+
+    /**
+     * FFS stands for "First Feasible Solution"
+     * C1 - timeslot available: priority to exam that has less timeslot available
+     * C2 - conflict with others: priority to exams with more conflict
+     *
+     * If the code reaches a stuck point with one exam, unschedule all conflicting exams and continue the procedure.
+     */
+    public boolean createFFS() {
+        List<Exam> order;
+        order = exams.values().stream().filter(ex -> !ex.isScheluded()).sorted(Comparator.comparing(Exam::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
+
+//        for (Exam e:order) {
+//            System.out.println(e.getExmID() + " " + e.nTimeslotNoWay() + " "+ e.nConflict());
+//        }
+        while (!order.isEmpty()) {
+//            System.out.println(" ");
+//            for (Exam e : order) {
+//                System.out.println(e.getExmID() + " " + e.nTimeslotNoWay() + " " + e.nConflict());
+//            }
+//            System.out.println(" ");
+
+            Exam e = order.get(0);
+            Map<Integer, Timeslot> slo = e.timeslotAvailable(timeslots);
+            if (slo.isEmpty()) {
+//                System.out.println("No good slot available");
+//                scheduleRand(e, timeslots);
+                for (Map.Entry<Integer, Exam> entry : e.exmConflict.entrySet()) {
+                    if (entry.getValue().isScheluded())
+                       entry.getValue().unschedule();
+                }
+            } else{
+                scheduleRand(e, slo);
+
+            }
+            order = exams.values().stream().filter(ex -> !ex.isScheluded()).sorted(Comparator.comparing(Exam::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
+        }
+
+        for (Map.Entry<Integer, Exam> entry : exams.entrySet()) {
+            System.out.println(entry.getValue().getExmID() + " " + entry.getValue().getTimeslot().getSloID());
+        }
+        System.out.println("FFS created");
+
+
+
         return true;
     }
 
@@ -209,7 +264,7 @@ class Data {
         e.setScheluded(true);
         e.setTimeslot(t);
         t.addExam(e);
-        System.out.println(e.getExmID() + " " + e.getTimeslot().getSloID());
+//        System.out.println(e.getExmID() + " " + e.getTimeslot().getSloID());
 
     }
 

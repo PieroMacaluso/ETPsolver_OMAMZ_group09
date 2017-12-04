@@ -25,6 +25,11 @@ public class Exam {
 	public boolean isScheluded() {
 		return scheluded;
 	}
+	public void unschedule() {
+		timeslot.removeExam(this);
+		timeslot = null;
+		this.scheluded = false;
+	}
 
 	public void setScheluded(boolean scheluded) {
 		this.scheluded = scheluded;
@@ -69,7 +74,7 @@ public class Exam {
 		Map <Integer, Timeslot> all = new TreeMap<>();
 		for (Map.Entry<Integer, Exam> entry : exmConflict.entrySet()) {
 			if (entry.getValue().getTimeslot() != null)
-				all.put(entry.getKey(), entry.getValue().getTimeslot());
+				all.put(entry.getValue().getTimeslot().getSloID(), entry.getValue().getTimeslot());
 		}
 		return all.size();
 	}
