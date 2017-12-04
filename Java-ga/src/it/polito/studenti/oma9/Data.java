@@ -239,10 +239,9 @@ class Data {
 	}
 
 	/**
-	 * Useful, but not yet used to reset FFS
+	 * Clears data structures from previously generated FFS
 	 */
 	private void resetFFS() {
-		System.out.println("FFS noway");
 		exams.forEach((i, e) -> e.resetTimeslot());
 		timeslots.forEach((i, t) -> t.resetExam());
 	}

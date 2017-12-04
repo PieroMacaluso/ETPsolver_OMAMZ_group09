@@ -61,7 +61,7 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 				}
 			}
 
-			//System.out.println("Penalty: " + (penalty / (double) this.S));
+			System.out.println("Penalty: " + (penalty / (double) this.S));
 			return penalty / (double) this.S;
 		};
 	}
@@ -85,7 +85,8 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 		}
 
 		theRealChromosome = IntegerChromosome.of(chromosome);
-		System.out.println("Ho creato dal nulla: " + theRealChromosome.toString());
+		//System.out.println("Ho creato dal nulla: " + theRealChromosome.toString());
+		System.out.println("FFS created with penalty " + fitness().apply(theRealChromosome.toSeq()));
 
 		return Genotype.of(theRealChromosome);
 	}
@@ -116,6 +117,7 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 					throw new RuntimeException("L'ottimizzazione non è ottimizzata!");
 				}
 				if(conflicts[exam][eprime] > 0) {
+					System.out.println("Unfeasible :'(");
 					//System.out.println("Invalid: " + gt);
 					return false;
 				}
@@ -123,6 +125,7 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 
 			sovrapposti.add(exam);
 		}
+		System.out.println("Valid");
 		//System.out.println("OK: " + gt);
 		return true;
 	}
