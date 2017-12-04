@@ -22,63 +22,68 @@ public class Exam {
 		students.put(s.getStuID(), s);
 	}
 
-	public boolean isScheluded() {
+	boolean isScheduled() {
 		return scheluded;
 	}
-	public void unschedule() {
+
+	void unschedule() {
 		timeslot.removeExam(this);
 		timeslot = null;
 		this.scheluded = false;
 	}
 
-	public void setScheluded(boolean scheluded) {
+	void setScheduled(boolean scheluded) {
 		this.scheluded = scheluded;
 	}
 
-	public Timeslot getTimeslot() {
+	Timeslot getTimeslot() {
 		return timeslot;
 	}
 
-	public void setTimeslot(Timeslot timeslot) {
+	void setTimeslot(Timeslot timeslot) {
 		this.timeslot = timeslot;
 	}
-	public void resetTimeslot() {
+
+	void resetTimeslot() {
 		this.timeslot = null;
-		this.scheluded= false;
+		this.scheluded = false;
 	}
 
-	public void addConflict(Exam e) {
+	void addConflict(Exam e) {
 		this.exmConflict.put(e.getExmID(), e);
 	}
 
-	public Map<Integer, Timeslot> timeslotAvailable(Map<Integer, Timeslot> t) {
-		Map <Integer, Timeslot> all = new TreeMap<>();
+	Map<Integer, Timeslot> timeslotAvailable(Map<Integer, Timeslot> t) {
+		Map<Integer, Timeslot> all = new TreeMap<>();
 		all.putAll(t);
-		for (Map.Entry<Integer, Exam> entry : exmConflict.entrySet()) {
-			if (entry.getValue().getTimeslot() != null)
+		for(Map.Entry<Integer, Exam> entry : exmConflict.entrySet()) {
+			if(entry.getValue().getTimeslot() != null)
 				all.remove(entry.getValue().getTimeslot().getSloID());
 		}
 		return all;
 	}
+
 	public int nTimeslotAvailable(Map<Integer, Timeslot> t) {
-		Map <Integer, Timeslot> all = new TreeMap<>();
+		Map<Integer, Timeslot> all = new TreeMap<>();
 		all.putAll(t);
-		for (Map.Entry<Integer, Exam> entry : exmConflict.entrySet()) {
-			if (entry.getValue().getTimeslot() != null)
+		for(Map.Entry<Integer, Exam> entry : exmConflict.entrySet()) {
+			if(entry.getValue().getTimeslot() != null)
 
 				all.remove(entry.getValue().getTimeslot().getSloID());
 		}
 		return all.size();
 	}
-	public int nTimeslotNoWay() {
-		Map <Integer, Timeslot> all = new TreeMap<>();
-		for (Map.Entry<Integer, Exam> entry : exmConflict.entrySet()) {
-			if (entry.getValue().getTimeslot() != null)
+
+	int nTimeslotNoWay() {
+		Map<Integer, Timeslot> all = new TreeMap<>();
+		for(Map.Entry<Integer, Exam> entry : exmConflict.entrySet()) {
+			if(entry.getValue().getTimeslot() != null)
 				all.put(entry.getValue().getTimeslot().getSloID(), entry.getValue().getTimeslot());
 		}
 		return all.size();
 	}
-	public int nConflict() {
+
+	int nConflict() {
 		return exmConflict.size();
 	}
 }

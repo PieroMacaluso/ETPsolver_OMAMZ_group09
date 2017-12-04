@@ -6,7 +6,7 @@ import java.util.TreeMap;
 
 class Student {
 	private int stuID;
-	Map<Integer, Exam> exams = new TreeMap<>();
+	private Map<Integer, Exam> exams = new TreeMap<>();
 
 	Student(int stuID) {
 		this.stuID = stuID;

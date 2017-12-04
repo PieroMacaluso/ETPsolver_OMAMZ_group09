@@ -2,7 +2,6 @@ package it.polito.studenti.oma9;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.sql.Array;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
@@ -164,7 +163,7 @@ class Data {
 	 */
 	public boolean createFFS2() {
 		List<Exam> order;
-		order = exams.values().stream().filter(e -> !e.isScheluded()).sorted(Comparator.comparing(Exam::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
+		order = exams.values().stream().filter(e -> !e.isScheduled()).sorted(Comparator.comparing(Exam::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
 
 //        for (Exam e:order) {
 //            System.out.println(e.getExmID() + " " + e.nTimeslotNoWay() + " "+ e.nConflict());
@@ -185,7 +184,7 @@ class Data {
 				}
 				scheduleRand(entry.getValue(), slo);
 			}
-			order = exams.values().stream().filter(ex -> !ex.isScheluded()).sorted(Comparator.comparing(Exam::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
+			order = exams.values().stream().filter(ex -> !ex.isScheduled()).sorted(Comparator.comparing(Exam::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
 		}
 
 		System.out.println("FFS created");
@@ -199,9 +198,10 @@ class Data {
 	 * <p>
 	 * If the code reaches a stuck point with one exam, unschedule all conflicting exams and continue the procedure.
 	 */
-	public boolean createFFS() {
+	@SuppressWarnings("UnusedReturnValue")
+	private boolean createFFS() {
 		List<Exam> order;
-		order = exams.values().stream().filter(ex -> !ex.isScheluded()).sorted(Comparator.comparing(Exam::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
+		order = exams.values().stream().filter(ex -> !ex.isScheduled()).sorted(Comparator.comparing(Exam::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
 
 //        for (Exam e:order) {
 //            System.out.println(e.getExmID() + " " + e.nTimeslotNoWay() + " "+ e.nConflict());
@@ -219,21 +219,20 @@ class Data {
 //                System.out.println("No good slot available");
 //                scheduleRand(e, timeslots);
 				for(Map.Entry<Integer, Exam> entry : e.exmConflict.entrySet()) {
-					if(entry.getValue().isScheluded())
+					if(entry.getValue().isScheduled()) {
 						entry.getValue().unschedule();
+					}
 				}
 			} else {
 				scheduleRand(e, slo);
-
 			}
-			order = exams.values().stream().filter(ex -> !ex.isScheluded()).sorted(Comparator.comparing(Exam::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
+			order = exams.values().stream().filter(ex -> !ex.isScheduled()).sorted(Comparator.comparing(Exam::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
 		}
 
 		for(Map.Entry<Integer, Exam> entry : exams.entrySet()) {
 			System.out.println(entry.getValue().getExmID() + " " + entry.getValue().getTimeslot().getSloID());
 		}
 		System.out.println("FFS created");
-
 
 		return true;
 	}
@@ -259,7 +258,7 @@ class Data {
 			n = rand.nextInt(nSlo) + 1;
 		}
 		Timeslot t = timeslots.get(n);
-		e.setScheluded(true);
+		e.setScheduled(true);
 		e.setTimeslot(t);
 		t.addExam(e);
 //        System.out.println(e.getExmID() + " " + e.getTimeslot().getSloID());
@@ -275,7 +274,7 @@ class Data {
 		Exam e;
 		int n = rand.nextInt(nExm) + 1;
 		e = exams.get(n);
-		while(e.isScheluded()) {
+		while(e.isScheduled()) {
 			n = rand.nextInt(nExm) + 1;
 			e = exams.get(n);
 		}
