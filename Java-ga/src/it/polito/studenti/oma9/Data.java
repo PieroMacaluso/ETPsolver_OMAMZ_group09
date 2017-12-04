@@ -30,10 +30,8 @@ class Data {
 	 */
 	Data(String filename) throws FileNotFoundException {
 		this.filename = filename;
-		rand.setSeed(Timestamp.from(Instant.now()).getTime());
+		rand.setSeed(System.nanoTime()); // TODO: this is a bad seed™, something even MORE random should be used (e.g. /dev/random, which is not available on Windows)
 		startRead();
-		createFFS();
-		createFFS();
 	}
 
 	/**
@@ -199,8 +197,10 @@ class Data {
 	 * If the code reaches a stuck point with one exam, unschedule all conflicting exams and continue the procedure.
 	 */
 	@SuppressWarnings("UnusedReturnValue")
-	private boolean createFFS() {
+	int[] createFFS() {
 		List<Exam> order;
+		int[] result = new int[this.nExm];
+
 		order = exams.values().stream().filter(ex -> !ex.isScheduled()).sorted(Comparator.comparing(Exam::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
 
 //        for (Exam e:order) {
@@ -230,11 +230,11 @@ class Data {
 		}
 
 		for(Map.Entry<Integer, Exam> entry : exams.entrySet()) {
-			System.out.println(entry.getValue().getExmID() + " " + entry.getValue().getTimeslot().getSloID());
+			//System.out.println(entry.getValue().getExmID() + " " + entry.getValue().getTimeslot().getSloID());
+			result[entry.getValue().getExmID() - 1] = entry.getValue().getTimeslot().getSloID();
 		}
-		System.out.println("FFS created");
 
-		return true;
+		return result;
 	}
 
 	/**

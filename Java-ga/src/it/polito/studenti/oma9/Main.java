@@ -53,7 +53,7 @@ public class Main {
 			//e.printStackTrace();
 		}
 
-		Timetabling problem = new Timetabling(data.nStu, data.nExm, data.nSlo, data.conflictTable);
+		Timetabling problem = new Timetabling(data);
 
 		final Engine<IntegerGene, Double> engine = Engine.builder(problem)
 				.optimize(Optimize.MINIMUM) // minimizza la fitness function (funzione obiettivo)
@@ -61,10 +61,10 @@ public class Main {
 				//.individualCreationRetries(999999)
 				//.populationSize(500)
 				.survivorsSelector(new StochasticUniversalSelector<>())
-				.offspringSelector(new TournamentSelector<>(5))
+				.offspringSelector(new EliteSelector<>())
 				.alterers(
-						new Mutator<>(0.1), // se volete mutazioni...
-						new MultiPointCrossover<>(0.5, data.nExm/data.nSlo))
+						new SwapMutator<>(0.1), // se volete mutazioni...
+						new MultiPointCrossover<>(0.6, data.nExm/data.nSlo))
 				.build();
 
 
@@ -76,7 +76,7 @@ public class Main {
 
 		final Phenotype<IntegerGene, Double> result = engine.stream()
 				//.limit(Limits.byExecutionTime(duration))
-				.limit(100) // numero di iterazioni
+				//.limit(100) // numero di iterazioni
 				.peek(statistics)
 				.collect(toBestPhenotype());
 

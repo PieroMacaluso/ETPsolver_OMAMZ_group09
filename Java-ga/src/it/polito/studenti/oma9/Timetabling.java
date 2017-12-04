@@ -14,21 +14,25 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 	private int S;
 	private int e;
 	private int ts;
+	private IntRange domain;
+	private Data data;
+	/**
+	 * e×e matrix with number of conflicting students
+	 */
 	private static int[][] conflicts;
 
 	/**
 	 * Build problem representation
 	 *
-	 * @param S         Total number of students
-	 * @param e         Total number of exams
-	 * @param ts        Total number of timeslots
-	 * @param conflicts e×e matrix with number of conflicting students
+	 * @param data THE data
 	 */
-	Timetabling(int S, int e, int ts, int[][] conflicts) {
-		this.S = S;
-		this.e = e;
-		this.ts = ts;
-		Timetabling.conflicts = conflicts; // questo è LO SCHIFO, la classe è un singleton forzosamente ma non so che farci
+	Timetabling(Data data) {
+		this.S = data.nStu;
+		this.e = data.nExm;
+		this.ts = data.nSlo;
+		this.domain = IntRange.of(1, this.ts); // Estremo destro escluso?
+		this.data = data;
+		Timetabling.conflicts = data.conflictTable; // questo è LO SCHIFO, la classe è un singleton forzosamente ma non so che farci
 	}
 
 	public Function<ISeq<IntegerGene>, Double> fitness() {
@@ -40,7 +44,7 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 			for(int i = 0; i < this.e; i++) {
 				for(int j = 0; j < i; j++) {
 					// se 2 esami sono in conflitto
-					if(Timetabling.conflicts[i][j] > 0) {
+					if(conflicts[i][j] > 0) {
 						// calcola la distanza...
 						distance = Math.abs(schedule.get(i).intValue() - schedule.get(j).intValue());
 						if(distance <= 5) {
@@ -72,76 +76,22 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 	}
 
 	private Genotype<IntegerGene> genotypeFactory() {
-		// TODO: "chromosome" è una soluzione di partenza, infilarci i geni con geneFactory(ts) (ts è il time slot, sono ordinati) tramite algoritmi greedy arditi
 		IntegerGene[] chromosome = new IntegerGene[this.e];
+		IntegerChromosome theRealChromosome;
 
-		// ------- Greedy che non funziona -----------------------------------------------------------------------------
-
-		boolean feasible = true;
-
-		SortedMap<Integer, Set<Integer>> TimeslotConflicts = new TreeMap<>();
-
-		// Create an empty conflict map
-		int tsPlusOne = ts + 1;
-		for(int i = 1; i < tsPlusOne; i++) {
-			TimeslotConflicts.put(i, new TreeSet<>());
+		int[] intermediate = this.data.createFFS();
+		for(int i = 0; i < intermediate.length; i++) {
+			chromosome[i] = geneFactory(intermediate[i]);
 		}
 
-		// Collections.shuffle(solution)
+		theRealChromosome = IntegerChromosome.of(chromosome);
+		System.out.println("Ho creato dal nulla: " + theRealChromosome.toString());
 
-		// Will try each time slot in order exactly one time
-		// For each exam
-		for(int exam = 0; exam < e; exam++) {
-			int timeslot = (Math.abs(new Random().nextInt()) % this.ts) + 1;
-			// System.out.println("Parto da " + timeslot);
-			// Try each time slot, give up after wrapping around
-			do {
-				// any conflicts?
-				boolean conflicting = false;
-				Set<Integer> collisions = TimeslotConflicts.get(timeslot);
-				for(int eprime : collisions) {
-					if(conflicts[exam][eprime] > 0) {
-						conflicting = true;
-						break;
-					}
-				}
-				// If not conflicting with anything, place it right there
-				if(!conflicting) {
-					chromosome[exam] = geneFactory(timeslot);
-					collisions.add(exam);
-//				} else {
-//					System.out.println("Conflict: " + exam + " in TS " + timeslot);
-				}
-
-				// Slot to try next time
-				timeslot = (timeslot % this.ts) + 1;
-
-				// If a time slot has been assigned, go to next exam
-				if(!conflicting) {
-					break;
-				}
-			} while(timeslot > 1);
-			// Pezza abnorme che produce soluzioni infeasible
-			if(timeslot == 1) {
-				//System.out.println("Unsolvable conflict: " + exam + " :(");
-				chromosome[exam] = geneFactory(timeslot);
-				feasible = false;
-			}
-		}
-		if(feasible) {
-			System.out.println("Toh, una soluzione fisicamente realizzabile");
-		} else {
-			System.out.println("Soluzione infeasible, maledizione!");
-			System.out.println(IntegerChromosome.of(chromosome)); // Se vogliamo provare a infilarla in un file e darla a ETPChecker per vedere se concorda...
-		}
-
-		// ------- Fine del greedy -------------------------------------------------------------------------------------
-
-		return Genotype.of(IntegerChromosome.of(chromosome));
+		return Genotype.of(theRealChromosome);
 	}
 
 	private IntegerGene geneFactory(int value) {
-		return IntegerGene.of(value, 1, this.ts);
+		return IntegerGene.of(value, domain);
 	}
 
 
@@ -186,7 +136,7 @@ public class Timetabling implements Problem<ISeq<IntegerGene>, IntegerGene, Doub
 				Output.println((i + 1) + " " + result.get(i).intValue());
 			}
 		} catch (IOException e) {
-			System.out.println("Errore: " + e);
+			System.out.println("Error writing solution to file: " + e);
 			System.exit(1);
 		}
 	}
