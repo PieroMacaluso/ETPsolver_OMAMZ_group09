@@ -234,6 +234,7 @@ class Data {
 			result[entry.getValue().getExmID() - 1] = entry.getValue().getTimeslot().getSloID();
 		}
 
+		resetFFS();
 		return result;
 	}
 
