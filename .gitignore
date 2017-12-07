@@ -13,3 +13,6 @@ Java-ga/out/
 Java-ga/target/
 Java-ga/dependency-reduced-pom.xml
 instances/*.sol
+JavaSA/out/
+JavaSA/target/
+JavaSA/dependency-reduced-pom.xml
