@@ -3,9 +3,17 @@ import java.util.*;
 import java.awt.*;
 public class ObjectCloner
 {
-    // so that nobody can accidentally create an ObjectCloner object
+    /**
+     * This is a class with a static method in order to do the clone with serialization
+     */
     private ObjectCloner(){}
-    // returns a deep copy of an object
+
+    /**
+     * Returns a deep copy of the object
+      * @param oldObj
+     * @return new copy
+     * @throws Exception
+     */
     static public Object deepCopy(Object oldObj) throws Exception
     {
         ObjectOutputStream oos = null;

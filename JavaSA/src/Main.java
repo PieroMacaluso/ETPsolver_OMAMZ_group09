@@ -16,6 +16,7 @@ public class Main {
         int seconds = 0;
         String instance = "";
 
+        // Initialization of the arguments
         for (String arg : args) {
             if (secondsIsNext) {
                 seconds = Integer.parseInt(arg);
@@ -41,6 +42,8 @@ public class Main {
             // dalla cartella Java-ga, si può invocare "questo-file.jar ../instances/instance01 -t 30"
             // (o mettere "../instances/instance01 -t 30" nei parametri della run configuration di Intellij...)
             // e va a prendere l'istanza nella cartella giusta
+
+            // Initialization of a new object Data and creation of the FFS
             data = new Data(instance);
             data.createSolution();
 
@@ -50,12 +53,15 @@ public class Main {
             //e.printStackTrace();
         }
 
+        // Data x is an object that the program uses to write the solution of the Simulated Annealing
         Data x = null;
         try {
-            x = optimization.startOptimization(data, data.evaluateSolution(), 200, 0.9 , 10, startTime);
+            // To see information of this method go to the implementation
+            x = optimization.startOptimization(data, data.evaluateSolution(), 1000, 0.9 , 10, startTime);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        // Print of the solution
         x.printSolution();
     }
 }
