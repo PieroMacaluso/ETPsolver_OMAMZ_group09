@@ -1,3 +1,5 @@
+package it.polito.studenti.oma9;
+
 import java.io.Serializable;
 import java.sql.Time;
 import java.util.HashMap;

@@ -1,3 +1,5 @@
+package it.polito.studenti.oma9;
+
 import java.util.concurrent.Callable;
 
 class Task implements Callable<String> {
