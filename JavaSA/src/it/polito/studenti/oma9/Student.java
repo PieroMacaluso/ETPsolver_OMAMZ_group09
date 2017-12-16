@@ -10,7 +10,8 @@ class Student implements Serializable {
 
 	/**
 	 * Default constructor
-	 * @param stuID
+	 *
+	 * @param stuID student ID
 	 */
 	Student(int stuID) {
 		this.stuID = stuID;
@@ -18,7 +19,8 @@ class Student implements Serializable {
 
 	/**
 	 * Get Student ID
-	 * @return
+	 *
+	 * @return student ID
 	 */
 	int getStuID() {
 		return stuID;
@@ -26,6 +28,7 @@ class Student implements Serializable {
 
 	/**
 	 * Add exam to the student
+	 *
 	 * @param e Exam
 	 */
 	void addExam(Exam e) {
@@ -34,10 +37,11 @@ class Student implements Serializable {
 
 	/**
 	 * Check if the student is signed up to exam with id
-	 * @param id
-	 * @return
+	 *
+	 * @param id exam ID
+	 * @return is it signed up or not?
 	 */
-	boolean hasExam (int id) {
+	boolean hasExam(int id) {
 		return exams.containsKey(id);
 	}
 

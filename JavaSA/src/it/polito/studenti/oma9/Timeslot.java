@@ -4,13 +4,14 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class Timeslot implements Serializable {
+class Timeslot implements Serializable {
 	private int sloID;
 	private Map<Integer, Exam> exams = new TreeMap<>();
 
 	/**
 	 * Default constructor
-	 * @param sloID
+	 *
+	 * @param sloID slot ID
 	 */
 	Timeslot(int sloID) {
 		this.sloID = sloID;
@@ -18,7 +19,10 @@ public class Timeslot implements Serializable {
 
 	/**
 	 * Get exam in the timeslot
-	 * @return
+	 *
+	 * TODO: why is this unused!?
+	 *
+	 * @return exams in each time slot
 	 */
 	public Map<Integer, Exam> getExams() {
 		return exams;
@@ -26,7 +30,8 @@ public class Timeslot implements Serializable {
 
 	/**
 	 * Add exam e to the timeslot
-	 * @param e
+	 *
+	 * @param e exam
 	 */
 	void addExam(Exam e) {
 		exams.put(e.getExmID(), e);
@@ -34,7 +39,8 @@ public class Timeslot implements Serializable {
 
 	/**
 	 * Get timeslot identifier
-	 * @return
+	 *
+	 * @return timeslot ID
 	 */
 	int getSloID() {
 		return sloID;
@@ -49,12 +55,12 @@ public class Timeslot implements Serializable {
 
 	/**
 	 * Remove exam from timeslot
-	 * @param exam
+	 *
+	 * @param exam exam
 	 */
 	void removeExam(Exam exam) {
 		exams.remove(exam.getExmID());
 	}
-
 
 
 }
