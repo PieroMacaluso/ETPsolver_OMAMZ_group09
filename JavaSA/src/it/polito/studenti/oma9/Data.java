@@ -1,8 +1,6 @@
 package it.polito.studenti.oma9;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -103,10 +101,20 @@ class Data implements Serializable {
 	 * Print the solution
 	 */
 	void printSolution() {
-		for(Map.Entry<Integer, Exam> e : exams.entrySet()) {
-			System.out.println(e.getKey() + " " + e.getValue().getTimeslot());
+		try{
+			PrintWriter writer = new PrintWriter(filename + ".sol", "UTF-8");
+			for(Map.Entry<Integer, Exam> e : exams.entrySet()) {
+				writer.println(e.getKey() + " " + e.getValue().getTimeslot());
 
+				//System.out.println(e.getKey() + " " + e.getValue().getTimeslot());
+
+			}
+			writer.close();
+		} catch (IOException e) {
+			System.out.println("Non riesco a scrivere la soluzione su " + filename + ".sol");
+			throw new RuntimeException();
 		}
+
 	}
 
 	/**
@@ -245,14 +253,14 @@ class Data implements Serializable {
 
 	}
 
-	/**
-	 * Clears data structures from previously generated FFS
-	 * <p>
-	 * TODO: is this needed?
-	 */
-	private void resetFFS() {
-		exams.forEach((i, e) -> e.unschedule());
-	}
+//	/*
+//	 * Clears data structures from previously generated FFS
+//	 * <p>
+//	 *
+//	 */
+//	private void resetFFS() {
+//		exams.forEach((i, e) -> e.unschedule());
+//	}
 
 	/**
 	 * Insert the exam in a timeslot available where there are no conflicts
@@ -282,13 +290,11 @@ class Data implements Serializable {
 	/**
 	 * Create a neighborhood starting from the main solution unscheduling 1/3 of the exams and randomly rescheduling them using the FFS method
 	 *
-	 * @param n size of neighborhood
 	 * @return List of neighbor
 	 * <p>
 	 * TODO: accept the "1/3" thing as a parameter?
 	 */
-	List<Data> createNeighborhood(int n) throws Exception {
-		List<Data> neigh = new ArrayList<>();
+	Data createNeighbor() throws Exception {
 		Exam u;
 		Data d = (Data) ObjectCloner.deepCopy(this);
 
@@ -301,15 +307,8 @@ class Data implements Serializable {
 			}
 		}
 
-		int i;
-		for(i = 0; i < n; i++) {
-			neigh.add(d);
-		}
-
-		for(Data da : neigh) {
-			da.createSolution();
-		}
-		return neigh;
+		d.createSolution();
+		return d;
 	}
 }
 

@@ -1,6 +1,5 @@
 package it.polito.studenti.oma9;
 
-import java.util.List;
 import java.util.Random;
 
 class SA {
@@ -21,27 +20,31 @@ class SA {
 	@SuppressWarnings("SameParameterValue")
 	Data startOptimization(Data ffs, double startingTemperature, int numberOfIterations, double coolingRate, int neighPop, long startTime) throws Exception {
 		double t = startingTemperature;
+		LS ls = new LS();
 		Data best = (Data) ObjectCloner.deepCopy(ffs);
 		rand.setSeed(System.nanoTime());
 		Data x;
 		x = (Data) ObjectCloner.deepCopy(ffs);
 
 		System.out.println("Initial solution: " + ffs.evaluateSolution());
-		List<Data> neigh;
 
 		for(int i = 0; i < numberOfIterations; i++) {
 			// If the current solution is the best, save it!
 			if(x.evaluateSolution() < best.evaluateSolution()) {
 				best = (Data) ObjectCloner.deepCopy(x);
 				System.out.println("NEW BEST\t" + best.evaluateSolution() + "\t" + (System.currentTimeMillis() - startTime) / 1000.00 + " s");
+				best.printSolution();
 			}
 			// Create neighborhood of the current solution
-			neigh = x.createNeighborhood(1);
+
 			// Evaluate the solution of the current solution and of a random neighbor
 			double f = x.evaluateSolution();
-			//Data mutatedX = neigh.get(rand.nextInt(neighPop));
-			Data mutatedX = neigh.get(0);
-			double newF = mutatedX.evaluateSolution();
+			ls.deepOptimization(x, 0.1);
+
+			//Data neigh = neigh.get(rand.nextInt(neighPop));
+			Data neigh = x.createNeighbor();
+			ls.deepOptimization(neigh, 0.1);
+			double newF = neigh.evaluateSolution();
 
 			// If the solution found is bad, instead of discarding them, use it as current solution randomly (following the probability in the method PR)
 			if(newF > f) {
@@ -55,12 +58,12 @@ class SA {
 //                    System.out.println("No");
 				} else {
 					System.out.println("Prob new!" + "\t" + newF);
-					x = (Data) ObjectCloner.deepCopy(mutatedX);
+					x = (Data) ObjectCloner.deepCopy(neigh);
 				}
 			} // If the solution found is good take it!
 			else {
 				System.out.println("Found new!" + "\t" + newF);
-				x = (Data) ObjectCloner.deepCopy(mutatedX);
+				x = (Data) ObjectCloner.deepCopy(neigh);
 			}
 
 			// Lower the temperature

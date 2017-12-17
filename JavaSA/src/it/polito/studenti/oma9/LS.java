@@ -12,10 +12,10 @@ class LS implements Serializable {
 		while((prev - next) / prev > delta) {
 			prev = next;
 			next = startOptimization(data);
-			System.out.println("Ottimizzazione pari a: " + 100 * (prev - next) / prev + "%");
+//			System.out.println("Ottimizzazione pari a: " + 100 * (prev - next) / prev + "%");
 			i++;
 		}
-		System.out.println("" + i + " giri di LS compiuti con gaudio");
+//		System.out.println("" + i + " giri di LS compiuti con gaudio");
 	}
 
 	private double startOptimization(Data ffs) {
@@ -24,6 +24,7 @@ class LS implements Serializable {
 			Exam e = (Exam) en.getValue();
 			bestSlo = e.getTimeslot();
 			Set<Integer> sloA = e.timeslotAvailable();
+//			System.out.println("Ho " + sloA.size() + " buchi a disposizione");
 			double bestC = e.examCost(ffs.nStu);
 			for(Integer s : sloA) {
 				e.unschedule();
