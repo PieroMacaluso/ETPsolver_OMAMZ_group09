@@ -1,6 +1,8 @@
 package it.polito.studenti.oma9;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -8,11 +10,10 @@ class Data implements Serializable {
 
 	private int nExm = 0;
 	private int nStu = 0;
-	private int nSlo = 0;
+	int nSlo = 0;
 	private boolean hasFFS = false;
 	private Map<Integer, Student> students = new TreeMap<>();
 	private Map<Integer, Exam> exams = new TreeMap<>();
-	private Map<Integer, Timeslot> timeslots = new TreeMap<>();
 	private Random rand = new Random();
 	private String filename;
 
@@ -89,7 +90,7 @@ class Data implements Serializable {
 	 * Set the flag and create the solution
 	 */
 	void createSolution() {
-		createFFS2();
+		createFFS();
 		hasFFS = true;
 //        printSolution();
 //        System.out.println(evaluateSolution());
@@ -100,7 +101,7 @@ class Data implements Serializable {
 	 */
 	void printSolution() {
 		for(Map.Entry<Integer, Exam> e : exams.entrySet()) {
-			System.out.println(e.getKey() + " " + e.getValue().getTimeslot().getSloID());
+			System.out.println(e.getKey() + " " + e.getValue().getTimeslot());
 
 		}
 	}
@@ -115,13 +116,13 @@ class Data implements Serializable {
 		if(hasFFS) {
 			for(Map.Entry<Integer, Exam> e1 : exams.entrySet()) {
 				for(Map.Entry<Integer, Exam> e2 : e1.getValue().exmConflict.entrySet()) {
-					if(Math.abs(e2.getValue().getTimeslot().getSloID() - e1.getValue().getTimeslot().getSloID()) == 0) {
+					if(Math.abs(e2.getValue().getTimeslot() - e1.getValue().getTimeslot()) == 0) {
 						System.out.println("Unfesible solution!! BAAAAAD");
 						return Double.MAX_VALUE;
 
 					}
-					if(e2.getKey() > e1.getKey() && Math.abs(e2.getValue().getTimeslot().getSloID() - e1.getValue().getTimeslot().getSloID()) < 6) {
-						int d = Math.abs(e2.getValue().getTimeslot().getSloID() - e1.getValue().getTimeslot().getSloID());
+					if(e2.getKey() > e1.getKey() && Math.abs(e2.getValue().getTimeslot() - e1.getValue().getTimeslot()) < 6) {
+						int d = Math.abs(e2.getValue().getTimeslot() - e1.getValue().getTimeslot());
 						long nee = students.entrySet().stream().filter(s -> s.getValue().hasExam(e1.getKey())).filter(s -> s.getValue().hasExam(e2.getKey())).collect(Collectors.toList()).size();
 						sum += Math.pow(2, 5 - d) * nee;
 					}
@@ -149,7 +150,7 @@ class Data implements Serializable {
 			}
 			String part[] = line.split(" ");
 			exmID = Integer.parseInt(part[0]);
-			exams.put(exmID, new Exam(exmID));
+			exams.put(exmID, new Exam(exmID, this));
 			if(exmID > maxID) {
 				maxID = Integer.parseInt(part[0]);
 			}
@@ -199,8 +200,6 @@ class Data implements Serializable {
 	private void readSlots(Scanner sSlo) {
 		String line = sSlo.nextLine();
 		nSlo = Integer.parseInt(line);
-		for(int i = 1; i <= nSlo; i++)
-			timeslots.put(i, new Timeslot(i));
 	}
 
 	/**
@@ -210,7 +209,7 @@ class Data implements Serializable {
 	 * <p>
 	 * If the code reaches a stuck point with one exam, unschedule all conflicting exams and continue the procedure.
 	 */
-	private void createFFS2() {
+	private void createFFS() {
 		List<Exam> order;
 
 		order = exams.values().stream().filter(ex -> !ex.isScheduled()).sorted(Comparator.comparing(Exam::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
@@ -218,6 +217,7 @@ class Data implements Serializable {
 //        for (Exam e:order) {
 //            System.out.println(e.getExmID() + " " + e.nTimeslotNoWay() + " "+ e.nConflict());
 //        }
+		// TODO: use do-while?
 		while(!order.isEmpty()) {
 //            System.out.println(" ");
 //            for (Exam e : order) {
@@ -226,7 +226,7 @@ class Data implements Serializable {
 //            System.out.println(" ");
 
 			Exam e = order.get(0);
-			Map<Integer, Timeslot> slo = e.timeslotAvailable(timeslots);
+			Set<Integer> slo = e.timeslotAvailable();
 			if(slo.isEmpty()) {
 //                System.out.println("No good slot available");
 //                scheduleRand(e, timeslots);
@@ -245,30 +245,37 @@ class Data implements Serializable {
 
 	/**
 	 * Clears data structures from previously generated FFS
-	 *
+	 * <p>
 	 * TODO: is this needed?
 	 */
 	private void resetFFS() {
 		exams.forEach((i, e) -> e.resetTimeslot());
-		timeslots.forEach((i, t) -> t.resetExam());
+		//timeslots.forEach((i, t) -> t.resetExam());
 	}
 
 	/**
 	 * Insert the exam in a timeslot available where there are no conflicts
+	 * Does nothing if there are no available time slots.
 	 *
 	 * @param e: exam to schedule
 	 */
-	private void scheduleRand(Exam e, Map<Integer, Timeslot> slo) {
-		if(slo.size() == 0) return;
-		int n = rand.nextInt(nSlo) + 1;
-		while(!slo.containsKey(n)) {
-			n = rand.nextInt(nSlo) + 1;
+	private void scheduleRand(Exam e, Set<Integer> availableTimeslots) {
+		if(availableTimeslots.size() == 0) {
+			return;
 		}
-		Timeslot t = timeslots.get(n);
-		e.schedule(t);
 
-//        System.out.println(e.getExmID() + " " + e.getTimeslot().getSloID());
+		int n = rand.nextInt(availableTimeslots.size());
+		int i = 0;
+		for(Integer timeslot : availableTimeslots) {
+			if(i == n) {
+				e.schedule(timeslot);
+				//System.out.println(e.getExmID() + " randomly scheduled in " + timeslot + " (position " + i + "/" + availableTimeslots.size() + ")");
+				return;
+			}
+			i++;
+		}
 
+		throw new RuntimeException("Bad things are happening");
 	}
 
 //
@@ -334,7 +341,7 @@ class Data implements Serializable {
 	 *
 	 * @param n size of neighborhood
 	 * @return List of neighbor
-	 *
+	 * <p>
 	 * TODO: accept the "1/3" thing as a parameter?
 	 */
 	List<Data> createNeighborhood(int n) throws Exception {

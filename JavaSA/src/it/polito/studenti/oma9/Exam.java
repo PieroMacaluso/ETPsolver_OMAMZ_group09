@@ -2,22 +2,26 @@ package it.polito.studenti.oma9;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 class Exam implements Serializable {
 	Map<Integer, Student> students = new HashMap<>();
-	Map<Integer, Exam> exmConflict = new HashMap<>();
+	Map<Integer, Exam> exmConflict = new HashMap<>(); // TODO: is Integer the other exam ID? Can we turn this into a Set?
 	private int exmID;
 	private boolean scheduled = false;
-	private Timeslot timeslot = null;
+	private Integer timeslot = null;
+	private Data data;
 
 	/**
 	 * Default constructor
 	 *
 	 * @param exmID exam ID
 	 */
-	Exam(int exmID) {
+	Exam(int exmID, Data data) {
 		this.exmID = exmID;
+		this.data = data;
 	}
 
 	/**
@@ -39,6 +43,24 @@ class Exam implements Serializable {
 	}
 
 	/**
+	 * Schedule exam in timeslot t
+	 *
+	 * @param t timeslot
+	 */
+	void schedule(int t) {
+		this.timeslot = t;
+		this.scheduled = true;
+	}
+
+	/**
+	 * Unschedule the exam
+	 */
+	void unschedule() {
+		timeslot = null;
+		this.scheduled = false;
+	}
+
+	/**
 	 * Is it scheduled yet?
 	 *
 	 * @return True if the exam is scheduled, False otherwise
@@ -48,29 +70,21 @@ class Exam implements Serializable {
 	}
 
 	/**
-	 * Unschedule the exam
-	 */
-	void unschedule() {
-		timeslot.removeExam(this);
-		timeslot = null;
-		this.scheduled = false;
-	}
-
-	/**
 	 * Get the timeslot where the exam is scheduled
 	 *
 	 * @return timeslot
 	 */
-	Timeslot getTimeslot() {
+	Integer getTimeslot() {
 		return timeslot;
 	}
 
 	/**
 	 * Reset the timeslot
+	 *
+	 * @deprecated it's a duplicate of "unschedule"
 	 */
 	void resetTimeslot() {
-		this.timeslot = null;
-		this.scheduled = false;
+		this.unschedule();
 	}
 
 	/**
@@ -83,34 +97,52 @@ class Exam implements Serializable {
 	}
 
 	/**
-	 * Return a map of all the timeslot available (no conflict) in the current context
+	 * Return a set of all the available time slots (no conflict) in the current context
 	 *
-	 * @param t: set of timeslot
-	 * @return set of timeslot available
+	 * @return set of available time slots
 	 */
-	Map<Integer, Timeslot> timeslotAvailable(Map<Integer, Timeslot> t) {
-		Map<Integer, Timeslot> all = new HashMap<>();
+	Set<Integer> timeslotAvailable() {
+		Set<Integer> all = new HashSet<>();
 
-		all.putAll(t);
-		for(Map.Entry<Integer, Exam> entry : exmConflict.entrySet()) {
-			if(entry.getValue().getTimeslot() != null)
-				all.remove(entry.getValue().getTimeslot().getSloID());
+		// Start from all timeslots
+		for(int i = 1; i <= data.nSlo; i++) {
+			all.add(i);
 		}
+
+		// Get every conflicting exam
+		for(Exam entry : exmConflict.values()) {
+			// Is it scheduled somewhere?
+			Integer timeslot = entry.getTimeslot();
+			if(timeslot != null) {
+				// If it is, remove that time slot
+				all.remove(timeslot);
+			}
+		}
+
+		// Return remaining set
 		return all;
 	}
 
 	/**
-	 * Find the number of slots where the exam e cannot be placed
+	 * Find the number of slots where this exam cannot be placed
 	 *
 	 * @return number of slots
 	 */
 	int nTimeslotNoWay() {
-		Map<Integer, Timeslot> all = new HashMap<>();
-		for(Map.Entry<Integer, Exam> entry : exmConflict.entrySet()) {
-			if(entry.getValue().getTimeslot() != null)
-				all.put(entry.getValue().getTimeslot().getSloID(), entry.getValue().getTimeslot());
+		Set<Integer> timeslots = new HashSet<>();
+
+		// For each conflicting exam
+		for(Exam other : exmConflict.values()) {
+			// If it has been scheduled
+			Integer timeslot = other.getTimeslot();
+			if(timeslot != null) {
+				// Add that time slot to the list of conflicting ones
+				// (Set compares Integer value, not that it is a pointer to same memory location, so everything works fine)
+				timeslots.add(timeslot);
+			}
 		}
-		return all.size();
+
+		return timeslots.size();
 	}
 
 	/**
@@ -120,16 +152,5 @@ class Exam implements Serializable {
 	 */
 	int nConflict() {
 		return exmConflict.size();
-	}
-
-	/**
-	 * Schedule exam in timeslot t
-	 *
-	 * @param t timeslot
-	 */
-	void schedule(Timeslot t) {
-		this.scheduled = true;
-		this.timeslot = t;
-		t.addExam(this);
 	}
 }
