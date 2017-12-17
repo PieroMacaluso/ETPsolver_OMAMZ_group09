@@ -5,6 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
     <groupId>it.polito.studenti.oma9</groupId>
     <artifactId>JavaSA</artifactId>
     <version>1.0</version>
@@ -44,7 +48,7 @@
                             <transformers>
                                 <!-- add Main-Class to manifest file -->
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>Main</mainClass>
+                                    <mainClass>it.polito.studenti.oma9.Main</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
