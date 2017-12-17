@@ -1,7 +1,11 @@
-*.aux
-*.log
-*.synctex.gz
-*.pdf
+relazione*/*.aux
+relazione*/*.log
+relazione*/*.out
+relazione*/*.toc
+relazione*/*.synctex.gz
+relazione*/*.pdf
+relazione*/*.nav
+relazione*/*.snm
 .idea
 trasformatore/*.slo
 trasformatore/*.stu
