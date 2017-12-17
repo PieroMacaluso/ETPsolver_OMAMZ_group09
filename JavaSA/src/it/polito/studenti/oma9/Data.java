@@ -294,12 +294,12 @@ class Data implements Serializable {
 	 * <p>
 	 * TODO: accept the "1/3" thing as a parameter?
 	 */
-	Data createNeighbor() throws Exception {
+	Data createNeighbor(double percentage) throws Exception {
 		Exam u;
 		Data d = (Data) ObjectCloner.deepCopy(this);
 
 		int j = 0;
-		while(j < nExm / 3) {
+		while(j < (int) (nExm * percentage)) {
 			u = d.exams.get(rand.nextInt(nExm));
 			if(u != null && u.isScheduled()) {
 				u.unschedule();

@@ -1,16 +1,15 @@
 package it.polito.studenti.oma9;
 
 import java.io.FileNotFoundException;
-import java.time.Duration;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 
 public class Main {
 
 	public static void main(String[] args) {
-		long startTime = System.currentTimeMillis();
-		@SuppressWarnings("unused") Temporal start = LocalTime.now(); // TODO: use this?
-		@SuppressWarnings("unused") Duration duration;
+		Temporal start = LocalTime.now();
+		Temporal endTime;
 		LS ls = new LS();
 		SA optimization = new SA();
 		Data data;
@@ -47,23 +46,28 @@ public class Main {
 
 			// Initialization of a new object Data and creation of the FFS
 			data = new Data(instance);
-			data.createSolution();
-			System.out.println("Initial solution: " + data.evaluateSolution());
-			ls.deepOptimization(data, 0.01);
-			System.out.println("LS solution: " + data.evaluateSolution());
-
-
 		} catch(FileNotFoundException e) {
 			System.out.println("Missing files for instance " + instance);
 			return;
 			//e.printStackTrace();
 		}
 
+		data.createSolution();
+		System.out.println("Initial solution: " + data.evaluateSolution());
+		Double delta = data.evaluateSolution();
+		ls.deepOptimization(data, 0.01);
+		System.out.println("LS solution: " + data.evaluateSolution());
+		delta -= data.evaluateSolution();
+
+
+		endTime = start.plus(seconds, ChronoUnit.SECONDS);
+
 		// Data x is an object that the program uses to write the solution of the Simulated Annealing
 		Data x;
 		try {
 			// To see information of this method go to the implementation
-			x = optimization.startOptimization(data, data.evaluateSolution(), 1000, 0.9, 10, startTime);
+			// 0.69 obtained from logaritmo (TODO: spiegare 'sta cosa)
+			x = optimization.startOptimization(data, delta / 0.69, start, endTime);
 			// Print of the solution
 			x.printSolution();
 		} catch(Exception e) {
