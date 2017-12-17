@@ -1,10 +1,12 @@
 import java.io.Serializable;
 import java.sql.Time;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
-public class Exam implements Serializable {
+public class Exam implements Serializable, Comparable<Exam> {
     private int exmID;
     private boolean scheluded = false;
     Map<Integer, Student> students = new HashMap<>();
@@ -149,5 +151,57 @@ public class Exam implements Serializable {
         this.setScheduled(true);
         this.setTimeslot(t);
         t.addExam(this);
+    }
+    double costExam (int nStu) {
+        double sum = 0;
+        for (Map.Entry<Integer, Exam> e2 : this.exmConflict.entrySet()) {
+            int d = Math.abs(e2.getValue().getTimeslot().getSloID() - this.getTimeslot().getSloID());
+            if (d == 0) {
+                System.out.println("Unfesible solution!! BAAAAAD");
+                return Double.MAX_VALUE;
+
+            }
+            if (e2.getKey() > this.getExmID() && d < 6) {
+                long nee = students.entrySet().stream().filter(s -> s.getValue().hasExam(this.getExmID())).filter(s -> s.getValue().hasExam(e2.getKey())).collect(Collectors.toList()).size();
+                sum += Math.pow(2, 5 - d) * nee;
+            }
+        }
+        return sum /nStu;
+    }
+    double costExamRemoving (int nStu) {
+        double sum = 0;
+        for (Map.Entry<Integer, Exam> e2 : this.exmConflict.entrySet()) {
+            int d = Math.abs(e2.getValue().getTimeslot().getSloID() - this.getTimeslot().getSloID());
+            if (d == 0) {
+                System.out.println("Unfesible solution!! BAAAAAD");
+                return Double.MAX_VALUE;
+
+            }
+            if (d < 6) {
+                long nee = students.entrySet().stream().filter(s -> s.getValue().hasExam(this.getExmID())).filter(s -> s.getValue().hasExam(e2.getKey())).collect(Collectors.toList()).size();
+                sum += Math.pow(2, 5 - d) * nee;
+            }
+        }
+        return sum /nStu;
+
+    }
+    int getNStuConflict() {
+        int stu = 0;
+        for (Map.Entry<Integer, Exam> e2 : exmConflict.entrySet()) {
+            int d = Math.abs(e2.getValue().getTimeslot().getSloID() - this.getTimeslot().getSloID());
+            if (d < 6) {
+                int nee = students.entrySet().stream().filter(s -> s.getValue().hasExam(this.getExmID())).filter(s -> s.getValue().hasExam(e2.getKey())).collect(Collectors.toList()).size();
+                stu += nee;
+            }
+        }
+        return stu;
+    }
+
+
+    @Override
+    public int compareTo(Exam o) {
+        if(this.nConflict()>o.nConflict()) return -1;
+        if(this.nConflict()<o.nConflict()) return 1;
+        return 0;
     }
 }
