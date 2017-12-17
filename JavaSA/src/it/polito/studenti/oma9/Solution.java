@@ -184,11 +184,7 @@ class Solution {
 				}
 				if(e2.getExmID() > e1.getExmID() && Math.abs((allocations.get(e2) - allocations.get(e1))) < 6) {
 					int d = Math.abs((allocations.get(e2) - allocations.get(e1)));
-					Set<Student> s = new TreeSet<>();
-					s.addAll(e1.students.values());
-					s.retainAll(e2.students.values());
-					long nee = s.size();
-					sum += Math.pow(2, 5 - d) * nee;
+					sum += Math.pow(2, 5 - d) * e1.conflictingStudentsCounter.getOrDefault(e2, 0);
 				}
 			}
 
