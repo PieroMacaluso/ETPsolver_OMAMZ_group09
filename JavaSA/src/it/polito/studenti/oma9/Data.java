@@ -1,6 +1,8 @@
 package it.polito.studenti.oma9;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -13,7 +15,7 @@ class Data implements Serializable {
 	private Map<Integer, Exam> exams = new HashMap<>();
 	private String filename;
 
-	public String getFilename() {
+	String getFilename() {
 		return filename;
 	}
 
@@ -21,13 +23,14 @@ class Data implements Serializable {
 		return exams;
 	}
 
+	private Data() {
+	}
+
 	/**
 	 * Create object representing problem data.
 	 *
 	 * @throws FileNotFoundException If any file for the instance doesn't exist
 	 */
-	private Data()  {
-	}
 	void initialize(String filename) throws FileNotFoundException {
 		this.filename = filename;
 		startRead();
@@ -35,8 +38,8 @@ class Data implements Serializable {
 
 
 	// Metodo della classe impiegato per accedere al singleton
-	public static synchronized Data getInstance() {
-		if (instance == null) {
+	static synchronized Data getInstance() {
+		if(instance == null) {
 			instance = new Data();
 		}
 		return instance;
@@ -55,47 +58,25 @@ class Data implements Serializable {
 
 		readSlots(sSlo);
 		readExams(sExm);
-//        conflictTable = new int[nExm][nExm];
 		readStudents(sStu);
 
-		// Creazione della tabella di conflitti con l'utilizzo delle Key delle mappe
-		// Gli ID degli esami devono partire da 0 se no Jenetics esplode.
-		// Si può modificare la funzione di validazione per farlo funzionare anche in quel modo, forse...
-		// In ogni caso, se ci sono buchi esplode tutto malamente a causa dei .get()
-		for(int i = 0; i < nExm; i++) {
+		buildConflicts();
+	}
+
+	private void buildConflicts() {
+		// TODO: questa cosa è inefficiente
+		for(int i = 1; i < nExm; i++) {
 			for(int j = i + 1; j < nExm; j++) {
-				// è già inizializzata a 0
-				// Se si vuole: assert(i < j); (magari non con assert visto che non si può usare...)
-				for(Integer student1 : exams.get(i + 1).students.keySet()) {
-					for(Integer student2 : exams.get(j + 1).students.keySet()) {
+				for(Integer student1 : exams.get(i).students.keySet()) {
+					for(Integer student2 : exams.get(j).students.keySet()) {
 						if(student1.equals(student2)) {
-//                            conflictTable[i][j]++;
-//                            conflictTable[j][i]++;
-							exams.get(i + 1).addConflict(exams.get(j + 1));
-							exams.get(j + 1).addConflict(exams.get(i + 1));
+							exams.get(i).addConflict(exams.get(j));
+							exams.get(j).addConflict(exams.get(i));
 						}
 					}
 				}
 			}
 		}
-
-
-//		System.out.println("Exams: " + nExm + ", slots: " + nSlo + ", students: " + nStu + "\n\n");
-//		// Stampa a video della tabella dei conflitti per verifica
-//		for(int i = 0; i < nExm; i++) {
-//			for(int j = 0; j < nExm; j++) {
-//				System.out.print(conflictTable[i][j] + "\t");
-//			}
-//			System.out.print("\n");
-//		}
-
-//		 Stampa a video della tabella dei booleani per verifica
-//		for(int i = 1; i <= nStu; i++) {
-//			for(int j = 1; j <= nExm; j++) {
-//				System.out.print(stuExm[i][j] + "\t");
-//			}
-//			System.out.print("\n");
-//		}
 	}
 
 	/**

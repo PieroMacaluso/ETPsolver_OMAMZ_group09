@@ -5,15 +5,15 @@ import java.io.PrintWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Solution {
+class Solution {
 	private Map<Exam, Integer> allocations = new TreeMap<>();
 	private Random rand = new Random();
 
-	public Solution(Solution sol) {
+	Solution(Solution sol) {
 		this.allocations.putAll(sol.allocations);
 	}
 
-	public Solution() {
+	Solution() {
 		createSolution();
 	}
 
@@ -200,6 +200,7 @@ public class Solution {
 
 	/**
 	 * @return exam cost
+	 * @deprecated is this an unused duplicate?
 	 */
 	double costExam(Exam e1) {
 		double sum = 0;
@@ -222,23 +223,23 @@ public class Solution {
 	}
 
 	/**
-	 * @return cost exam
+	 * @return exam cost
 	 */
-	double examCost(Exam e1) {
+	double examCost(Exam exam) {
 		double sum = 0;
-		for(Exam e2 : e1.exmConflict) {
-			int d = Math.abs(this.getTimeslot(e2) - this.getTimeslot(e1));
+		for(Exam conflicting : exam.exmConflict) {
+			// Take every conflicting exam and measure distance
+			int d = Math.abs(this.getTimeslot(conflicting) - this.getTimeslot(exam));
+			// This shouldn't happen, hopefully
 			if(d == 0) {
-				System.out.println("Unfesible solution!! BAAAAAD");
+				System.out.println("Infeasible solution!! BAAAAAD");
 				return Double.MAX_VALUE;
-
 			}
-			if(d < 6) {
-				Set<Student> s = new TreeSet<>();
-				s.addAll(e1.students.values());
-				s.retainAll(e2.students.values());
-				long nee = s.size();
-				sum += Math.pow(2, 5 - d) * nee;
+			// If they're close enough to trigger a penalty
+			if(d <= 5) {
+				// Calculate penalty
+				sum += Math.pow(2, 5 - d) * exam.conflictingStudentsCounter.getOrDefault(conflicting, 0);
+				//System.out.println("OMG confligge con " + exam.conflictingStudentsCounter.getOrDefault(conflicting, 0) + " studenti (" + exam.getExmID() + " con " + conflicting.getExmID() + ")");
 			}
 		}
 		return sum / Data.getInstance().nStu;
@@ -289,6 +290,7 @@ public class Solution {
 	 * @return List of neighbor
 	 * <p>
 	 */
+	@SuppressWarnings("SameParameterValue")
 	Solution createNeighbor(double percentage) throws Exception {
 		Exam u;
 		Solution s = new Solution(this);
