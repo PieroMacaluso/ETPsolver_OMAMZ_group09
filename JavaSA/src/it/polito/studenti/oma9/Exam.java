@@ -79,15 +79,6 @@ class Exam implements Serializable {
 	}
 
 	/**
-	 * Reset the timeslot
-	 *
-	 * @deprecated it's a duplicate of "unschedule"
-	 */
-	void resetTimeslot() {
-		this.unschedule();
-	}
-
-	/**
 	 * Add a conflicting exam
 	 *
 	 * @param e exam in conflict

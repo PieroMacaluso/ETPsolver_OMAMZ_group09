@@ -249,7 +249,7 @@ class Data implements Serializable {
 	 * TODO: is this needed?
 	 */
 	private void resetFFS() {
-		exams.forEach((i, e) -> e.resetTimeslot());
+		exams.forEach((i, e) -> e.unschedule());
 		//timeslots.forEach((i, t) -> t.resetExam());
 	}
 
