@@ -2,6 +2,7 @@ package it.polito.studenti.oma9;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 class Exam implements Comparable<Exam>, Serializable {
 	Map<Integer, Student> students = new TreeMap<>();
@@ -136,51 +137,53 @@ class Exam implements Comparable<Exam>, Serializable {
 	int nConflict() {
 		return exmConflict.size();
 	}
-	
-	double costExam (int nStu) {
-        double sum = 0;
-        for (Map.Entry<Integer, Exam> e2 : this.exmConflict.entrySet()) {
-            int d = Math.abs(e2.getValue().getTimeslot().getSloID() - this.getTimeslot().getSloID());
-            if (d == 0) {
-                System.out.println("Unfesible solution!! BAAAAAD");
-                return Double.MAX_VALUE;
 
-            }
-            if (e2.getKey() > this.getExmID() && d < 6) {
-                long nee = students.entrySet().stream().filter(s -> s.getValue().hasExam(this.getExmID())).filter(s -> s.getValue().hasExam(e2.getKey())).collect(Collectors.toList()).size();
-                sum += Math.pow(2, 5 - d) * nee;
-            }
-        }
-        return sum /nStu;
-    }
-    double costExamRemoving (int nStu) {
-        double sum = 0;
-        for (Map.Entry<Integer, Exam> e2 : this.exmConflict.entrySet()) {
-            int d = Math.abs(e2.getValue().getTimeslot().getSloID() - this.getTimeslot().getSloID());
-            if (d == 0) {
-                System.out.println("Unfesible solution!! BAAAAAD");
-                return Double.MAX_VALUE;
+	double costExam(int nStu) {
+		double sum = 0;
+		for(Exam e2 : this.exmConflict) {
+			int d = Math.abs(e2.getTimeslot() - this.getTimeslot());
+			if(d == 0) {
+				System.out.println("Unfesible solution!! BAAAAAD");
+				return Double.MAX_VALUE;
 
-            }
-            if (d < 6) {
-                long nee = students.entrySet().stream().filter(s -> s.getValue().hasExam(this.getExmID())).filter(s -> s.getValue().hasExam(e2.getKey())).collect(Collectors.toList()).size();
-                sum += Math.pow(2, 5 - d) * nee;
-            }
-        }
-        return sum /nStu;
+			}
+			if(e2.getExmID() > this.getExmID() && d < 6) {
+				long nee = students.entrySet().stream().filter(s -> s.getValue().hasExam(this.getExmID())).filter(s -> s.getValue().hasExam(e2.getExmID())).collect(Collectors.toList()).size();
+				sum += Math.pow(2, 5 - d) * nee;
+			}
+		}
+		return sum / nStu;
+	}
 
-    }
-    int getNStuConflict() {
-        int stu = 0;
-        for (Map.Entry<Integer, Exam> e2 : exmConflict.entrySet()) {
-            int d = Math.abs(e2.getValue().getTimeslot().getSloID() - this.getTimeslot().getSloID());
-            if (d < 6) {
-                int nee = students.entrySet().stream().filter(s -> s.getValue().hasExam(this.getExmID())).filter(s -> s.getValue().hasExam(e2.getKey())).collect(Collectors.toList()).size();
-                stu += nee;
-            }
-        }
-        return stu;
-    }
+	double examCost(int nStu) {
+		double sum = 0;
+		for(Exam e2 : this.exmConflict) {
+			int d = Math.abs(e2.getTimeslot() - this.getTimeslot());
+			if(d == 0) {
+				System.out.println("Unfesible solution!! BAAAAAD");
+				return Double.MAX_VALUE;
+
+			}
+			if(d < 6) {
+				long nee = students.entrySet().stream().filter(s -> s.getValue().hasExam(this.getExmID())).filter(s -> s.getValue().hasExam(e2.getExmID())).collect(Collectors.toList()).size();
+				sum += Math.pow(2, 5 - d) * nee;
+			}
+		}
+		return sum / nStu;
+
+	}
+
+	int getNStuConflict() {
+		int stu = 0;
+		for(Exam e2 : exmConflict) {
+			int d = Math.abs(e2.getTimeslot() - this.getTimeslot());
+			if(d < 6) {
+				int nee = students.entrySet().stream().filter(s -> s.getValue().hasExam(this.getExmID())).filter(s -> s.getValue().hasExam(e2.getExmID())).collect(Collectors.toList()).size();
+				stu += nee;
+			}
+		}
+		return stu;
+	}
 
 	// Used by Set, Map key, etc... Exams are the same based on ID only.
 	@Override

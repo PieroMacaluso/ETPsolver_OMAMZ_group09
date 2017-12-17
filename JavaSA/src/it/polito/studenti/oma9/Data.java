@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 class Data implements Serializable {
 
 	private int nExm = 0;
-	private int nStu = 0;
+	int nStu = 0;
 	int nSlo = 0;
 	private boolean hasFFS = false;
 	private Map<Integer, Student> students = new TreeMap<>();
@@ -17,6 +17,9 @@ class Data implements Serializable {
 	private Random rand = new Random();
 	private String filename;
 
+	Map<Integer, Exam> getExams() {
+		return exams;
+	}
 
 	/**
 	 * Create object representing problem data.

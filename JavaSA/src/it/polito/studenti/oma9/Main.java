@@ -11,6 +11,7 @@ public class Main {
 		long startTime = System.currentTimeMillis();
 		@SuppressWarnings("unused") Temporal start = LocalTime.now(); // TODO: use this?
 		@SuppressWarnings("unused") Duration duration;
+		LS ls = new LS();
 		SA optimization = new SA();
 		Data data;
 		boolean secondsIsNext = false;
@@ -47,6 +48,10 @@ public class Main {
 			// Initialization of a new object Data and creation of the FFS
 			data = new Data(instance);
 			data.createSolution();
+			System.out.println("Initial solution: " + data.evaluateSolution());
+			ls.deepOptimization(data, 0.01);
+			System.out.println("LS solution: " + data.evaluateSolution());
+
 
 		} catch(FileNotFoundException e) {
 			System.out.println("Missing files for instance " + instance);
