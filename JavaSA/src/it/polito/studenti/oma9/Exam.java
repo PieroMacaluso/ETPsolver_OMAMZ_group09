@@ -1,16 +1,12 @@
 package it.polito.studenti.oma9;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-class Exam implements Serializable {
-	Map<Integer, Student> students = new HashMap<>();
-	Map<Integer, Exam> exmConflict = new HashMap<>(); // TODO: is Integer the other exam ID? Can we turn this into a Set?
+class Exam implements Comparable<Exam>, Serializable {
+	Map<Integer, Student> students = new TreeMap<>();
+	Set<Exam> exmConflict = new TreeSet<>();
 	private int exmID;
-	private boolean scheduled = false;
 	private Integer timeslot = null;
 	private Data data;
 
@@ -49,7 +45,6 @@ class Exam implements Serializable {
 	 */
 	void schedule(int t) {
 		this.timeslot = t;
-		this.scheduled = true;
 	}
 
 	/**
@@ -57,7 +52,6 @@ class Exam implements Serializable {
 	 */
 	void unschedule() {
 		timeslot = null;
-		this.scheduled = false;
 	}
 
 	/**
@@ -66,13 +60,13 @@ class Exam implements Serializable {
 	 * @return True if the exam is scheduled, False otherwise
 	 */
 	boolean isScheduled() {
-		return scheduled;
+		return timeslot != null;
 	}
 
 	/**
 	 * Get the timeslot where the exam is scheduled
 	 *
-	 * @return timeslot
+	 * @return timeslot, null if not scheduled
 	 */
 	Integer getTimeslot() {
 		return timeslot;
@@ -84,7 +78,7 @@ class Exam implements Serializable {
 	 * @param e exam in conflict
 	 */
 	void addConflict(Exam e) {
-		this.exmConflict.put(e.getExmID(), e);
+		this.exmConflict.add(e);
 	}
 
 	/**
@@ -101,12 +95,11 @@ class Exam implements Serializable {
 		}
 
 		// Get every conflicting exam
-		for(Exam entry : exmConflict.values()) {
+		for(Exam exam : exmConflict) {
 			// Is it scheduled somewhere?
-			Integer timeslot = entry.getTimeslot();
-			if(timeslot != null) {
+			if(exam.isScheduled()) {
 				// If it is, remove that time slot
-				all.remove(timeslot);
+				all.remove(exam.getTimeslot());
 			}
 		}
 
@@ -123,13 +116,12 @@ class Exam implements Serializable {
 		Set<Integer> timeslots = new HashSet<>();
 
 		// For each conflicting exam
-		for(Exam other : exmConflict.values()) {
+		for(Exam conflicting : exmConflict) {
 			// If it has been scheduled
-			Integer timeslot = other.getTimeslot();
-			if(timeslot != null) {
+			if(conflicting.isScheduled()) {
 				// Add that time slot to the list of conflicting ones
 				// (Set compares Integer value, not that it is a pointer to same memory location, so everything works fine)
-				timeslots.add(timeslot);
+				timeslots.add(conflicting.getTimeslot());
 			}
 		}
 
@@ -143,5 +135,11 @@ class Exam implements Serializable {
 	 */
 	int nConflict() {
 		return exmConflict.size();
+	}
+
+	// Used by Set, Map key, etc... Exams are the same based on ID only.
+	@Override
+	public int compareTo(Exam exam) {
+		return exam.getExmID() - this.getExmID();
 	}
 }

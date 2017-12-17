@@ -26,7 +26,7 @@ class Data implements Serializable {
 	 */
 	Data(String filename) throws FileNotFoundException {
 		this.filename = filename;
-		rand.setSeed(System.nanoTime()); // TODO: this is a bad seed™, something even MORE random should be used (e.g. /dev/random, which is not available on Windows)
+		//rand.setSeed(System.nanoTime()); // TODO: this is a bad seed™, something even MORE random should be used (e.g. /dev/random, which is not available on Windows)
 		startRead();
 	}
 
@@ -115,15 +115,15 @@ class Data implements Serializable {
 		double sum = 0;
 		if(hasFFS) {
 			for(Map.Entry<Integer, Exam> e1 : exams.entrySet()) {
-				for(Map.Entry<Integer, Exam> e2 : e1.getValue().exmConflict.entrySet()) {
-					if(Math.abs(e2.getValue().getTimeslot() - e1.getValue().getTimeslot()) == 0) {
+				for(Exam e2 : e1.getValue().exmConflict) {
+					if(Math.abs(e2.getTimeslot() - e1.getValue().getTimeslot()) == 0) {
 						System.out.println("Unfesible solution!! BAAAAAD");
 						return Double.MAX_VALUE;
 
 					}
-					if(e2.getKey() > e1.getKey() && Math.abs(e2.getValue().getTimeslot() - e1.getValue().getTimeslot()) < 6) {
-						int d = Math.abs(e2.getValue().getTimeslot() - e1.getValue().getTimeslot());
-						long nee = students.entrySet().stream().filter(s -> s.getValue().hasExam(e1.getKey())).filter(s -> s.getValue().hasExam(e2.getKey())).collect(Collectors.toList()).size();
+					if(e2.getExmID() > e1.getKey() && Math.abs(e2.getTimeslot() - e1.getValue().getTimeslot()) < 6) {
+						int d = Math.abs(e2.getTimeslot() - e1.getValue().getTimeslot());
+						long nee = students.entrySet().stream().filter(s -> s.getValue().hasExam(e1.getKey())).filter(s -> s.getValue().hasExam(e2.getExmID())).collect(Collectors.toList()).size();
 						sum += Math.pow(2, 5 - d) * nee;
 					}
 				}
@@ -229,10 +229,9 @@ class Data implements Serializable {
 			Set<Integer> slo = e.timeslotAvailable();
 			if(slo.isEmpty()) {
 //                System.out.println("No good slot available");
-//                scheduleRand(e, timeslots);
-				for(Map.Entry<Integer, Exam> entry : e.exmConflict.entrySet()) {
-					if(entry.getValue().isScheduled()) {
-						entry.getValue().unschedule();
+				for(Exam conflicting : e.exmConflict) {
+					if(conflicting.isScheduled()) {
+						conflicting.unschedule();
 					}
 				}
 			} else {
@@ -250,7 +249,6 @@ class Data implements Serializable {
 	 */
 	private void resetFFS() {
 		exams.forEach((i, e) -> e.unschedule());
-		//timeslots.forEach((i, t) -> t.resetExam());
 	}
 
 	/**
@@ -269,7 +267,7 @@ class Data implements Serializable {
 		for(Integer timeslot : availableTimeslots) {
 			if(i == n) {
 				e.schedule(timeslot);
-				//System.out.println(e.getExmID() + " randomly scheduled in " + timeslot + " (position " + i + "/" + availableTimeslots.size() + ")");
+				// System.out.println(e.getExmID() + " randomly scheduled in " + timeslot + " (position " + i + "/" + availableTimeslots.size() + ")");
 				return;
 			}
 			i++;
@@ -277,64 +275,6 @@ class Data implements Serializable {
 
 		throw new RuntimeException("Bad things are happening");
 	}
-
-//
-//    public Data mutate() throws Exception {
-//        Data x = (Data) ObjectCloner.deepCopy(this);
-//        boolean feasible;
-//        do {
-//            feasible = true;
-//            Exam e1 = x.exams.get(rand.nextInt(nExm));
-//            while (e1 == null) {
-//                e1 = x.exams.get(rand.nextInt(nExm));
-//            }
-//            for (Map.Entry<Integer, Exam> e2 : e1.exmConflict.entrySet()) {
-//                x.swap(e1, e2.getValue());
-//
-//                if (x.evaluateSolution() > 0) {
-//                    break;
-//                } else {
-//                    x.swap(e1, e2.getValue());
-//                }
-//            }
-//
-//
-//        } while (x.evaluateSolution() < 0);
-//        return x;
-//
-//    }
-//
-//    private void swap(Exam e1, Exam e2) {
-//        e1.setTimeslot(e2.getTimeslot());
-//        e2.setTimeslot(e1.getTimeslot());
-//        e1.getTimeslot().removeExam(e2);
-//        e2.getTimeslot().removeExam(e1);
-//    }
-
-	//    public List<Data> createNeighborhood(int n) throws Exception {
-//        List<Data> neigh = new ArrayList<>();
-//        Exam u;
-//        Data d = (Data) ObjectCloner.deepCopy(this);
-//
-//        int j = 0;
-//        while (j < nExm/2) {
-//            u = d.exams.get(rand.nextInt(nExm));
-//            if (u != null && u.isScheduled()) {
-//                u.unschedule();
-//                j++;
-//            }
-//        }
-//
-//        int i;
-//        for (i = 0; i<n; i++) {
-//            neigh.add(d);
-//        }
-//
-//        for (Data da :neigh) {
-//            da.createSolution();
-//        }
-//        return neigh;
-//    }
 
 	/**
 	 * Create a neighborhood starting from the main solution unscheduling 1/3 of the exams and randomly rescheduling them using the FFS method
