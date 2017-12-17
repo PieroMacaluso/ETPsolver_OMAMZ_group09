@@ -8,6 +8,9 @@ class Exam implements Comparable<Exam>, Serializable {
 	Map<Integer, Student> students = new TreeMap<>();
 	Set<Exam> exmConflict = new TreeSet<>();
 	private int exmID;
+	/**
+	 * @deprecated
+	 */
 	private Integer timeslot = null;
 	private Data data;
 
@@ -43,6 +46,7 @@ class Exam implements Comparable<Exam>, Serializable {
 	 * Schedule exam in timeslot t
 	 *
 	 * @param t timeslot
+	 * @deprecated
 	 */
 	void schedule(int t) {
 		this.timeslot = t;
@@ -50,6 +54,8 @@ class Exam implements Comparable<Exam>, Serializable {
 
 	/**
 	 * Unschedule the exam
+	 *
+	 * @deprecated
 	 */
 	void unschedule() {
 		timeslot = null;
@@ -59,6 +65,7 @@ class Exam implements Comparable<Exam>, Serializable {
 	 * Is it scheduled yet?
 	 *
 	 * @return True if the exam is scheduled, False otherwise
+	 * @deprecated
 	 */
 	boolean isScheduled() {
 		return timeslot != null;
@@ -68,6 +75,7 @@ class Exam implements Comparable<Exam>, Serializable {
 	 * Get the timeslot where the exam is scheduled
 	 *
 	 * @return timeslot, null if not scheduled
+	 * @deprecated
 	 */
 	Integer getTimeslot() {
 		return timeslot;
@@ -86,6 +94,7 @@ class Exam implements Comparable<Exam>, Serializable {
 	 * Return a set of all the available time slots (no conflict) in the current context
 	 *
 	 * @return set of available time slots
+	 * @deprecated
 	 */
 	Set<Integer> timeslotAvailable() {
 		Set<Integer> all = new HashSet<>();
@@ -112,6 +121,7 @@ class Exam implements Comparable<Exam>, Serializable {
 	 * Find the number of slots where this exam cannot be placed
 	 *
 	 * @return number of slots
+	 * @deprecated
 	 */
 	int nTimeslotNoWay() {
 		Set<Integer> timeslots = new HashSet<>();
@@ -138,6 +148,11 @@ class Exam implements Comparable<Exam>, Serializable {
 		return exmConflict.size();
 	}
 
+	/**
+	 * @deprecated
+	 * @param nStu
+	 * @return
+	 */
 	double costExam(int nStu) {
 		double sum = 0;
 		for(Exam e2 : this.exmConflict) {
@@ -155,6 +170,11 @@ class Exam implements Comparable<Exam>, Serializable {
 		return sum / nStu;
 	}
 
+	/**
+	 * @deprecated
+	 * @param nStu
+	 * @return
+	 */
 	double examCost(int nStu) {
 		double sum = 0;
 		for(Exam e2 : this.exmConflict) {
@@ -173,6 +193,10 @@ class Exam implements Comparable<Exam>, Serializable {
 
 	}
 
+	/**
+	 * @deprecated
+	 * @return
+	 */
 	int getNStuConflict() {
 		int stu = 0;
 		for(Exam e2 : exmConflict) {
