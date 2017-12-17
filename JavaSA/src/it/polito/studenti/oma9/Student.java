@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.TreeMap;
 
-class Student implements Serializable {
+class Student implements Serializable, Comparable<Student> {
 	private int stuID;
 	private Map<Integer, Exam> exams = new TreeMap<>();
 
@@ -45,4 +45,9 @@ class Student implements Serializable {
 		return exams.containsKey(id);
 	}
 
+	@Override
+	public int compareTo(Student student) {
+		return student.getStuID() - this.getStuID();
+
+	}
 }

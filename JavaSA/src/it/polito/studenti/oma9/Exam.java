@@ -5,23 +5,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 class Exam implements Comparable<Exam>, Serializable {
-	Map<Integer, Student> students = new TreeMap<>();
-	Set<Exam> exmConflict = new TreeSet<>();
+	Map<Integer, Student> students = new HashMap<>();
+	Set<Exam> exmConflict = new HashSet<>();
 	private int exmID;
-	/**
-	 * @deprecated
-	 */
-	private Integer timeslot = null;
-	private Data data;
 
 	/**
 	 * Default constructor
 	 *
 	 * @param exmID exam ID
 	 */
-	Exam(int exmID, Data data) {
+	Exam(int exmID) {
 		this.exmID = exmID;
-		this.data = data;
 	}
 
 	/**
@@ -43,45 +37,6 @@ class Exam implements Comparable<Exam>, Serializable {
 	}
 
 	/**
-	 * Schedule exam in timeslot t
-	 *
-	 * @param t timeslot
-	 * @deprecated
-	 */
-	void schedule(int t) {
-		this.timeslot = t;
-	}
-
-	/**
-	 * Unschedule the exam
-	 *
-	 * @deprecated
-	 */
-	void unschedule() {
-		timeslot = null;
-	}
-
-	/**
-	 * Is it scheduled yet?
-	 *
-	 * @return True if the exam is scheduled, False otherwise
-	 * @deprecated
-	 */
-	boolean isScheduled() {
-		return timeslot != null;
-	}
-
-	/**
-	 * Get the timeslot where the exam is scheduled
-	 *
-	 * @return timeslot, null if not scheduled
-	 * @deprecated
-	 */
-	Integer getTimeslot() {
-		return timeslot;
-	}
-
-	/**
 	 * Add a conflicting exam
 	 *
 	 * @param e exam in conflict
@@ -90,54 +45,7 @@ class Exam implements Comparable<Exam>, Serializable {
 		this.exmConflict.add(e);
 	}
 
-	/**
-	 * Return a set of all the available time slots (no conflict) in the current context
-	 *
-	 * @return set of available time slots
-	 * @deprecated
-	 */
-	Set<Integer> timeslotAvailable() {
-		Set<Integer> all = new HashSet<>();
 
-		// Start from all timeslots
-		for(int i = 1; i <= data.nSlo; i++) {
-			all.add(i);
-		}
-
-		// Get every conflicting exam
-		for(Exam exam : exmConflict) {
-			// Is it scheduled somewhere?
-			if(exam.isScheduled()) {
-				// If it is, remove that time slot
-				all.remove(exam.getTimeslot());
-			}
-		}
-
-		// Return remaining set
-		return all;
-	}
-
-	/**
-	 * Find the number of slots where this exam cannot be placed
-	 *
-	 * @return number of slots
-	 * @deprecated
-	 */
-	int nTimeslotNoWay() {
-		Set<Integer> timeslots = new HashSet<>();
-
-		// For each conflicting exam
-		for(Exam conflicting : exmConflict) {
-			// If it has been scheduled
-			if(conflicting.isScheduled()) {
-				// Add that time slot to the list of conflicting ones
-				// (Set compares Integer value, not that it is a pointer to same memory location, so everything works fine)
-				timeslots.add(conflicting.getTimeslot());
-			}
-		}
-
-		return timeslots.size();
-	}
 
 	/**
 	 * Number of conflict of the exam
@@ -148,66 +56,6 @@ class Exam implements Comparable<Exam>, Serializable {
 		return exmConflict.size();
 	}
 
-	/**
-	 * @deprecated
-	 * @param nStu
-	 * @return
-	 */
-	double costExam(int nStu) {
-		double sum = 0;
-		for(Exam e2 : this.exmConflict) {
-			int d = Math.abs(e2.getTimeslot() - this.getTimeslot());
-			if(d == 0) {
-				System.out.println("Unfesible solution!! BAAAAAD");
-				return Double.MAX_VALUE;
-
-			}
-			if(e2.getExmID() > this.getExmID() && d < 6) {
-				long nee = students.entrySet().stream().filter(s -> s.getValue().hasExam(this.getExmID())).filter(s -> s.getValue().hasExam(e2.getExmID())).collect(Collectors.toList()).size();
-				sum += Math.pow(2, 5 - d) * nee;
-			}
-		}
-		return sum / nStu;
-	}
-
-	/**
-	 * @deprecated
-	 * @param nStu
-	 * @return
-	 */
-	double examCost(int nStu) {
-		double sum = 0;
-		for(Exam e2 : this.exmConflict) {
-			int d = Math.abs(e2.getTimeslot() - this.getTimeslot());
-			if(d == 0) {
-				System.out.println("Unfesible solution!! BAAAAAD");
-				return Double.MAX_VALUE;
-
-			}
-			if(d < 6) {
-				long nee = students.entrySet().stream().filter(s -> s.getValue().hasExam(this.getExmID())).filter(s -> s.getValue().hasExam(e2.getExmID())).collect(Collectors.toList()).size();
-				sum += Math.pow(2, 5 - d) * nee;
-			}
-		}
-		return sum / nStu;
-
-	}
-
-	/**
-	 * @deprecated
-	 * @return
-	 */
-	int getNStuConflict() {
-		int stu = 0;
-		for(Exam e2 : exmConflict) {
-			int d = Math.abs(e2.getTimeslot() - this.getTimeslot());
-			if(d < 6) {
-				int nee = students.entrySet().stream().filter(s -> s.getValue().hasExam(this.getExmID())).filter(s -> s.getValue().hasExam(e2.getExmID())).collect(Collectors.toList()).size();
-				stu += nee;
-			}
-		}
-		return stu;
-	}
 
 	// Used by Set, Map key, etc... Exams are the same based on ID only.
 	@Override

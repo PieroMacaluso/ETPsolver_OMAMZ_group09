@@ -8,42 +8,38 @@ class SA {
 	/**
 	 * Algorithm of Simulated Annealing
 	 *
-	 * @param ffs :                 first feasible solution
+	 * @param startSol :                 first feasible solution
 	 * @param initialTemperature : starting temperature of Simulated Annealing
 	 * @param endTime :           start time, i think that is useful in order to stop the program after a certain amount of time
 	 * @return the best solution found
 	 * @throws Exception when stuff that shouldn't happen happens
 	 */
 	@SuppressWarnings("SameParameterValue")
-	Data startOptimization(Data ffs, double initialTemperature, Temporal startTime, Temporal endTime) throws Exception {
+	Solution startOptimization(Solution startSol, double initialTemperature, Temporal startTime, Temporal endTime) throws Exception {
 		Double temperature = initialTemperature;
 		LS ls = new LS();
-		Data best = (Data) ObjectCloner.deepCopy(ffs);
-		Data x;
+		Solution best = new Solution(startSol);
 		Duration toEnd;
 		Duration total = Duration.between(startTime, endTime);
-		x = (Data) ObjectCloner.deepCopy(ffs);
+		Solution x = new Solution(startSol);
 
-		System.out.println("Initial solution: " + ffs.evaluateSolution());
+		System.out.println("Initial solution: " + startSol.evalutate());
 
 //		for(int i = 0; i < numberOfIterations; i++) {
 		while(!(toEnd = Duration.between(LocalTime.now(), endTime)).isNegative()) {
+			double f = x.evalutate();
 			// If the current solution is the best, save it!
-			if(x.evaluateSolution() < best.evaluateSolution()) {
-				best = (Data) ObjectCloner.deepCopy(x);
-				System.out.println("NEW BEST\t" + best.evaluateSolution() + "\t remaining: " + Duration.between(LocalTime.now(), endTime) + " s");
+			if(x.evalutate() < best.evalutate()) {
+				best = new Solution(x);
+				System.out.println("NEW BEST\t" + best.evalutate() + "\t remaining: " + Duration.between(LocalTime.now(), endTime) + " s");
 				best.printSolution();
 			}
-			// Create neighborhood of the current solution
-
-			// Evaluate the solution of the current solution and of a random neighbor
-			double f = x.evaluateSolution();
 			ls.deepOptimization(x, 0.1);
 
 			//Data neigh = neigh.get(rand.nextInt(neighPop));
-			Data neigh = x.createNeighbor(0.321);
+			Solution neigh = x.createNeighbor(0.321);
 			ls.deepOptimization(neigh, 0.1);
-			double newF = neigh.evaluateSolution();
+			double newF = neigh.evalutate();
 
 			// If the solution found is bad, instead of discarding them, use it as current solution randomly (following the probability in the method PR)
 			if(newF > f) {
@@ -57,12 +53,12 @@ class SA {
 //                    System.out.println("No");
 				} else {
 					System.out.println("Prob new!" + "\t" + newF);
-					x = (Data) ObjectCloner.deepCopy(neigh);
+					x = new Solution(neigh);
 				}
 			} // If the solution found is good take it!
 			else {
 				System.out.println("Found new!" + "\t" + newF);
-				x = (Data) ObjectCloner.deepCopy(neigh);
+				x = new Solution(neigh);
 			}
 
 			// Lower the temperature
@@ -70,8 +66,8 @@ class SA {
 			temperature = initialTemperature * coolingRate;
 			//System.out.println("Temperature: " + temperature);
 		}
-		System.out.println("Initial solution: " + ffs.evaluateSolution());
-		System.out.println("Final solution: " + best.evaluateSolution());
+		System.out.println("Initial solution: " + startSol.evalutate());
+		System.out.println("Final solution: " + best.evalutate());
 		return best;
 	}
 

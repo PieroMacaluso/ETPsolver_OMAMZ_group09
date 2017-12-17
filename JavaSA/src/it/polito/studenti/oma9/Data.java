@@ -5,15 +5,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 class Data implements Serializable {
-
-	private int nExm = 0;
+	private static Data instance = null;
+	int nExm = 0;
 	int nStu = 0;
 	int nSlo = 0;
-	private boolean hasFFS = false;
-	private Map<Integer, Student> students = new TreeMap<>();
-	private Map<Integer, Exam> exams = new TreeMap<>();
-	private Random rand = new Random();
+	private Map<Integer, Student> students = new HashMap<>();
+	private Map<Integer, Exam> exams = new HashMap<>();
 	private String filename;
+
+	public String getFilename() {
+		return filename;
+	}
 
 	Map<Integer, Exam> getExams() {
 		return exams;
@@ -22,13 +24,22 @@ class Data implements Serializable {
 	/**
 	 * Create object representing problem data.
 	 *
-	 * @param filename Instance name, actually. Without extension. Could even be a path.
 	 * @throws FileNotFoundException If any file for the instance doesn't exist
 	 */
-	Data(String filename) throws FileNotFoundException {
+	private Data()  {
+	}
+	void initialize(String filename) throws FileNotFoundException {
 		this.filename = filename;
-		//rand.setSeed(System.nanoTime()); // TODO: this is a bad seed™, something even MORE random should be used (e.g. /dev/random, which is not available on Windows)
 		startRead();
+	}
+
+
+	// Metodo della classe impiegato per accedere al singleton
+	public static synchronized Data getInstance() {
+		if (instance == null) {
+			instance = new Data();
+		}
+		return instance;
 	}
 
 	/**
@@ -89,62 +100,46 @@ class Data implements Serializable {
 
 	/**
 	 * Set the flag and create the solution
+	 *
+	 * @deprecated
 	 */
-	void createSolution() {
-		createFFS();
-		hasFFS = true;
+	Solution createSolution() {
+		Solution sol = new Solution();
+//		createFFS();
+		List<Exam> order;
+
+		order = exams.values().stream().filter(ex -> !sol.isScheduled(ex)).sorted(Comparator.comparing(sol::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
+
+//        for (Exam e:order) {
+//            System.out.println(e.getExmID() + " " + e.nTimeslotNoWay() + " "+ e.nConflict());
+//        }
+		// TODO: use do-while?
+		while(!order.isEmpty()) {
+//            System.out.println(" ");
+//            for (Exam e : order) {
+//                System.out.println(e.getExmID() + " " + e.nTimeslotNoWay() + " " + e.nConflict());
+//            }
+//            System.out.println(" ");
+
+			Exam e = order.get(0);
+			Set<Integer> slo = sol.timeslotAvailable(e);
+			if(slo.isEmpty()) {
+//                System.out.println("No good slot available");
+				for(Exam conflicting : e.exmConflict) {
+					if(sol.isScheduled(conflicting)) {
+						sol.unschedule(conflicting);
+					}
+				}
+			} else {
+				sol.scheduleRand(e, slo);
+			}
+			order = exams.values().stream().filter(ex -> !sol.isScheduled(ex)).sorted(Comparator.comparing(sol::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
+		}
+		return sol;
+
 //        printSolution();
 //        System.out.println(evaluateSolution());
 	}
-
-	/**
-	 * Print the solution
-	 */
-	void printSolution() {
-		try{
-			PrintWriter writer = new PrintWriter(filename + ".sol", "UTF-8");
-			for(Map.Entry<Integer, Exam> e : exams.entrySet()) {
-				writer.println(e.getKey() + " " + e.getValue().getTimeslot());
-
-				//System.out.println(e.getKey() + " " + e.getValue().getTimeslot());
-
-			}
-			writer.close();
-		} catch (IOException e) {
-			System.out.println("Non riesco a scrivere la soluzione su " + filename + ".sol");
-			throw new RuntimeException();
-		}
-
-	}
-
-	/**
-	 * Evaluate the cost of the current solution
-	 *
-	 * @return cost
-	 */
-	double evaluateSolution() {
-		double sum = 0;
-		if(hasFFS) {
-			for(Map.Entry<Integer, Exam> e1 : exams.entrySet()) {
-				for(Exam e2 : e1.getValue().exmConflict) {
-					if(Math.abs(e2.getTimeslot() - e1.getValue().getTimeslot()) == 0) {
-						System.out.println("Unfesible solution!! BAAAAAD");
-						return Double.MAX_VALUE;
-
-					}
-					if(e2.getExmID() > e1.getKey() && Math.abs(e2.getTimeslot() - e1.getValue().getTimeslot()) < 6) {
-						int d = Math.abs(e2.getTimeslot() - e1.getValue().getTimeslot());
-						long nee = students.entrySet().stream().filter(s -> s.getValue().hasExam(e1.getKey())).filter(s -> s.getValue().hasExam(e2.getExmID())).collect(Collectors.toList()).size();
-						sum += Math.pow(2, 5 - d) * nee;
-					}
-				}
-
-			}
-		}
-		sum = sum / nStu;
-		return sum;
-	}
-
 
 	/**
 	 * Read .exm file to find number of exams and build data structures
@@ -161,7 +156,7 @@ class Data implements Serializable {
 			}
 			String part[] = line.split(" ");
 			exmID = Integer.parseInt(part[0]);
-			exams.put(exmID, new Exam(exmID, this));
+			exams.put(exmID, new Exam(exmID));
 			if(exmID > maxID) {
 				maxID = Integer.parseInt(part[0]);
 			}
@@ -213,102 +208,5 @@ class Data implements Serializable {
 		nSlo = Integer.parseInt(line);
 	}
 
-	/**
-	 * FFS stands for "First Feasible Solution"
-	 * C1 - timeslot available: priority to exam that has less timeslot available
-	 * C2 - conflict with others: priority to exams with more conflict
-	 * <p>
-	 * If the code reaches a stuck point with one exam, unschedule all conflicting exams and continue the procedure.
-	 */
-	private void createFFS() {
-		List<Exam> order;
-
-		order = exams.values().stream().filter(ex -> !ex.isScheduled()).sorted(Comparator.comparing(Exam::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
-
-//        for (Exam e:order) {
-//            System.out.println(e.getExmID() + " " + e.nTimeslotNoWay() + " "+ e.nConflict());
-//        }
-		// TODO: use do-while?
-		while(!order.isEmpty()) {
-//            System.out.println(" ");
-//            for (Exam e : order) {
-//                System.out.println(e.getExmID() + " " + e.nTimeslotNoWay() + " " + e.nConflict());
-//            }
-//            System.out.println(" ");
-
-			Exam e = order.get(0);
-			Set<Integer> slo = e.timeslotAvailable();
-			if(slo.isEmpty()) {
-//                System.out.println("No good slot available");
-				for(Exam conflicting : e.exmConflict) {
-					if(conflicting.isScheduled()) {
-						conflicting.unschedule();
-					}
-				}
-			} else {
-				scheduleRand(e, slo);
-			}
-			order = exams.values().stream().filter(ex -> !ex.isScheduled()).sorted(Comparator.comparing(Exam::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
-		}
-
-	}
-
-//	/*
-//	 * Clears data structures from previously generated FFS
-//	 * <p>
-//	 *
-//	 */
-//	private void resetFFS() {
-//		exams.forEach((i, e) -> e.unschedule());
-//	}
-
-	/**
-	 * Insert the exam in a timeslot available where there are no conflicts
-	 * Does nothing if there are no available time slots.
-	 *
-	 * @param e: exam to schedule
-	 */
-	private void scheduleRand(Exam e, Set<Integer> availableTimeslots) {
-		if(availableTimeslots.size() == 0) {
-			return;
-		}
-
-		int n = rand.nextInt(availableTimeslots.size());
-		int i = 0;
-		for(Integer timeslot : availableTimeslots) {
-			if(i == n) {
-				e.schedule(timeslot);
-				// System.out.println(e.getExmID() + " randomly scheduled in " + timeslot + " (position " + i + "/" + availableTimeslots.size() + ")");
-				return;
-			}
-			i++;
-		}
-
-		throw new RuntimeException("Bad things are happening");
-	}
-
-	/**
-	 * Create a neighborhood starting from the main solution unscheduling 1/3 of the exams and randomly rescheduling them using the FFS method
-	 *
-	 * @return List of neighbor
-	 * <p>
-	 * TODO: accept the "1/3" thing as a parameter?
-	 */
-	Data createNeighbor(double percentage) throws Exception {
-		Exam u;
-		Data d = (Data) ObjectCloner.deepCopy(this);
-
-		int j = 0;
-		while(j < (int) (nExm * percentage)) {
-			u = d.exams.get(rand.nextInt(nExm));
-			if(u != null && u.isScheduled()) {
-				u.unschedule();
-				j++;
-			}
-		}
-
-		d.createSolution();
-		return d;
-	}
 }
 

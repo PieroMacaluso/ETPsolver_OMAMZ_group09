@@ -12,7 +12,6 @@ public class Main {
 		Temporal endTime;
 		LS ls = new LS();
 		SA optimization = new SA();
-		Data data;
 		boolean secondsIsNext = false;
 		int seconds = 0;
 		String instance = "";
@@ -45,29 +44,30 @@ public class Main {
 			// e va a prendere l'istanza nella cartella giusta
 
 			// Initialization of a new object Data and creation of the FFS
-			data = new Data(instance);
+			Data.getInstance().initialize(instance);
 		} catch(FileNotFoundException e) {
 			System.out.println("Missing files for instance " + instance);
 			return;
 			//e.printStackTrace();
 		}
 
-		data.createSolution();
-		System.out.println("Initial solution: " + data.evaluateSolution());
-		Double delta = data.evaluateSolution();
-		ls.deepOptimization(data, 0.01);
-		System.out.println("LS solution: " + data.evaluateSolution());
-		delta -= data.evaluateSolution();
+		Solution ffs = new Solution();
+		ffs.createSolution();
+		Solution fls = new Solution(ffs);
+		ls.deepOptimization(fls, 0.01);
+		System.out.println("Initial solution: " + ffs.evalutate());
+		System.out.println("LS solution: " + fls.evalutate());
+		double delta = ffs.evalutate() - fls.evalutate();
 
 
 		endTime = start.plus(seconds, ChronoUnit.SECONDS);
 
 		// Data x is an object that the program uses to write the solution of the Simulated Annealing
-		Data x;
+		Solution x;
 		try {
 			// To see information of this method go to the implementation
 			// 0.69 obtained from logaritmo (TODO: spiegare 'sta cosa)
-			x = optimization.startOptimization(data, delta / 0.69, start, endTime);
+			x = optimization.startOptimization(fls, delta / 0.69, start, endTime);
 			// Print of the solution
 			x.printSolution();
 		} catch(Exception e) {

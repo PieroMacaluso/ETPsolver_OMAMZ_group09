@@ -5,41 +5,41 @@ import java.util.*;
 
 class LS implements Serializable {
 
-	void deepOptimization(Data data, double delta) {
-		double next = data.evaluateSolution();
+	void deepOptimization(Solution sol, double delta) {
+		double next = sol.evalutate();
 		double prev = Double.MAX_VALUE;
 		int i = 0;
 		while((prev - next) / prev > delta) {
 			prev = next;
-			next = startOptimization(data);
+			next = startOptimization(sol);
 //			System.out.println("Ottimizzazione pari a: " + 100 * (prev - next) / prev + "%");
 			i++;
 		}
 //		System.out.println("" + i + " giri di LS compiuti con gaudio");
 	}
 
-	private double startOptimization(Data ffs) {
+	private double startOptimization(Solution sol) {
 		Integer bestSlo;
-		for(Map.Entry en : entriesSortedByValues(ffs.getExams())) {
+		for(Map.Entry en : entriesSortedByValues(Data.getInstance().getExams())) {
 			Exam e = (Exam) en.getValue();
-			bestSlo = e.getTimeslot();
-			Set<Integer> sloA = e.timeslotAvailable();
+			bestSlo = sol.getTimeslot(e);
+			Set<Integer> sloA = sol.timeslotAvailable(e);
 //			System.out.println("Ho " + sloA.size() + " buchi a disposizione");
-			double bestC = e.examCost(ffs.nStu);
+			double bestC = sol.examCost(e);
 			for(Integer s : sloA) {
-				e.unschedule();
-				e.schedule(s);
-				double newC = e.examCost(ffs.nStu);
+				sol.unschedule(e);
+				sol.schedule(e, s);
+				double newC = sol.examCost(e);
 				if(newC < bestC) {
 					bestSlo = s;
 					bestC = newC;
 				}
 
 			}
-			e.unschedule();
-			e.schedule(bestSlo);
+			sol.unschedule(e);
+			sol.schedule(e, bestSlo);
 		}
-		return ffs.evaluateSolution();
+		return sol.evalutate();
 	}
 
 	private static <K, V extends Comparable<? super V>>
