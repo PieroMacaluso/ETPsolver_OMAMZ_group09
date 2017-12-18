@@ -190,52 +190,12 @@ class Solution {
 				}
 				if(e2.getExmID() > e1.getExmID() && distance <= 5) {
 					sum += Math.pow(2, 5 - distance) * e1.conflictingStudentsCounter.getOrDefault(e2, 0);
-					if(e1.conflictingStudentsCounter.getOrDefault(e2, 0) != getConflictingStudentsOld(e1, e2)) {
-						throw new RuntimeException("BUG CATASTROFICO!");
-					}
 				}
 			}
 
 		}
 		sum = sum / Data.getInstance().nStu;
 		return sum;
-	}
-
-	/**
-	 * Count students that have both exams.
-	 *
-	 * @param e1 Exam
-	 * @param e2 Other exam
-	 * @return students that have both exams
-	 * @deprecated Old, slow and inefficient method, but yielded correct results
-	 */
-	int getConflictingStudentsOld(Exam e1, Exam e2) {
-		Set<Student> s = new TreeSet<>();
-		s.addAll(e1.students.values());
-		s.retainAll(e2.students.values());
-		return s.size();
-	}
-
-	/**
-	 * Get number of conflicting students between e1 and every other exam that is close enough to trigger a penalty
-	 * (depends on distance between exams)
-	 *
-	 * @deprecated old method, use newer one when it will exist
-	 * @return nstuconflict
-	 */
-	int getConflictingStudentsAll(Exam e1) {
-		int stu = 0;
-		for(Exam e2 : e1.exmConflict) {
-			int d = Math.abs(this.getTimeslot(e2) - this.getTimeslot(e1));
-			if(d < 6) {
-				Set<Student> s = new TreeSet<>();
-				s.addAll(e1.students.values());
-				s.retainAll(e2.students.values());
-				long nee = s.size();
-				stu += nee;
-			}
-		}
-		return stu;
 	}
 
 	/**
@@ -255,10 +215,7 @@ class Solution {
 			if(d <= 5) {
 				// Calculate penalty
 				sum += Math.pow(2, 5 - d) * exam.conflictingStudentsCounter.getOrDefault(conflicting, 0);
-				if(exam.conflictingStudentsCounter.getOrDefault(conflicting, 0) != getConflictingStudentsOld(exam, conflicting)) {
-					throw new RuntimeException("BUG CATASTROFICO!");
-				}
-				//System.out.println("OMG confligge con " + exam.conflictingStudentsCounter.getOrDefault(conflicting, 0) + " studenti (" + exam.getExmID() + " con " + conflicting.getExmID() + ")");
+				//System.out.println("Conflict between " + exam.conflictingStudentsCounter.getOrDefault(conflicting, 0) + " students (exam " + exam.getExmID() + " with " + conflicting.getExmID() + ")");
 			}
 		}
 		return sum / Data.getInstance().nStu;
@@ -279,7 +236,7 @@ class Solution {
 			}
 			writer.close();
 		} catch(IOException e) {
-			System.out.println("Non riesco a scrivere la soluzione su " + Data.getInstance().getFilename() + ".sol");
+			System.err.println("Cannot write solution on " + Data.getInstance().getFilename() + ".sol");
 			throw new RuntimeException();
 		}
 
