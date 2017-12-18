@@ -6,6 +6,11 @@ import java.util.TreeMap;
 
 class Student implements Serializable, Comparable<Student> {
 	private int stuID;
+
+	public Map<Integer, Exam> getExams() {
+		return exams;
+	}
+
 	private Map<Integer, Exam> exams = new TreeMap<>();
 
 	/**

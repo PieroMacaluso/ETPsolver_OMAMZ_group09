@@ -7,7 +7,7 @@ class Exam implements Comparable<Exam>, Serializable {
 	Map<Integer, Student> students = new HashMap<>();
 	Set<Exam> exmConflict = new HashSet<>();
 	Map<Exam, Integer> conflictingStudentsCounter = new HashMap<>();
-	private int exmID;
+	public final int exmID;
 
 	/**
 	 * Default constructor
@@ -22,6 +22,7 @@ class Exam implements Comparable<Exam>, Serializable {
 	 * Getter ExmID
 	 *
 	 * @return exam ID
+	 * @deprecated
 	 */
 	int getExmID() {
 		return exmID;
@@ -43,9 +44,13 @@ class Exam implements Comparable<Exam>, Serializable {
 	 */
 	void addConflict(Exam e) {
 		exmConflict.add(e);
-		conflictingStudentsCounter.putIfAbsent(e, 0);
+		//conflictingStudentsCounter.putIfAbsent(e, 0);
 		// TODO: questa cosa è inefficiente
-		conflictingStudentsCounter.put(e, conflictingStudentsCounter.get(e) + 1);
+		//conflictingStudentsCounter.put(e, conflictingStudentsCounter.get(e) + 1);
+	}
+
+	void setConflictCounter(Exam other, Integer number) {
+		conflictingStudentsCounter.put(other, number);
 	}
 
 	/**
