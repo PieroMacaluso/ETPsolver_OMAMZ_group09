@@ -80,49 +80,6 @@ class Data implements Serializable {
 	}
 
 	/**
-	 * Set the flag and create the solution
-	 *
-	 * @deprecated
-	 */
-	Solution createSolution() {
-		Solution sol = new Solution();
-//		createFFS();
-		List<Exam> order;
-
-		order = exams.values().stream().filter(ex -> !sol.isScheduled(ex)).sorted(Comparator.comparing(sol::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
-
-//        for (Exam e:order) {
-//            System.out.println(e.getExmID() + " " + e.nTimeslotNoWay() + " "+ e.nConflict());
-//        }
-		// TODO: use do-while?
-		while(!order.isEmpty()) {
-//            System.out.println(" ");
-//            for (Exam e : order) {
-//                System.out.println(e.getExmID() + " " + e.nTimeslotNoWay() + " " + e.nConflict());
-//            }
-//            System.out.println(" ");
-
-			Exam e = order.get(0);
-			Set<Integer> slo = sol.timeslotAvailable(e);
-			if(slo.isEmpty()) {
-//                System.out.println("No good slot available");
-				for(Exam conflicting : e.exmConflict) {
-					if(sol.isScheduled(conflicting)) {
-						sol.unschedule(conflicting);
-					}
-				}
-			} else {
-				sol.scheduleRand(e, slo);
-			}
-			order = exams.values().stream().filter(ex -> !sol.isScheduled(ex)).sorted(Comparator.comparing(sol::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
-		}
-		return sol;
-
-//        printSolution();
-//        System.out.println(evaluateSolution());
-	}
-
-	/**
 	 * Read .exm file to find number of exams and build data structures
 	 *
 	 * @param sExm Scanner

@@ -23,15 +23,15 @@ class SA {
 		Duration total = Duration.between(startTime, endTime);
 		Solution x = new Solution(startSol);
 
-		System.out.println("Initial solution: " + startSol.evalutate());
+		System.out.println("Initial solution: " + startSol.evaluateCost());
 
 //		for(int i = 0; i < numberOfIterations; i++) {
 		while(!(toEnd = Duration.between(LocalTime.now(), endTime)).isNegative()) {
-			double f = x.evalutate();
+			double f = x.evaluateCost();
 			// If the current solution is the best, save it!
-			if(x.evalutate() < best.evalutate()) {
+			if(x.evaluateCost() < best.evaluateCost()) {
 				best = new Solution(x);
-				System.out.println("NEW BEST\t" + best.evalutate() + "\t remaining: " + Duration.between(LocalTime.now(), endTime) + " s");
+				System.out.println("NEW BEST\t" + best.evaluateCost() + "\t remaining: " + Duration.between(LocalTime.now(), endTime) + " s");
 				best.printSolution();
 			}
 			ls.deepOptimization(x, 0.1);
@@ -39,7 +39,7 @@ class SA {
 			//Data neigh = neigh.get(rand.nextInt(neighPop));
 			Solution neigh = x.createNeighbor(0.321);
 			ls.deepOptimization(neigh, 0.1);
-			double newF = neigh.evalutate();
+			double newF = neigh.evaluateCost();
 
 			// If the solution found is bad, instead of discarding them, use it as current solution randomly (following the probability in the method PR)
 			if(newF > f) {
@@ -66,8 +66,8 @@ class SA {
 			temperature = initialTemperature * coolingRate;
 			//System.out.println("Temperature: " + temperature);
 		}
-		System.out.println("Initial solution: " + startSol.evalutate());
-		System.out.println("Final solution: " + best.evalutate());
+		System.out.println("Initial solution: " + startSol.evaluateCost());
+		System.out.println("Final solution: " + best.evaluateCost());
 		return best;
 	}
 

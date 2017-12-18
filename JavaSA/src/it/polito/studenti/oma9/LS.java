@@ -6,7 +6,7 @@ import java.util.*;
 class LS implements Serializable {
 
 	void deepOptimization(Solution sol, double delta) {
-		double next = sol.evalutate();
+		double next = sol.evaluateCost();
 		double prev = Double.MAX_VALUE;
 		int i = 0;
 		while((prev - next) / prev > delta) {
@@ -23,7 +23,7 @@ class LS implements Serializable {
 		for(Map.Entry en : entriesSortedByValues(Data.getInstance().getExams())) {
 			Exam e = (Exam) en.getValue();
 			bestSlo = sol.getTimeslot(e);
-			Set<Integer> sloA = sol.timeslotAvailable(e);
+			Set<Integer> sloA = sol.getAvailableTimeslots(e);
 //			System.out.println("Ho " + sloA.size() + " buchi a disposizione");
 			double bestC = sol.examCost(e);
 			for(Integer s : sloA) {
@@ -39,7 +39,7 @@ class LS implements Serializable {
 			sol.unschedule(e);
 			sol.schedule(e, bestSlo);
 		}
-		return sol.evalutate();
+		return sol.evaluateCost();
 	}
 
 	private static <K, V extends Comparable<? super V>>

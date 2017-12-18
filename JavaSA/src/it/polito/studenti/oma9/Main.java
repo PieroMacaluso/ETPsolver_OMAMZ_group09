@@ -55,9 +55,9 @@ public class Main {
 		ffs.createSolution();
 		Solution fls = new Solution(ffs);
 		ls.deepOptimization(fls, 0.01);
-		System.out.println("Initial solution: " + ffs.evalutate());
-		System.out.println("LS solution: " + fls.evalutate());
-		double delta = ffs.evalutate() - fls.evalutate();
+		System.out.println("Initial solution: " + ffs.evaluateCost());
+		System.out.println("LS solution: " + fls.evaluateCost());
+		double delta = ffs.evaluateCost() - fls.evaluateCost();
 
 
 		endTime = start.plus(seconds, ChronoUnit.SECONDS);

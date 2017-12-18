@@ -6,13 +6,22 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 class Solution {
-	private Map<Exam, Integer> allocations = new TreeMap<>();
+	//private Map<Exam, Integer> timetable = new HashMap<>();
+	private Map<Exam, Integer> timetable = new HashMap<>(Data.getInstance().nExm + 2, (float) 1.0);
 	private Random rand = new Random();
 
+	/**
+	 * Clone another solution, basically.
+	 *
+	 * @param sol other solution
+	 */
 	Solution(Solution sol) {
-		this.allocations.putAll(sol.allocations);
+		timetable.putAll(sol.timetable);
 	}
 
+	/**
+	 * Create a new feasible solution.
+	 */
 	Solution() {
 		createSolution();
 	}
@@ -21,39 +30,23 @@ class Solution {
 	 *  Create the solution
 	 */
 	void createSolution() {
-
-//		createFFS();
 		List<Exam> order;
 
-		order = Data.getInstance().getExams().values().stream().filter((Exam ex) -> !this.isScheduled(ex)).sorted(Comparator.comparing(this::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
-
-//        for (Exam e:order) {
-//            System.out.println(e.getExmID() + " " + e.nTimeslotNoWay() + " "+ e.nConflict());
-//        }
+		order = Data.getInstance().getExams().values().stream().filter((Exam ex) -> !this.isScheduled(ex)).sorted(Comparator.comparing(this::countUnavailableTimeslots).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
 		// TODO: use do-while?
 		while(!order.isEmpty()) {
-//            System.out.println(" ");
-//            for (Exam e : order) {
-//                System.out.println(e.getExmID() + " " + e.nTimeslotNoWay() + " " + e.nConflict());
-//            }
-//            System.out.println(" ");
-
 			Exam e = order.get(0);
-			Set<Integer> slo = this.timeslotAvailable(e);
+			Set<Integer> slo = this.getAvailableTimeslots(e);
 			if(slo.isEmpty()) {
-//                System.out.println("No good slot available");
+				// System.out.println("No good slot available");
 				for(Exam conflicting : e.exmConflict) {
-					if(this.isScheduled(conflicting)) {
-						this.unschedule(conflicting);
-					}
+					this.unschedule(conflicting);
 				}
 			} else {
 				this.scheduleRand(e, slo);
 			}
-			order = Data.getInstance().getExams().values().stream().filter((Exam ex) -> !this.isScheduled(ex)).sorted(Comparator.comparing(this::nTimeslotNoWay).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
+			order = Data.getInstance().getExams().values().stream().filter((Exam ex) -> !this.isScheduled(ex)).sorted(Comparator.comparing(this::countUnavailableTimeslots).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
 		}
-
-//        printSolution();
 	}
 
 	/**
@@ -63,16 +56,17 @@ class Solution {
 	 * @param ts   timeslot
 	 */
 	void schedule(Exam exam, int ts) {
-		allocations.put(exam, ts);
+		timetable.put(exam, ts);
 	}
 
 	/**
-	 * Unschedule the exam
+	 * Unschedule the exam.
+	 * Does nothing if it wasn't scheduled.
 	 *
 	 * @param exam exam
 	 */
 	void unschedule(Exam exam) {
-		allocations.remove(exam);
+		timetable.remove(exam);
 	}
 
 	/**
@@ -81,8 +75,8 @@ class Solution {
 	 * @param exam exam
 	 * @return True if the exam is scheduled, False otherwise
 	 */
-	boolean isScheduled(Exam exam) {
-		return allocations.containsKey(exam);
+	private boolean isScheduled(Exam exam) {
+		return timetable.containsKey(exam);
 	}
 
 	/**
@@ -92,24 +86,25 @@ class Solution {
 	 * @return timeslot, null if not scheduled
 	 */
 	Integer getTimeslot(Exam exam) {
-		return allocations.get(exam);
+		return timetable.get(exam);
 	}
 
 	/**
-	 * Find the number of slots where this exam cannot be placed
+	 * Find the number of slots where the specified exam cannot be placed
 	 *
 	 * @return number of slots
 	 */
-	int nTimeslotNoWay(Exam exam) {
+	private int countUnavailableTimeslots(Exam exam) {
 		Set<Integer> timeslots = new HashSet<>();
 
 		// For each conflicting exam
 		for(Exam conflicting : exam.exmConflict) {
 			// If it has been scheduled
+			// TODO: optimize by calling .get directly?
 			if(this.isScheduled(conflicting)) {
 				// Add that time slot to the list of conflicting ones
 				// (Set compares Integer value, not that it is a pointer to same memory location, so everything works fine)
-				timeslots.add(this.allocations.get(conflicting));
+				timeslots.add(this.timetable.get(conflicting));
 			}
 		}
 
@@ -117,12 +112,12 @@ class Solution {
 	}
 
 	/**
-	 * Return a set of all the available time slots (no conflict) in the current context
+	 * Return a set of all the available time slots (no conflict) for the specified exam
 	 *
 	 * @param exam exam
 	 * @return set of available time slots
 	 */
-	Set<Integer> timeslotAvailable(Exam exam) {
+	Set<Integer> getAvailableTimeslots(Exam exam) {
 		Set<Integer> all = new HashSet<>();
 
 		// Start from all timeslots
@@ -144,12 +139,12 @@ class Solution {
 	}
 
 	/**
-	 * Insert the exam in a timeslot available where there are no conflicts
+	 * Insert the exam in an available time slot (= where there are no conflicts)
 	 * Does nothing if there are no available time slots.
 	 *
-	 * @param e: exam to schedule
+	 * @param e exam to schedule
 	 */
-	void scheduleRand(Exam e, Set<Integer> availableTimeslots) {
+	private void scheduleRand(Exam e, Set<Integer> availableTimeslots) {
 		if(availableTimeslots.size() == 0) {
 			return;
 		}
@@ -169,22 +164,35 @@ class Solution {
 	}
 
 	/**
-	 * Evaluate the cost of the current solution
+	 * Find distance between two allocated exams
+	 *
+	 * @param e1 Exam
+	 * @param e2 Other exam
+	 * @return distance
+	 */
+	private int getDistance(Exam e1, Exam e2) {
+		return Math.abs(timetable.get(e2) - timetable.get(e1));
+	}
+
+	/**
+	 * Evaluate the cost of the current solution according to the objective function
 	 *
 	 * @return cost
 	 */
-	double evalutate() {
+	double evaluateCost() {
 		double sum = 0;
-		for(Exam e1 : allocations.keySet()) {
+		for(Exam e1 : timetable.keySet()) {
 			for(Exam e2 : e1.exmConflict) {
-				if(Math.abs(allocations.get(e2) - allocations.get(e1)) == 0) {
-					System.out.println("Unfesible solution!! BAAAAAD");
-					return Double.MAX_VALUE;
-
+				int distance = getDistance(e1, e2);
+				if(distance == 0) {
+					throw new RuntimeException("Infeasible solution!");
+					//return Double.MAX_VALUE;
 				}
-				if(e2.getExmID() > e1.getExmID() && Math.abs((allocations.get(e2) - allocations.get(e1))) < 6) {
-					int d = Math.abs((allocations.get(e2) - allocations.get(e1)));
-					sum += Math.pow(2, 5 - d) * e1.conflictingStudentsCounter.getOrDefault(e2, 0);
+				if(e2.getExmID() > e1.getExmID() && distance <= 5) {
+					sum += Math.pow(2, 5 - distance) * e1.conflictingStudentsCounter.getOrDefault(e2, 0);
+					if(e1.conflictingStudentsCounter.getOrDefault(e2, 0) != getConflictingStudentsOld(e1, e2)) {
+						throw new RuntimeException("BUG CATASTROFICO!");
+					}
 				}
 			}
 
@@ -193,29 +201,41 @@ class Solution {
 		return sum;
 	}
 
+	/**
+	 * Count students that have both exams.
+	 *
+	 * @param e1 Exam
+	 * @param e2 Other exam
+	 * @return students that have both exams
+	 * @deprecated Old, slow and inefficient method, but yielded correct results
+	 */
+	int getConflictingStudentsOld(Exam e1, Exam e2) {
+		Set<Student> s = new TreeSet<>();
+		s.addAll(e1.students.values());
+		s.retainAll(e2.students.values());
+		return s.size();
+	}
 
 	/**
-	 * @return exam cost
-	 * @deprecated is this an unused duplicate?
+	 * Get number of conflicting students between e1 and every other exam that is close enough to trigger a penalty
+	 * (depends on distance between exams)
+	 *
+	 * @deprecated old method, use newer one when it will exist
+	 * @return nstuconflict
 	 */
-	double costExam(Exam e1) {
-		double sum = 0;
+	int getConflictingStudentsAll(Exam e1) {
+		int stu = 0;
 		for(Exam e2 : e1.exmConflict) {
 			int d = Math.abs(this.getTimeslot(e2) - this.getTimeslot(e1));
-			if(d == 0) {
-				System.out.println("Unfesible solution!! BAAAAAD");
-				return Double.MAX_VALUE;
-
-			}
-			if(e2.getExmID() > e1.getExmID() && d < 6) {
+			if(d < 6) {
 				Set<Student> s = new TreeSet<>();
 				s.addAll(e1.students.values());
 				s.retainAll(e2.students.values());
 				long nee = s.size();
-				sum += Math.pow(2, 5 - d) * nee;
+				stu += nee;
 			}
 		}
-		return sum / Data.getInstance().nStu;
+		return stu;
 	}
 
 	/**
@@ -235,6 +255,9 @@ class Solution {
 			if(d <= 5) {
 				// Calculate penalty
 				sum += Math.pow(2, 5 - d) * exam.conflictingStudentsCounter.getOrDefault(conflicting, 0);
+				if(exam.conflictingStudentsCounter.getOrDefault(conflicting, 0) != getConflictingStudentsOld(exam, conflicting)) {
+					throw new RuntimeException("BUG CATASTROFICO!");
+				}
 				//System.out.println("OMG confligge con " + exam.conflictingStudentsCounter.getOrDefault(conflicting, 0) + " studenti (" + exam.getExmID() + " con " + conflicting.getExmID() + ")");
 			}
 		}
@@ -243,30 +266,12 @@ class Solution {
 	}
 
 	/**
-	 * @return nstuconflict
-	 */
-	int getNStuConflict(Exam e1) {
-		int stu = 0;
-		for(Exam e2 : e1.exmConflict) {
-			int d = Math.abs(this.getTimeslot(e2) - this.getTimeslot(e1));
-			if(d < 6) {
-				Set<Student> s = new TreeSet<>();
-				s.addAll(e1.students.values());
-				s.retainAll(e2.students.values());
-				long nee = s.size();
-				stu += nee;
-			}
-		}
-		return stu;
-	}
-
-	/**
 	 * Print the solution
 	 */
 	void printSolution() {
 		try {
 			PrintWriter writer = new PrintWriter(Data.getInstance().getFilename() + ".sol", "UTF-8");
-			for(Map.Entry<Exam, Integer> e : allocations.entrySet()) {
+			for(Map.Entry<Exam, Integer> e : timetable.entrySet()) {
 				writer.println(e.getKey().getExmID() + " " + e.getValue());
 
 				//System.out.println(e.getKey() + " " + e.getValue().getTimeslot());
@@ -281,20 +286,21 @@ class Solution {
 	}
 
 	/**
-	 * Create a neighborhood starting from the main solution unscheduling 1/3 of the exams and randomly rescheduling them using the FFS method
+	 * Create a neighbor solution starting from current solution, "unscheduling" a percentage of the exams
+	 * and randomly rescheduling them using the FFS method
 	 *
-	 * @return List of neighbor
-	 * <p>
+	 * @return New solution (leaves old solution unchanged)
 	 */
 	@SuppressWarnings("SameParameterValue")
 	Solution createNeighbor(double percentage) throws Exception {
-		Exam u;
 		Solution s = new Solution(this);
+
 		int j = 0;
 		while(j < (int) (Data.getInstance().nExm * percentage)) {
-			u = Data.getInstance().getExams().get(rand.nextInt(Data.getInstance().nExm));
-			if(u != null && this.isScheduled(u)) {
-				s.unschedule(u);
+			Exam chosen = Data.getInstance().getExams().get(rand.nextInt(Data.getInstance().nExm));
+			// TODO: lots of accesses to isScheduled, which is slow... shuffle exams, put into list and unschedule first part of the list?
+			if(chosen != null && this.isScheduled(chosen)) {
+				s.unschedule(chosen);
 				j++;
 			}
 		}
