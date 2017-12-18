@@ -95,16 +95,17 @@ class Solution {
 	 * @return number of slots
 	 */
 	private int countUnavailableTimeslots(Exam exam) {
-		Set<Integer> timeslots = new HashSet<>();
+		Set<Integer> timeslots = new HashSet<>(Data.getInstance().nSlo + 1, (float) 1.0);
 
 		// For each conflicting exam
 		for(Exam conflicting : exam.exmConflict) {
-			// If it has been scheduled
-			// TODO: optimize by calling .get directly?
-			if(this.isScheduled(conflicting)) {
+			// Get its scheduled position
+			Integer timeslot = this.timetable.get(conflicting);
+			// If it has actually been scheduled
+			if(timeslot != null) {
 				// Add that time slot to the list of conflicting ones
 				// (Set compares Integer value, not that it is a pointer to same memory location, so everything works fine)
-				timeslots.add(this.timetable.get(conflicting));
+				timeslots.add(timeslot);
 			}
 		}
 
