@@ -66,7 +66,7 @@ class Data implements Serializable {
 	private void buildConflicts() {
 		// TODO: questa cosa è inefficiente
 		for(int i = 1; i < nExm; i++) {
-			for(int j = i + 1; j < nExm; j++) {
+			for(int j = i + 1; j <= nExm; j++) {
 				for(Integer student1 : exams.get(i).students.keySet()) {
 					for(Integer student2 : exams.get(j).students.keySet()) {
 						if(student1.equals(student2)) {
