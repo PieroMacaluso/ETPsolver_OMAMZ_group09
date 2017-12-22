@@ -7,7 +7,8 @@ import java.util.stream.Collectors;
 
 class Solution {
 	//private Map<Exam, Integer> timetable = new HashMap<>();
-	private Map<Exam, Integer> timetable = new HashMap<>(Data.getInstance().nExm + 2, (float) 1.0);
+	//private Map<Exam, Integer> timetable = new HashMap<>(Data.getInstance().nExm + 2, (float) 1.0);
+	private Map<Exam, Integer> timetable = new TreeMap<>();
 	private Random rand = new Random();
 
 	/**
@@ -23,14 +24,16 @@ class Solution {
 	 * Create a new feasible solution.
 	 */
 	Solution() {
-		createSolution();
+		while(!createSolution()) ;
+
 	}
 
 	/**
-	 *  Create the solution
+	 * Create the solution
 	 */
-	void createSolution() {
+	boolean createSolution() {
 		List<Exam> order;
+		int count = 0;
 
 		order = Data.getInstance().getExams().values().stream().filter((Exam ex) -> !this.isScheduled(ex)).sorted(Comparator.comparing(this::countUnavailableTimeslots).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
 		// TODO: use do-while?
@@ -38,7 +41,10 @@ class Solution {
 			Exam e = order.get(0);
 			Set<Integer> slo = this.getAvailableTimeslots(e);
 			if(slo.isEmpty()) {
+				count++;
+				order.add(e);
 				// System.out.println("No good slot available");
+				order.addAll(e.exmConflict);
 				for(Exam conflicting : e.exmConflict) {
 					this.unschedule(conflicting);
 				}
@@ -47,6 +53,7 @@ class Solution {
 			}
 			order = Data.getInstance().getExams().values().stream().filter((Exam ex) -> !this.isScheduled(ex)).sorted(Comparator.comparing(this::countUnavailableTimeslots).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
 		}
+		return true;
 	}
 
 	/**
@@ -263,7 +270,7 @@ class Solution {
 			}
 		}
 
-		s.createSolution();
+		while(!s.createSolution());
 		return s;
 	}
 
