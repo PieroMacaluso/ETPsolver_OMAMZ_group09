@@ -33,11 +33,17 @@ class Solution {
 	 */
 	boolean createSolution() {
 		List<Exam> order;
+		Map<Exam, Integer> backup = new TreeMap<>(timetable);
 		int count = 0;
 
 		order = Data.getInstance().getExams().values().stream().filter((Exam ex) -> !this.isScheduled(ex)).sorted(Comparator.comparing(this::countUnavailableTimeslots).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
 		// TODO: use do-while?
 		while(!order.isEmpty()) {
+			if(count > Data.getInstance().nExm / 2) {
+				timetable = new TreeMap<>(backup);
+				return false;
+			}
+
 			Exam e = order.get(0);
 			Set<Integer> slo = this.getAvailableTimeslots(e);
 			if(slo.isEmpty()) {
