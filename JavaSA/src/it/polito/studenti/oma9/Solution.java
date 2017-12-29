@@ -10,6 +10,8 @@ class Solution {
 	//private Map<Exam, Integer> timetable = new HashMap<>(Data.getInstance().nExm + 2, (float) 1.0);
 	private Map<Exam, Integer> timetable = new TreeMap<>();
 	private Random rand = new Random();
+	private double solCost = 0;
+
 
 	/**
 	 * Clone another solution, basically.
@@ -18,6 +20,7 @@ class Solution {
 	 */
 	Solution(Solution sol) {
 		timetable.putAll(sol.timetable);
+		this.solCost = sol.solCost;
 	}
 
 	/**
@@ -52,7 +55,9 @@ class Solution {
 				// System.out.println("No good slot available");
 				order.addAll(e.exmConflict);
 				for(Exam conflicting : e.exmConflict) {
-					this.unschedule(conflicting);
+					if(this.isScheduled(conflicting)) {
+						this.unschedule(conflicting);
+					}
 				}
 			} else {
 				this.scheduleRand(e, slo);
@@ -70,6 +75,7 @@ class Solution {
 	 */
 	void schedule(Exam exam, int ts) {
 		timetable.put(exam, ts);
+		solCost += examCost(exam);
 	}
 
 	/**
@@ -79,7 +85,9 @@ class Solution {
 	 * @param exam exam
 	 */
 	void unschedule(Exam exam) {
+		solCost -= examCost(exam);
 		timetable.remove(exam);
+
 	}
 
 	/**
@@ -108,7 +116,7 @@ class Solution {
 	 * @return number of slots
 	 */
 	private int countUnavailableTimeslots(Exam exam) {
-		Set<Integer> timeslots = new HashSet<>(Data.getInstance().nSlo + 1, (float) 1.0);
+		Set<Integer> timeslots = new TreeSet<>();
 
 		// For each conflicting exam
 		for(Exam conflicting : exam.exmConflict) {
@@ -194,28 +202,14 @@ class Solution {
 	 * @return cost
 	 */
 	double evaluateCost() {
-		double sum = 0;
-		for(Exam e1 : timetable.keySet()) {
-			for(Exam e2 : e1.exmConflict) {
-				int distance = getDistance(e1, e2);
-				if(distance == 0) {
-					throw new RuntimeException("Infeasible solution!");
-					//return Double.MAX_VALUE;
-				}
-				if(e2.getExmID() > e1.getExmID() && distance <= 5) {
-					sum += Math.pow(2, 5 - distance) * e1.conflictingStudentsCounter.getOrDefault(e2, 0);
-				}
-			}
 
-		}
-		sum = sum / Data.getInstance().nStu;
-		return sum;
+		return solCost / Data.getInstance().nStu;
 	}
 
 	/**
 	 * @return exam cost
 	 */
-	double examCost(Exam exam) {
+	double examCostOld(Exam exam) {
 		double sum = 0;
 		for(Exam conflicting : exam.exmConflict) {
 			// Take every conflicting exam and measure distance
@@ -233,6 +227,32 @@ class Solution {
 			}
 		}
 		return sum / Data.getInstance().nStu;
+
+	}
+
+	/**
+	 * @return exam cost
+	 */
+	double examCost(Exam exam) {
+		double sum = 0;
+		for(Exam conflicting : exam.exmConflict) {
+			if(this.isScheduled(conflicting)) {
+				// Take every conflicting exam and measure distance
+				int d = Math.abs(this.getTimeslot(conflicting) - this.getTimeslot(exam));
+				// This shouldn't happen, hopefully
+				if(d == 0) {
+					System.out.println("Infeasible solution!! BAAAAAD");
+					return Double.MAX_VALUE;
+				}
+				// If they're close enough to trigger a penalty
+				if(d <= 5) {
+					// Calculate penalty
+					sum += Math.pow(2, 5 - d) * exam.conflictingStudentsCounter.getOrDefault(conflicting, 0);
+					//System.out.println("Conflict between " + exam.conflictingStudentsCounter.getOrDefault(conflicting, 0) + " students (exam " + exam.getExmID() + " with " + conflicting.getExmID() + ")");
+				}
+			}
+		}
+		return sum;
 
 	}
 
@@ -270,7 +290,7 @@ class Solution {
 		while(j < (int) (Data.getInstance().nExm * percentage)) {
 			Exam chosen = Data.getInstance().getExams().get(rand.nextInt(Data.getInstance().nExm));
 			// TODO: lots of accesses to isScheduled, which is slow... shuffle exams, put into list and unschedule first part of the list?
-			if(chosen != null && this.isScheduled(chosen)) {
+			if(chosen != null && s.isScheduled(chosen)) {
 				s.unschedule(chosen);
 				j++;
 			}
