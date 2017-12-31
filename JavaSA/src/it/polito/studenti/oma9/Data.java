@@ -2,11 +2,14 @@ package it.polito.studenti.oma9;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-//import java.time.Duration;
-//import java.time.LocalTime;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+//import java.time.Duration;
+//import java.time.LocalTime;
 
 class Data {
 	private static Data instance;
@@ -48,7 +51,6 @@ class Data {
 	/**
 	 * Access the singleton.
 	 *
-	 * @deprecated replace with final public variable, to shave off a few microseconds
 	 * @return instance
 	 */
 	static Data getInstance() {
@@ -106,7 +108,6 @@ class Data {
 				}
 				Exam exam = exams.get(examID);
 				student.addExam(exam);
-				exam.addStudent(student);
 			}
 		}
 		return students.size();
@@ -130,7 +131,7 @@ class Data {
 	private void buildConflicts() {
 		//LocalTime start = LocalTime.now();
 		//System.out.println("Begin building conflict map (new method)");
-		conflicts = new int[nExm +1][nExm +1];
+		conflicts = new int[nExm + 1][nExm + 1];
 
 		for(Student student : students.values()) {
 			for(Exam exam : student.getExams().values()) {
@@ -138,29 +139,41 @@ class Data {
 					if(exam.compareTo(other) < 0) {
 						exam.addConflict(other);
 						other.addConflict(exam);
-						conflicts[exam.exmID][other.exmID]++;
-						conflicts[other.exmID][exam.exmID]++;
-						//System.out.println(exam.exmID + " and " + other.exmID + " conflict by " + conflicts[exam.exmID][other.exmID]);
+						conflicts[exam.id][other.id]++;
+						conflicts[other.id][exam.id]++;
+						//System.out.println(exam.id + " and " + other.id + " conflict by " + conflicts[exam.id][other.id]);
 					}
 				}
 			}
 		}
 
 		//int total = 0;
-		for(int i = 1; i <= nExm; i++) {
-			for(int j = i + 1; j <= nExm; j++) {
-				if(conflicts[i][j] != 0) {
-					Exam one = this.exams.get(i);
-					Exam two = this.exams.get(j);
-					Integer numberOfConflicts = conflicts[i][j];
-					one.setConflictCounter(two, numberOfConflicts);
-					two.setConflictCounter(one, numberOfConflicts);
-					//total += 2;
-				}
-			}
-		}
+//		for(int i = 1; i <= nExm; i++) {
+//			for(int j = i + 1; j <= nExm; j++) {
+//				if(conflicts[i][j] != 0) {
+//					Exam one = this.exams.get(i);
+//					Exam two = this.exams.get(j);
+//					Integer numberOfConflicts = conflicts[i][j];
+//					one.setConflictCounter(two, numberOfConflicts);
+//					two.setConflictCounter(one, numberOfConflicts);
+//					//total += 2;
+//				}
+//			}
+//		}
 
 		//System.out.println("Finished building conflict map, " + total + " conflicting exam couples, took: " + Duration.between(start, LocalTime.now()));
+	}
+
+	int conflictsBetween(Exam one, Exam two) {
+		return conflicts[one.id][two.id];
+	}
+
+	int conflictsBetween(Integer one, Integer two) {
+		return conflicts[one][two];
+	}
+
+	int conflictsBetween(int one, int two) {
+		return conflicts[one][two];
 	}
 
 	/**
@@ -170,7 +183,7 @@ class Data {
 		try {
 			PrintWriter writer = new PrintWriter(solutionFile, "UTF-8");
 			for(Map.Entry<Exam, Integer> e : solution.export()) {
-				writer.println(e.getKey().exmID + " " + e.getValue());
+				writer.println(e.getKey().id + " " + e.getValue());
 
 				//System.out.println(e.getKey() + " " + e.getValue().getTimeslot());
 

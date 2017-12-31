@@ -37,7 +37,7 @@ class Solution {
 		Map<Exam, Integer> backup = new TreeMap<>(timetable);
 		int count = 0;
 
-		order = Data.getInstance().getExams().values().stream().filter((Exam ex) -> !this.isScheduled(ex)).sorted(Comparator.comparing(this::countUnavailableTimeslots).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
+		order = Data.getInstance().getExams().values().stream().filter((Exam ex) -> !this.isScheduled(ex)).sorted(Comparator.comparing(this::countUnavailableTimeslots).thenComparing(Exam::nConflictingExams).reversed()).collect(Collectors.toList());
 		// TODO: use do-while?
 		while(!order.isEmpty()) {
 			if(count > Data.getInstance().nExm / 2) {
@@ -51,8 +51,8 @@ class Solution {
 				count++;
 				order.add(e);
 				// System.out.println("No good slot available");
-				order.addAll(e.exmConflict);
-				for(Exam conflicting : e.exmConflict) {
+				order.addAll(e.conflicts);
+				for(Exam conflicting : e.conflicts) {
 					if(this.isScheduled(conflicting)) {
 						this.unschedule(conflicting);
 					}
@@ -60,7 +60,7 @@ class Solution {
 			} else {
 				this.scheduleRand(e, slo);
 			}
-			order = Data.getInstance().getExams().values().stream().filter((Exam ex) -> !this.isScheduled(ex)).sorted(Comparator.comparing(this::countUnavailableTimeslots).thenComparing(Exam::nConflict).reversed()).collect(Collectors.toList());
+			order = Data.getInstance().getExams().values().stream().filter((Exam ex) -> !this.isScheduled(ex)).sorted(Comparator.comparing(this::countUnavailableTimeslots).thenComparing(Exam::nConflictingExams).reversed()).collect(Collectors.toList());
 		}
 		return true;
 	}
@@ -117,7 +117,7 @@ class Solution {
 		Set<Integer> timeslots = new TreeSet<>();
 
 		// For each conflicting exam
-		for(Exam conflicting : exam.exmConflict) {
+		for(Exam conflicting : exam.conflicts) {
 			// Get its scheduled position
 			Integer timeslot = this.timetable.get(conflicting);
 			// If it has actually been scheduled
@@ -146,7 +146,7 @@ class Solution {
 		}
 
 		// Get every conflicting exam
-		for(Exam e : exam.exmConflict) {
+		for(Exam e : exam.conflicts) {
 			// Is it scheduled somewhere?
 			if(this.isScheduled(e)) {
 				// If it is, remove that time slot
@@ -200,32 +200,7 @@ class Solution {
 	 * @return cost
 	 */
 	double evaluateCost() {
-
 		return solCost / Data.getInstance().nStu;
-	}
-
-	/**
-	 * @return exam cost
-	 */
-	double examCostOld(Exam exam) {
-		double sum = 0;
-		for(Exam conflicting : exam.exmConflict) {
-			// Take every conflicting exam and measure distance
-			int d = Math.abs(this.getTimeslot(conflicting) - this.getTimeslot(exam));
-			// This shouldn't happen, hopefully
-			if(d == 0) {
-				System.out.println("Infeasible solution!! BAAAAAD");
-				return Double.MAX_VALUE;
-			}
-			// If they're close enough to trigger a penalty
-			if(d <= 5) {
-				// Calculate penalty
-				sum += Math.pow(2, 5 - d) * exam.conflictingStudentsCounter.getOrDefault(conflicting, 0);
-				//System.out.println("Conflict between " + exam.conflictingStudentsCounter.getOrDefault(conflicting, 0) + " students (exam " + exam.getExmID() + " with " + conflicting.getExmID() + ")");
-			}
-		}
-		return sum / Data.getInstance().nStu;
-
 	}
 
 	/**
@@ -233,7 +208,7 @@ class Solution {
 	 */
 	double examCost(Exam exam) {
 		double sum = 0;
-		for(Exam conflicting : exam.exmConflict) {
+		for(Exam conflicting : exam.conflicts) {
 			if(this.isScheduled(conflicting)) {
 				// Take every conflicting exam and measure distance
 				int d = Math.abs(this.getTimeslot(conflicting) - this.getTimeslot(exam));
@@ -245,13 +220,13 @@ class Solution {
 				// If they're close enough to trigger a penalty
 				if(d <= 5) {
 					// Calculate penalty
-					sum += Math.pow(2, 5 - d) * exam.conflictingStudentsCounter.getOrDefault(conflicting, 0);
+					sum += Math.pow(2, 5 - d) * Data.getInstance().conflictsBetween(exam, conflicting);
 					//System.out.println("Conflict between " + exam.conflictingStudentsCounter.getOrDefault(conflicting, 0) + " students (exam " + exam.getExmID() + " with " + conflicting.getExmID() + ")");
 				}
 			}
 		}
+		// These are used just for sorting, so dividing by number of students is useless, it's just a scaling factor
 		return sum;
-
 	}
 
 	/**
@@ -274,7 +249,7 @@ class Solution {
 			}
 		}
 
-		while(!s.createSolution());
+		while(!s.createSolution()) ;
 		return s;
 	}
 

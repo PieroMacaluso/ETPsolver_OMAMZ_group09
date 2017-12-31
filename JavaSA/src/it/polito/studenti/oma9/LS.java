@@ -1,9 +1,8 @@
 package it.polito.studenti.oma9;
 
-import java.io.Serializable;
 import java.util.*;
 
-class LS implements Serializable {
+class LS {
 
 	void deepOptimization(Solution sol, double delta) {
 		double next = sol.evaluateCost();

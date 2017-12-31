@@ -1,34 +1,23 @@
 package it.polito.studenti.oma9;
 
-import java.io.Serializable;
 import java.util.Map;
 import java.util.TreeMap;
 
-class Student implements Serializable, Comparable<Student> {
-	private int stuID;
+class Student implements Comparable<Student> {
+	private final int id;
+	private Map<Integer, Exam> exams = new TreeMap<>();
 
-	public Map<Integer, Exam> getExams() {
+	Map<Integer, Exam> getExams() {
 		return exams;
 	}
-
-	private Map<Integer, Exam> exams = new TreeMap<>();
 
 	/**
 	 * Default constructor
 	 *
-	 * @param stuID student ID
+	 * @param id student ID
 	 */
-	Student(int stuID) {
-		this.stuID = stuID;
-	}
-
-	/**
-	 * Get Student ID
-	 *
-	 * @return student ID
-	 */
-	int getStuID() {
-		return stuID;
+	Student(int id) {
+		this.id = id;
 	}
 
 	/**
@@ -37,22 +26,12 @@ class Student implements Serializable, Comparable<Student> {
 	 * @param e Exam
 	 */
 	void addExam(Exam e) {
-		exams.put(e.exmID, e);
-	}
-
-	/**
-	 * Check if the student is signed up to exam with id
-	 *
-	 * @param id exam ID
-	 * @return is it signed up or not?
-	 */
-	boolean hasExam(int id) {
-		return exams.containsKey(id);
+		exams.put(e.id, e);
 	}
 
 	@Override
 	public int compareTo(Student student) {
-		return student.getStuID() - this.getStuID();
+		return student.id - this.id;
 
 	}
 }
