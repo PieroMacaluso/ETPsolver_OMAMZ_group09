@@ -37,7 +37,7 @@ class Student implements Serializable, Comparable<Student> {
 	 * @param e Exam
 	 */
 	void addExam(Exam e) {
-		exams.put(e.getExmID(), e);
+		exams.put(e.exmID, e);
 	}
 
 	/**

@@ -32,7 +32,7 @@ class SA {
 			if(x.evaluateCost() < best.evaluateCost()) {
 				best = new Solution(x);
 				System.out.println("NEW BEST\t" + best.evaluateCost() + "\t remaining: " + Duration.between(LocalTime.now(), endTime) + " s");
-				best.printSolution();
+				Data.getInstance().saveSolution(best);
 			}
 			ls.deepOptimization(x, 0.1);
 

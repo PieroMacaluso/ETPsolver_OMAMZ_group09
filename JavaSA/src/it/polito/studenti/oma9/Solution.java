@@ -1,12 +1,10 @@
 package it.polito.studenti.oma9;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
 class Solution {
-	//private Map<Exam, Integer> timetable = new HashMap<>();
+	// TODO: capire se hashmap era più veloce (O(1) vs O(logn), in teoria...)
 	//private Map<Exam, Integer> timetable = new HashMap<>(Data.getInstance().nExm + 2, (float) 1.0);
 	private Map<Exam, Integer> timetable = new TreeMap<>();
 	private Random rand = new Random();
@@ -257,26 +255,6 @@ class Solution {
 	}
 
 	/**
-	 * Print the solution
-	 */
-	void printSolution() {
-		try {
-			PrintWriter writer = new PrintWriter(Data.getInstance().getFilename() + ".sol", "UTF-8");
-			for(Map.Entry<Exam, Integer> e : timetable.entrySet()) {
-				writer.println(e.getKey().getExmID() + " " + e.getValue());
-
-				//System.out.println(e.getKey() + " " + e.getValue().getTimeslot());
-
-			}
-			writer.close();
-		} catch(IOException e) {
-			System.err.println("Cannot write solution on " + Data.getInstance().getFilename() + ".sol");
-			throw new RuntimeException();
-		}
-
-	}
-
-	/**
 	 * Create a neighbor solution starting from current solution, "unscheduling" a percentage of the exams
 	 * and randomly rescheduling them using the FFS method
 	 *
@@ -300,5 +278,7 @@ class Solution {
 		return s;
 	}
 
-
+	Iterable<? extends Map.Entry<Exam, Integer>> export() {
+		return timetable.entrySet();
+	}
 }

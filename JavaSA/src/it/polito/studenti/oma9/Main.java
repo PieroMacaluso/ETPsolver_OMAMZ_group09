@@ -44,7 +44,7 @@ public class Main {
 			// e va a prendere l'istanza nella cartella giusta
 
 			// Initialization of a new object Data and creation of the FFS
-			Data.getInstance().initialize(instance);
+			new Data(instance);
 		} catch(FileNotFoundException e) {
 			System.out.println("Missing files for instance " + instance);
 			return;
@@ -69,7 +69,7 @@ public class Main {
 			// 0.69 obtained from logaritmo (TODO: spiegare 'sta cosa)
 			x = optimization.startOptimization(fls, delta / 0.69, start, endTime);
 			// Print of the solution
-			x.printSolution();
+			//x.printSolution(); // TODO: serviva?
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

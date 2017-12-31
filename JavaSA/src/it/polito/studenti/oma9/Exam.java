@@ -10,7 +10,7 @@ class Exam implements Comparable<Exam>, Serializable {
 	Map<Integer, Student> students = new TreeMap<>();
 	Set<Exam> exmConflict = new TreeSet<>();
 	Map<Exam, Integer> conflictingStudentsCounter = new TreeMap<>();
-	public final int exmID;
+	final int exmID;
 
 	/**
 	 * Default constructor
@@ -19,16 +19,6 @@ class Exam implements Comparable<Exam>, Serializable {
 	 */
 	Exam(int exmID) {
 		this.exmID = exmID;
-	}
-
-	/**
-	 * Getter ExmID
-	 *
-	 * @return exam ID
-	 * @deprecated
-	 */
-	int getExmID() {
-		return exmID;
 	}
 
 	/**
@@ -68,6 +58,6 @@ class Exam implements Comparable<Exam>, Serializable {
 	// Used by Set, Map key, etc... Exams are the same based on ID only.
 	@Override
 	public int compareTo(Exam exam) {
-		return exam.getExmID() - this.getExmID();
+		return exam.exmID - this.exmID;
 	}
 }

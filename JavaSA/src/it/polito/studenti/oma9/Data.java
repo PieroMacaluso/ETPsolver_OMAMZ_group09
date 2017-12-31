@@ -2,140 +2,57 @@ package it.polito.studenti.oma9;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.Serializable;
-import java.time.Duration;
-import java.time.LocalTime;
+//import java.time.Duration;
+//import java.time.LocalTime;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 
-class Data implements Serializable {
-	private static Data instance = null;
-	int nExm = 0;
-	int nStu = 0;
-	int nSlo = 0;
+class Data {
+	private static Data instance;
+	final int nExm;
+	final int nStu;
+	final int nSlo;
 	private Map<Integer, Student> students = new HashMap<>();
 	private Map<Integer, Exam> exams = new HashMap<>();
 	private int[][] conflicts;
-	private String filename;
-
-	String getFilename() {
-		return filename;
-	}
-
-	Map<Integer, Exam> getExams() {
-		return exams;
-	}
-
-	private Data() {
-	}
+	private File solutionFile;
 
 	/**
 	 * Create object representing problem data.
 	 *
 	 * @throws FileNotFoundException If any file for the instance doesn't exist
 	 */
-	void initialize(String filename) throws FileNotFoundException {
-		this.filename = filename;
-		startRead();
-	}
+	Data(String filename) throws FileNotFoundException {
+		Data.instance = this;
 
-
-	// Metodo della classe impiegato per accedere al singleton
-	static synchronized Data getInstance() {
-		if(instance == null) {
-			instance = new Data();
-		}
-		return instance;
-	}
-
-	/**
-	 * Read .stu and .exm files and fill the appropriate matrices
-	 */
-	private void startRead() throws FileNotFoundException {
 		File stuFile = new File(filename + ".stu");
 		File exmFile = new File(filename + ".exm");
 		File sloFile = new File(filename + ".slo");
+		solutionFile = new File(filename + ".sol");
 		Scanner sStu = new Scanner(stuFile);
 		Scanner sExm = new Scanner(exmFile);
 		Scanner sSlo = new Scanner(sloFile);
 
-		readSlots(sSlo);
-		readExams(sExm);
-		readStudents(sStu);
+		nSlo = readSlots(sSlo);
+		nExm = readExams(sExm);
+		nStu = readStudents(sStu);
 
 		buildConflicts();
 	}
 
-	/**
-	 * Build conflicts map. Ci mette 27 s ogni volta.
-	 *
-	 * @deprecated dire che è inefficiente è un understatement
-	 */
-	private void buildConflictsOld() {
-		// TODO: questa cosa è inefficiente
-		LocalTime start = LocalTime.now();
-		System.out.println("Begin building conflict map");
-		for(int i = 1; i <= nExm; i++) {
-			for(int j = i + 1; j <= nExm; j++) {
-				for(Integer student1 : exams.get(i).students.keySet()) {
-					for(Integer student2 : exams.get(j).students.keySet()) {
-						if(student1.equals(student2)) {
-							exams.get(i).addConflict(exams.get(j));
-							exams.get(j).addConflict(exams.get(i));
-
-							// Questo prima lo faceva in addConflict (col codice ora commentato via), è un numero a caso tanto per metterci qualcosa, in realtà dovrebbe fare ++...
-							exams.get(i).setConflictCounter(exams.get(j), 1337);
-							exams.get(j).setConflictCounter(exams.get(i), 1337);
-						}
-					}
-				}
-			}
-		}
-
-		int total = 0;
-		for(Exam e : exams.values()) {
-			total += e.exmConflict.size();
-		}
-		System.out.println("Finished building conflict map, " + total + " conflicting exam couples, took: " + Duration.between(start, LocalTime.now()));
+	Map<Integer, Exam> getExams() {
+		return exams;
 	}
 
 	/**
-	 * Build conflicts map.
-	 * Runs in 0.05 s, usually.
+	 * Access the singleton.
+	 *
+	 * @deprecated replace with final public variable, to shave off a few microseconds
+	 * @return instance
 	 */
-	private void buildConflicts() {
-		LocalTime start = LocalTime.now();
-		System.out.println("Begin building conflict map (new)");
-		conflicts = new int[nExm+1][nExm+1];
-
-		for(Student student : students.values()) {
-			for(Exam exam : student.getExams().values()) {
-				for(Exam other : student.getExams().values()) {
-					if(exam.compareTo(other) < 0) {
-						exam.addConflict(other);
-						other.addConflict(exam);
-						conflicts[exam.exmID][other.exmID]++;
-						conflicts[other.exmID][exam.exmID]++;
-						//System.out.println(exam.exmID + " and " + other.exmID + " conflict by " + conflicts[exam.exmID][other.exmID]);
-					}
-				}
-			}
-		}
-
-		int total = 0;
-		for(int i = 1; i <= nExm; i++) {
-			for(int j = i + 1; j <= nExm; j++) {
-				if(conflicts[i][j] != 0) {
-					Exam one = this.exams.get(i);
-					Exam two = this.exams.get(j);
-					Integer numberOfConflicts = conflicts[i][j];
-					one.setConflictCounter(two, numberOfConflicts);
-					two.setConflictCounter(one, numberOfConflicts);
-					total += 2;
-				}
-			}
-		}
-
-		System.out.println("Finished building conflict map, " + total + " conflicting exam couples, took: " + Duration.between(start, LocalTime.now()));
+	static Data getInstance() {
+		return instance;
 	}
 
 	/**
@@ -143,7 +60,7 @@ class Data implements Serializable {
 	 *
 	 * @param sExm Scanner
 	 */
-	private void readExams(Scanner sExm) {
+	private int readExams(Scanner sExm) {
 		int exmID;
 		int maxID = 0;
 		while(sExm.hasNextLine()) {
@@ -158,15 +75,16 @@ class Data implements Serializable {
 				maxID = Integer.parseInt(part[0]);
 			}
 		}
-		nExm = maxID;
+		return maxID;
 	}
 
 	/**
 	 * Read .stu file
 	 *
 	 * @param sStu Scanner
+	 * @return number of students
 	 */
-	private void readStudents(Scanner sStu) {
+	private int readStudents(Scanner sStu) {
 		Integer studentID;
 		Integer examID;
 
@@ -191,19 +109,78 @@ class Data implements Serializable {
 				exam.addStudent(student);
 			}
 		}
-		// È necessario il numero esatto, anche se ci sono buchi tra un ID e l'altro!
-		nStu = students.size();
+		return students.size();
 	}
 
 	/**
 	 * Read .slo file
 	 *
 	 * @param sSlo Scanner
+	 * @return number of slots
 	 */
-	private void readSlots(Scanner sSlo) {
+	private int readSlots(Scanner sSlo) {
 		String line = sSlo.nextLine();
-		nSlo = Integer.parseInt(line);
+		return Integer.parseInt(line);
 	}
 
+
+	/**
+	 * Build conflicts map.
+	 */
+	private void buildConflicts() {
+		//LocalTime start = LocalTime.now();
+		//System.out.println("Begin building conflict map (new method)");
+		conflicts = new int[nExm +1][nExm +1];
+
+		for(Student student : students.values()) {
+			for(Exam exam : student.getExams().values()) {
+				for(Exam other : student.getExams().values()) {
+					if(exam.compareTo(other) < 0) {
+						exam.addConflict(other);
+						other.addConflict(exam);
+						conflicts[exam.exmID][other.exmID]++;
+						conflicts[other.exmID][exam.exmID]++;
+						//System.out.println(exam.exmID + " and " + other.exmID + " conflict by " + conflicts[exam.exmID][other.exmID]);
+					}
+				}
+			}
+		}
+
+		//int total = 0;
+		for(int i = 1; i <= nExm; i++) {
+			for(int j = i + 1; j <= nExm; j++) {
+				if(conflicts[i][j] != 0) {
+					Exam one = this.exams.get(i);
+					Exam two = this.exams.get(j);
+					Integer numberOfConflicts = conflicts[i][j];
+					one.setConflictCounter(two, numberOfConflicts);
+					two.setConflictCounter(one, numberOfConflicts);
+					//total += 2;
+				}
+			}
+		}
+
+		//System.out.println("Finished building conflict map, " + total + " conflicting exam couples, took: " + Duration.between(start, LocalTime.now()));
+	}
+
+	/**
+	 * Print solution to file
+	 */
+	synchronized void saveSolution(Solution solution) {
+		try {
+			PrintWriter writer = new PrintWriter(solutionFile, "UTF-8");
+			for(Map.Entry<Exam, Integer> e : solution.export()) {
+				writer.println(e.getKey().exmID + " " + e.getValue());
+
+				//System.out.println(e.getKey() + " " + e.getValue().getTimeslot());
+
+			}
+			writer.close();
+		} catch(IOException e) {
+			System.err.println("Cannot write solution on " + solutionFile.getName() + ".sol");
+			throw new RuntimeException();
+		}
+
+	}
 }
 

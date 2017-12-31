@@ -42,6 +42,16 @@
 		\nome{Alberto Romano}{s254036} % 164371
 	\end{center}
 
+	\section{Building conflict matrix}
+	
+	Was done by taking each couple of exams and counting students enrolled in both. This was agonizingly slow, taking about 20 seconds on istance 6.
+	
+	Also, it was a mistake since before that it worked differently but the entire data structure has been changed multiple times.
+	
+	It was later improved by iterating over students once and, for each student, taking every couple of exams they're enrolled in and incrementing the right cell in the conflict matrix.
+	
+	Finding this performance problem (which appeared by mistake, mind you) required us to use a profiler, but nobody cares about stuff that's really useful in the real world and we'll almost surely use in future (these absurd algorithms... most of us will never see them again).
+
 	\section{Initial solution generation}
 	
 	\subsection{Random}
