@@ -44,28 +44,10 @@ public class Main {
 			System.exit(1);
 		}
 
-		// TODO: do we need a local search right at the beginning?
-		Solution ffs = new Solution();
-		ffs.createSolution();
-		Solution fls = new Solution(ffs);
-		LocalSearch.optimize(fls, 0.01);
-		System.out.println("Initial solution: " + ffs.solutionCost());
-		System.out.println("LS solution: " + fls.solutionCost());
-		double delta = ffs.solutionCost() - fls.solutionCost();
-
-
 		endTime = start.plus(seconds, ChronoUnit.SECONDS);
-
-		try {
-			// To see information of this method go to the implementation
-			// 0.69 obtained from logaritmo (TODO: spiegare 'sta cosa)
-			// TODO: actually run in a thread
-			new SimulatedAnnealing(fls, delta / 0.69, endTime).run();
-			// Print of the solution
-			//x.printSolution(); // TODO: serviva?
-			System.out.println("Final solution: " + Data.getInstance().getBest());
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
+		// TODO: actually run in a thread
+		new Solver(endTime).run();
+		// Print of the solution
+		System.out.println("Final solution: " + Data.getInstance().getBest());
 	}
 }

@@ -37,6 +37,6 @@ class Exam implements Comparable<Exam> {
 	// Used by Set, Map key, etc... Exams are the same based on ID only.
 	@Override
 	public int compareTo(Exam exam) {
-		return exam.id - this.id;
+		return this.id - exam.id;
 	}
 }

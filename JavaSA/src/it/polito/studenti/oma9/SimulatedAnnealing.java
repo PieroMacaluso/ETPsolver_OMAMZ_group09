@@ -4,31 +4,15 @@ import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.Temporal;
 
-class SimulatedAnnealing implements Runnable {
-	// This is needed because run() cannot accept parameters
-	private final Solution initial;
-	private final double initialTemperature;
-	private final Temporal endTime;
-
-	/**
-	 * Prepare to run simulated annealing inside a thread
-	 *
-	 * @see SimulatedAnnealing#optimize optimize() for an explanation of parameters
-	 */
-	@SuppressWarnings("SameParameterValue")
-	SimulatedAnnealing(Solution initial, double initialTemperature, Temporal endTime) {
-		this.initial = initial;
-		this.initialTemperature = initialTemperature;
-		this.endTime = endTime;
-	}
-
+class SimulatedAnnealing {
 	/**
 	 * An implementation of Simulated Annealing
 	 *
 	 * @param initial            a feasible solution
 	 * @param initialTemperature starting temperature of Simulated Annealing
 	 */
-	private static void optimize(Solution initial, double initialTemperature, Temporal endTime) {
+	@SuppressWarnings("SameParameterValue")
+	static void optimize(Solution initial, double initialTemperature, Temporal endTime) {
 		double temperature = initialTemperature;
 		Temporal startTime = LocalTime.now();
 		Duration toEnd;
@@ -86,10 +70,5 @@ class SimulatedAnnealing implements Runnable {
 	 */
 	private static double PR(double f1, double f2, double t) {
 		return Math.exp(-(f2 - f1) / t);
-	}
-
-	@Override
-	public void run() {
-		SimulatedAnnealing.optimize(initial, initialTemperature, endTime);
 	}
 }

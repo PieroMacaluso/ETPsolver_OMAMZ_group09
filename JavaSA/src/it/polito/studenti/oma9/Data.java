@@ -201,11 +201,14 @@ class Data {
 	 * @see Data#compareAndUpdateBest(Solution)
 	 */
 	private synchronized boolean compareAndUpdateBestSynchronized(double cost, Solution candidate) {
+		System.out.println(Thread.currentThread().getName() + " entering critical section");
 		if(cost >= this.best) {
+			System.out.println(Thread.currentThread().getName() + " leaving critical section (worse)");
 			return false;
 		} else {
 			this.best = cost;
 			saveSolution(candidate);
+			System.out.println(Thread.currentThread().getName() + " leaving critical section (NEW BEST)");
 			return true;
 		}
 	}
