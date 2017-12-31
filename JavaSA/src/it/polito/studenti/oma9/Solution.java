@@ -8,17 +8,17 @@ class Solution {
 	//private Map<Exam, Integer> timetable = new HashMap<>(Data.getInstance().nExm + 2, (float) 1.0);
 	private Map<Exam, Integer> timetable = new TreeMap<>();
 	private Random rand = new Random();
-	private double solCost = 0;
+	private double cost;
 
 
 	/**
 	 * Clone another solution, basically.
 	 *
-	 * @param sol other solution
+	 * @param other solution
 	 */
-	Solution(Solution sol) {
-		timetable.putAll(sol.timetable);
-		this.solCost = sol.solCost;
+	Solution(Solution other) {
+		timetable.putAll(other.timetable);
+		cost = other.cost;
 	}
 
 	/**
@@ -73,7 +73,7 @@ class Solution {
 	 */
 	void schedule(Exam exam, int ts) {
 		timetable.put(exam, ts);
-		solCost += examCost(exam);
+		cost += examCost(exam);
 	}
 
 	/**
@@ -83,9 +83,8 @@ class Solution {
 	 * @param exam exam
 	 */
 	void unschedule(Exam exam) {
-		solCost -= examCost(exam);
+		cost -= examCost(exam);
 		timetable.remove(exam);
-
 	}
 
 	/**
@@ -195,39 +194,45 @@ class Solution {
 	}
 
 	/**
-	 * Evaluate the cost of the current solution according to the objective function
+	 * Cost of a single exam, calculated according to objective function.
+	 * Conflicting exams that aren't yet scheduled don't increase penalty.
 	 *
-	 * @return cost
-	 */
-	double evaluateCost() {
-		return solCost / Data.getInstance().nStu;
-	}
-
-	/**
 	 * @return exam cost
 	 */
 	double examCost(Exam exam) {
 		double sum = 0;
+		// Take every conflicting exam
 		for(Exam conflicting : exam.conflicts) {
+			// If it has been scheduled
 			if(this.isScheduled(conflicting)) {
-				// Take every conflicting exam and measure distance
-				int d = Math.abs(this.getTimeslot(conflicting) - this.getTimeslot(exam));
-				// This shouldn't happen, hopefully
+				// Measure distance
+				int d = getDistance(conflicting, exam);
 				if(d == 0) {
-					System.out.println("Infeasible solution!! BAAAAAD");
+					// This shouldn't happen, hopefully
+					System.out.println("Infeasible solution!");
 					return Double.MAX_VALUE;
 				}
 				// If they're close enough to trigger a penalty
 				if(d <= 5) {
 					// Calculate penalty
+					// TODO: precompute pow for ULTIMATE optimization?
 					sum += Math.pow(2, 5 - d) * Data.getInstance().conflictsBetween(exam, conflicting);
 					//System.out.println("Conflict between " + exam.conflictingStudentsCounter.getOrDefault(conflicting, 0) + " students (exam " + exam.getExmID() + " with " + conflicting.getExmID() + ")");
 				}
 			}
 		}
-		// These are used just for sorting, so dividing by number of students is useless, it's just a scaling factor
 		return sum;
 	}
+
+	/**
+	 * Return cost of current solution according to objective function
+	 *
+	 * @return cost
+	 */
+	double solutionCost() {
+		return cost / Data.getInstance().nStu;
+	}
+
 
 	/**
 	 * Create a neighbor solution starting from current solution, "unscheduling" a percentage of the exams
@@ -236,7 +241,7 @@ class Solution {
 	 * @return New solution (leaves old solution unchanged)
 	 */
 	@SuppressWarnings("SameParameterValue")
-	Solution createNeighbor(double percentage) throws Exception {
+	Solution createNeighbor(double percentage) {
 		Solution s = new Solution(this);
 
 		int j = 0;

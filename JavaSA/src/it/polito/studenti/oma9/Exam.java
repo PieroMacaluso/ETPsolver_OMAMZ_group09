@@ -39,6 +39,4 @@ class Exam implements Comparable<Exam> {
 	public int compareTo(Exam exam) {
 		return exam.id - this.id;
 	}
-
-
 }

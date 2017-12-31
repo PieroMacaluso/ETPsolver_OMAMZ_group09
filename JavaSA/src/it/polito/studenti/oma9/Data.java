@@ -13,13 +13,14 @@ import java.util.Scanner;
 
 class Data {
 	private static Data instance;
+	private double best = Double.MAX_VALUE;
 	final int nExm;
 	final int nStu;
 	final int nSlo;
-	private Map<Integer, Student> students = new HashMap<>();
-	private Map<Integer, Exam> exams = new HashMap<>();
+	private final Map<Integer, Student> students = new HashMap<>();
+	private final Map<Integer, Exam> exams = new HashMap<>();
 	private int[][] conflicts;
-	private File solutionFile;
+	private final File solutionFile;
 
 	/**
 	 * Create object representing problem data.
@@ -177,9 +178,42 @@ class Data {
 	}
 
 	/**
+	 * Is this solution better than the best?
+	 * If yes, save it to file.
+	 *
+	 * This calls a synchronized function internally, so for all intents and purposes it's synchronized.
+	 *
+	 * @return true if new solution is better
+	 */
+	boolean compareAndUpdateBest(Solution candidate) {
+		double cost = candidate.solutionCost();
+		return compareAndUpdateBestSynchronized(cost, candidate);
+	}
+
+	/**
+	 * Use for debugging and printing messages ONLY
+	 */
+	double getBest() {
+		return this.best;
+	}
+
+	/**
+	 * @see Data#compareAndUpdateBest(Solution)
+	 */
+	private synchronized boolean compareAndUpdateBestSynchronized(double cost, Solution candidate) {
+		if(cost >= this.best) {
+			return false;
+		} else {
+			this.best = cost;
+			saveSolution(candidate);
+			return true;
+		}
+	}
+
+	/**
 	 * Print solution to file
 	 */
-	synchronized void saveSolution(Solution solution) {
+	private synchronized void saveSolution(Solution solution) {
 		try {
 			PrintWriter writer = new PrintWriter(solutionFile, "UTF-8");
 			for(Map.Entry<Exam, Integer> e : solution.export()) {

@@ -10,13 +10,11 @@ public class Main {
 	public static void main(String[] args) {
 		Temporal start = LocalTime.now();
 		Temporal endTime;
-		LS ls = new LS();
-		SA optimization = new SA();
-		boolean secondsIsNext = false;
 		int seconds = 0;
 		String instance = "";
 
-		// Initialization of the arguments
+		// Read command line arguments
+		boolean secondsIsNext = false;
 		for(String arg : args) {
 			if(secondsIsNext) {
 				seconds = Integer.parseInt(arg);
@@ -30,46 +28,42 @@ public class Main {
 
 		if(seconds <= 0) {
 			System.out.println("Invalid number of seconds to run: " + seconds);
-			return;
+			System.exit(1);
 		}
 
 		if(instance.length() == 0) {
 			System.out.println("No instance name provided");
-			return;
+			System.exit(1);
 		}
 
 		try {
-			// dalla cartella Java-ga, si può invocare "questo-file.jar ../instances/instance01 -t 30"
-			// (o mettere "../instances/instance01 -t 30" nei parametri della run configuration di Intellij...)
-			// e va a prendere l'istanza nella cartella giusta
-
-			// Initialization of a new object Data and creation of the FFS
+			// Load supplied data files. Data class is a singleton, accessible via a static method.
 			new Data(instance);
 		} catch(FileNotFoundException e) {
 			System.out.println("Missing files for instance " + instance);
-			return;
-			//e.printStackTrace();
+			System.exit(1);
 		}
 
+		// TODO: do we need a local search right at the beginning?
 		Solution ffs = new Solution();
 		ffs.createSolution();
 		Solution fls = new Solution(ffs);
-		ls.deepOptimization(fls, 0.01);
-		System.out.println("Initial solution: " + ffs.evaluateCost());
-		System.out.println("LS solution: " + fls.evaluateCost());
-		double delta = ffs.evaluateCost() - fls.evaluateCost();
+		LocalSearch.optimize(fls, 0.01);
+		System.out.println("Initial solution: " + ffs.solutionCost());
+		System.out.println("LS solution: " + fls.solutionCost());
+		double delta = ffs.solutionCost() - fls.solutionCost();
 
 
 		endTime = start.plus(seconds, ChronoUnit.SECONDS);
 
-		// Data x is an object that the program uses to write the solution of the Simulated Annealing
-		Solution x;
 		try {
 			// To see information of this method go to the implementation
 			// 0.69 obtained from logaritmo (TODO: spiegare 'sta cosa)
-			x = optimization.startOptimization(fls, delta / 0.69, start, endTime);
+			// TODO: actually run in a thread
+			new SimulatedAnnealing(fls, delta / 0.69, endTime).run();
 			// Print of the solution
 			//x.printSolution(); // TODO: serviva?
+			System.out.println("Final solution: " + Data.getInstance().getBest());
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

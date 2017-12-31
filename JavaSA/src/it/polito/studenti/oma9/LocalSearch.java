@@ -2,22 +2,31 @@ package it.polito.studenti.oma9;
 
 import java.util.*;
 
-class LS {
+class LocalSearch {
 
-	void deepOptimization(Solution sol, double delta) {
-		double next = sol.evaluateCost();
+	private LocalSearch() {
+	}
+
+	/**
+	 * Deep optimization.
+	 *
+	 * @param sol start from there
+	 * @param delta keep improving only if improvement is greater than this
+	 */
+	static void optimize(Solution sol, double delta) {
+		double next = sol.solutionCost();
 		double prev = Double.MAX_VALUE;
 		int i = 0;
 		while((prev - next) / prev > delta) {
 			prev = next;
-			next = startOptimization(sol);
+			next = optimizeOnce(sol);
 //			System.out.println("Ottimizzazione pari a: " + 100 * (prev - next) / prev + "%");
 			i++;
 		}
 //		System.out.println("" + i + " giri di LS compiuti con gaudio");
 	}
 
-	private double startOptimization(Solution sol) {
+	private static double optimizeOnce(Solution sol) {
 		Integer bestSlo;
 		for(Map.Entry en : entriesSortedByValues(Data.getInstance().getExams())) {
 			Exam e = (Exam) en.getValue();
@@ -38,7 +47,7 @@ class LS {
 			sol.unschedule(e);
 			sol.schedule(e, bestSlo);
 		}
-		return sol.evaluateCost();
+		return sol.solutionCost();
 	}
 
 	private static <K, V extends Comparable<? super V>>
