@@ -15,17 +15,23 @@ public class Solver implements Runnable {
 
 	@Override
 	public void run() {
-		Solution feasible = new Solution();
+		double unoptimizedCost;
+		double delta;
 
-		// TODO: do we need a local search right at the beginning?
-		Solution optimized = new Solution(feasible);
-		LocalSearch.optimize(optimized, 0.05);
+		// Build a feasible solution and save its cost
+		Solution initial = new Solution();
+		unoptimizedCost = initial.solutionCost();
+		// Optimize with local search
+		LocalSearch.optimize(initial, 0.1);
 
-		System.out.println(Thread.currentThread().getName() + " Initial solution:\t" + feasible.solutionCost() + "\n" +
-				"         LS solution:\t" + optimized.solutionCost());
-		double delta = feasible.solutionCost() - optimized.solutionCost();
+		// Save it, as a starting point
+		Data.getInstance().compareAndUpdateBest(initial);
 
-		// 0.69 obtained from logaritmo (TODO: spiegare 'sta cosa)
-		SimulatedAnnealing.optimize(optimized, delta / 0.69, endTime);
+		System.out.println(Thread.currentThread().getName() + " Initial solution:\t" + unoptimizedCost + "\n" +
+				"         LS solution:\t" + initial.solutionCost());
+
+		// Calculate delta and start SA. 0.69 obtained from logaritmo (TODO: spiegare 'sta cosa)
+		delta = unoptimizedCost - initial.solutionCost();
+		SimulatedAnnealing.optimize(initial, delta / 0.69, endTime);
 	}
 }
