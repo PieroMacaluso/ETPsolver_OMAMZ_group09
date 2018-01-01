@@ -1,18 +1,16 @@
 package it.polito.studenti.oma9;
 
-import com.sun.istack.internal.NotNull;
-
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 class Solution {
-	// TODO: capire se hashmap era più veloce (O(1) vs O(logn), in teoria...)
-	//private Map<Exam, Integer> timetable = new HashMap<>(Data.getInstance().nExm + 2, (float) 1.0);
-	private Map<Exam, Integer> timetable = new TreeMap<>();
+	// TODO: capire se hashmap è più veloce (O(1) vs O(logn), in teoria...)
+	private Map<Exam, Integer> timetable = new HashMap<>(Data.getInstance().nExm * 2, (float) 1.0);
+	//private Map<Exam, Integer> timetable = new TreeMap<>();
 	private ThreadLocalRandom rand = ThreadLocalRandom.current();
 	private double cost;
-
+	private static final double[] precomputedPowers = {32, 16, 8, 4, 2, 1};
 
 	/**
 	 * Clone another solution, basically.
@@ -147,7 +145,7 @@ class Solution {
 	 * @return number of slots
 	 */
 	private int countUnavailableTimeslots(Exam exam) {
-		Set<Integer> timeslots = new TreeSet<>();
+		Set<Integer> unavailable = new HashSet<>(Data.getInstance().nExm * 2, (float) 1.0);
 
 		// For each conflicting exam
 		for(Exam conflicting : exam.conflicts) {
@@ -157,11 +155,11 @@ class Solution {
 			if(timeslot != null) {
 				// Add that time slot to the list of conflicting ones
 				// (Set compares Integer value, not that it is a pointer to same memory location, so everything works fine)
-				timeslots.add(timeslot);
+				unavailable.add(timeslot);
 			}
 		}
 
-		return timeslots.size();
+		return unavailable.size();
 	}
 
 	/**
@@ -217,14 +215,20 @@ class Solution {
 	}
 
 	/**
-	 * Find distance between two allocated exams
+	 * Find distance between two allocated exams.
+	 * Returns -1 if at least one hasn't been scheduled.
 	 *
 	 * @param e1 Exam
 	 * @param e2 Other exam
 	 * @return distance
 	 */
 	private int getDistance(Exam e1, Exam e2) {
-		return Math.abs(timetable.get(e2) - timetable.get(e1));
+		Integer ts1 = timetable.get(e1);
+		Integer ts2 = timetable.get(e2);
+		if(ts1 == null || ts2 == null) {
+			return -1;
+		}
+		return Math.abs(ts2 - ts1);
 	}
 
 	/**
@@ -237,22 +241,24 @@ class Solution {
 		double sum = 0;
 		// Take every conflicting exam
 		for(Exam conflicting : exam.conflicts) {
-			// If it has been scheduled
-			if(this.isScheduled(conflicting)) {
-				// Measure distance
-				int d = getDistance(conflicting, exam);
-				if(d == 0) {
-					// This shouldn't happen, hopefully
-					System.out.println("Infeasible solution!");
-					return Double.MAX_VALUE;
-				}
-				// If they're close enough to trigger a penalty
-				if(d <= 5) {
-					// Calculate penalty
-					// TODO: precompute pow for ULTIMATE optimization?
-					sum += Math.pow(2, 5 - d) * Data.getInstance().conflictsBetween(exam, conflicting);
-					//System.out.println("Conflict between " + exam.conflictingStudentsCounter.getOrDefault(conflicting, 0) + " students (exam " + exam.getExmID() + " with " + conflicting.getExmID() + ")");
-				}
+			// Measure distance
+			int d = getDistance(conflicting, exam);
+			// If conflicting exam hasn't been scheduled
+			if(d < 0) {
+				// keep looping
+				continue;
+			}
+			// If they're scheduled to the same time slot
+			if(d == 0) {
+				// This shouldn't happen, hopefully
+				System.out.println("Infeasible solution!");
+				return Double.MAX_VALUE;
+			}
+			// If they're close enough to trigger a penalty
+			if(d <= 5) {
+				// Calculate penalty
+				sum += precomputedPowers[d] * Data.getInstance().conflictsBetween(exam, conflicting);
+				//System.out.println("Conflict between " + exam.conflictingStudentsCounter.getOrDefault(conflicting, 0) + " students (exam " + exam.getExmID() + " with " + conflicting.getExmID() + ")");
 			}
 		}
 		return sum;
@@ -275,7 +281,7 @@ class Solution {
 	 * @return New solution (leaves old solution unchanged)
 	 */
 	@SuppressWarnings("SameParameterValue")
-	@NotNull Solution createNeighbor(double percentage) {
+	Solution createNeighbor(double percentage) {
 		Solution neighbor = null; // This just prevents the compiler from complaining, but it's guaranteed to be set before returning...
 		boolean done = false;
 

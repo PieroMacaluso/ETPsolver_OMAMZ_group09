@@ -34,6 +34,24 @@ class Exam implements Comparable<Exam> {
 		return conflicts.size();
 	}
 
+	/**
+	 * Number of conflicting students
+	 *
+	 * Didn't work very well (slow and solutions are basically the same)
+	 *
+	 * @return number of conflicting students
+	 */
+	int nConflictingStudents() {
+		Data data = Data.getInstance();
+		int sum = 0;
+
+		for(Exam other : conflicts) {
+			sum += data.conflictsBetween(this, other);
+		}
+
+		return sum;
+	}
+
 	// Used by Set, Map key, etc... Exams are the same based on ID only.
 	@Override
 	public int compareTo(Exam exam) {
