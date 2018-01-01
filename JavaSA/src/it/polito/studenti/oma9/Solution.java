@@ -50,13 +50,20 @@ class Solution {
 	private boolean tryScheduleRemaining() {
 		List<Exam> sortedExams;
 		int failures = 0;
-		int limit = Data.getInstance().nExm / 2;
+		final int nExm = Data.getInstance().nExm;
+		final int limit = nExm / 2;
 		boolean allScheduled = false;
-		Collection<Exam> allExams = Data.getInstance().getExams().values();
+		final Collection<Exam> allExams = Data.getInstance().getExams().values();
 
 		while(!allScheduled) {
 			if(failures > limit) {
 				return false;
+			}
+
+			if(timetable.size() >= nExm) {
+				// Should never be >, actually
+				System.out.println(Thread.currentThread().getName() + " pointless rescheduling");
+				return true;
 			}
 
 			sortedExams = allExams.stream()
@@ -65,6 +72,10 @@ class Solution {
 							.thenComparing(Exam::nConflictingExams)
 							.reversed())
 					.collect(Collectors.toList());
+
+			if(sortedExams.size() == 0) {
+				return true;
+			}
 
 			Exam candidate = sortedExams.get(0);
 			Set<Integer> availableTimeslots = this.getAvailableTimeslots(candidate);
@@ -264,31 +275,44 @@ class Solution {
 	 */
 	@SuppressWarnings("SameParameterValue")
 	@NotNull Solution createNeighbor(double percentage) {
-		Solution neighbor = null;
+		Solution neighbor = null; // This just prevents the compiler from complaining, but it's guaranteed to be set before returning...
 		boolean done = false;
 
 		while(!done) {
 			neighbor = new Solution(this);
-			neighbor.unschedulePercentage(percentage);
-			done = neighbor.tryScheduleRemaining();
+			done = neighbor.unschedulePercentage(percentage) || neighbor.tryScheduleRemaining();
 		}
 
 		return neighbor;
 	}
 
 	/**
-	 * "Unschedule" a percentage of exams
+	 * "Unschedule" a percentage of exams.
+	 * Make sure that all exams have been scheduled before calling!
+	 *
+	 * @return true if nothing has been unscheduled (percentage too low) so solution is still valid, false otherwise
 	 */
-	private void unschedulePercentage(double percentage) {
+	private boolean unschedulePercentage(double percentage) {
 		int j = 0;
-		while(j < (int) (Data.getInstance().nExm * percentage)) {
-			Exam chosen = Data.getInstance().getExams().get(rand.nextInt(Data.getInstance().nExm));
-			// TODO: lots of accesses to isScheduled, which is slow... shuffle exams, put into list and unschedule first part of the list?
-			if(chosen != null && isScheduled(chosen)) {
+		final int nExm = Data.getInstance().nExm;
+		final int limit = (int) (nExm * percentage);
+		ArrayList<Exam> shuffled;
+
+		if(limit <= 0) {
+			return true;
+		}
+
+		shuffled = new ArrayList<>(Data.getInstance().getExams().values());
+		Collections.shuffle(shuffled);
+
+		while(j < limit) {
+			Exam chosen = shuffled.get(j);
+			//if(chosen != null && isScheduled(chosen)) {
 				unschedule(chosen);
 				j++;
-			}
+			//}
 		}
+		return false;
 	}
 
 	Iterable<? extends Map.Entry<Exam, Integer>> export() {
