@@ -36,7 +36,7 @@ class SimulatedAnnealing {
 			Data.getInstance().compareAndUpdateBest(current);
 
 			// Then create a neighbor and optimize it
-			Solution neighbor = current.createNeighbor(0.2); // TODO: explain 0.2 which was 0.3 (~1/3)
+			Solution neighbor = current.createNeighbor(0.22); // TODO: explain 0.2 which was 0.3 (~1/3)
 			LocalSearch.optimize(neighbor, 0.03 * relativeTemperature); // TODO: explain 0.03 (3%)
 			Data.getInstance().compareAndUpdateBest(neighbor);
 
@@ -52,6 +52,11 @@ class SimulatedAnnealing {
 				//noinspection StatementWithEmptyBody
 				if(random < probability) {
 					//System.out.println(Thread.currentThread().getName() + " discarded              \t" + neighbor.solutionCost() + "\t(got " + String.format("%4.2f < %4.2f)", random, probability));
+					if((random = (rng.nextDouble() * 2000)) < probability) {
+						current = new Solution();
+						LocalSearch.optimize(current, 0.1 * relativeTemperature);
+						System.out.printf(Thread.currentThread().getName() + " restarting with %.6f (got %4.2f < %4.2f)\n", current.solutionCost(), random, probability);
+					}
 				} else {
 					//System.out.println(Thread.currentThread().getName() + " accepted worse solution\t" + neighbor.solutionCost() + "\t(got " + String.format("%4.2f > %4.2f)", random, probability));
 					current = neighbor;
