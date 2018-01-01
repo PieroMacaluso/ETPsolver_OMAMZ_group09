@@ -49,7 +49,7 @@ public class Main {
 
 		endTime = start.plus(seconds, ChronoUnit.SECONDS);
 		int cores = Runtime.getRuntime().availableProcessors();
-		//int cores = 8;
+		//int cores = 1;
 		System.out.println("Running " + cores + " threads...");
 		workers = new ArrayList<>(cores);
 		for(int i = 0; i < cores; i++) {

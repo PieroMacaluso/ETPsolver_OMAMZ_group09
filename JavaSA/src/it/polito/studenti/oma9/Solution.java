@@ -1,13 +1,16 @@
 package it.polito.studenti.oma9;
 
+import com.sun.istack.internal.NotNull;
+
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 class Solution {
 	// TODO: capire se hashmap era più veloce (O(1) vs O(logn), in teoria...)
 	//private Map<Exam, Integer> timetable = new HashMap<>(Data.getInstance().nExm + 2, (float) 1.0);
 	private Map<Exam, Integer> timetable = new TreeMap<>();
-	private Random rand = new Random();
+	private ThreadLocalRandom rand = ThreadLocalRandom.current();
 	private double cost;
 
 
@@ -22,45 +25,65 @@ class Solution {
 	}
 
 	/**
-	 * Create a new feasible solution.
+	 * Create a new, random, feasible solution.
 	 */
 	Solution() {
-		while(!createSolution()) ;
-
+		createSolution();
 	}
 
 	/**
-	 * Create the solution
+	 * Schedule all remaining exams and make sure the solution will be feasible.
 	 */
-	boolean createSolution() {
-		List<Exam> order;
-		Map<Exam, Integer> backup = new TreeMap<>(timetable);
-		int count = 0;
+	private void createSolution() {
+		boolean valid = false;
+		while(!valid) {
+			valid = tryScheduleRemaining();
+		}
+	}
 
-		order = Data.getInstance().getExams().values().stream().filter((Exam ex) -> !this.isScheduled(ex)).sorted(Comparator.comparing(this::countUnavailableTimeslots).thenComparing(Exam::nConflictingExams).reversed()).collect(Collectors.toList());
-		// TODO: use do-while?
-		while(!order.isEmpty()) {
-			if(count > Data.getInstance().nExm / 2) {
-				timetable = new TreeMap<>(backup);
+	/**
+	 * Attempt to schedule all remaining exams, to create a feasible solution
+	 *
+	 * @see Solution#createSolution()
+	 * @return true if valid, false if creation failed
+	 */
+	private boolean tryScheduleRemaining() {
+		List<Exam> sortedExams;
+		int failures = 0;
+		int limit = Data.getInstance().nExm / 2;
+		boolean allScheduled = false;
+		Collection<Exam> allExams = Data.getInstance().getExams().values();
+
+		while(!allScheduled) {
+			if(failures > limit) {
 				return false;
 			}
 
-			Exam e = order.get(0);
-			Set<Integer> slo = this.getAvailableTimeslots(e);
-			if(slo.isEmpty()) {
-				count++;
-				order.add(e);
-				// System.out.println("No good slot available");
-				order.addAll(e.conflicts);
-				for(Exam conflicting : e.conflicts) {
+			sortedExams = allExams.stream()
+					.filter((Exam exam) -> !this.isScheduled(exam))
+					.sorted(Comparator.comparing(this::countUnavailableTimeslots)
+							.thenComparing(Exam::nConflictingExams)
+							.reversed())
+					.collect(Collectors.toList());
+
+			Exam candidate = sortedExams.get(0);
+			Set<Integer> availableTimeslots = this.getAvailableTimeslots(candidate);
+
+			if(availableTimeslots.isEmpty()) {
+				// System.out.println("No slots available");
+				failures++;
+				for(Exam conflicting : candidate.conflicts) {
 					if(this.isScheduled(conflicting)) {
 						this.unschedule(conflicting);
 					}
 				}
 			} else {
-				this.scheduleRand(e, slo);
+				this.scheduleRand(candidate, availableTimeslots);
+				if(sortedExams.size() <= 1) {
+					allScheduled = true;
+				}
 			}
-			order = Data.getInstance().getExams().values().stream().filter((Exam ex) -> !this.isScheduled(ex)).sorted(Comparator.comparing(this::countUnavailableTimeslots).thenComparing(Exam::nConflictingExams).reversed()).collect(Collectors.toList());
+
 		}
 		return true;
 	}
@@ -78,7 +101,6 @@ class Solution {
 
 	/**
 	 * Unschedule the exam.
-	 * Does nothing if it wasn't scheduled.
 	 *
 	 * @param exam exam
 	 */
@@ -236,26 +258,37 @@ class Solution {
 
 	/**
 	 * Create a neighbor solution starting from current solution, "unscheduling" a percentage of the exams
-	 * and randomly rescheduling them using the FFS method
+	 * and randomly rescheduling them.
 	 *
 	 * @return New solution (leaves old solution unchanged)
 	 */
 	@SuppressWarnings("SameParameterValue")
-	Solution createNeighbor(double percentage) {
-		Solution s = new Solution(this);
+	@NotNull Solution createNeighbor(double percentage) {
+		Solution neighbor = null;
+		boolean done = false;
 
+		while(!done) {
+			neighbor = new Solution(this);
+			neighbor.unschedulePercentage(percentage);
+			done = neighbor.tryScheduleRemaining();
+		}
+
+		return neighbor;
+	}
+
+	/**
+	 * "Unschedule" a percentage of exams
+	 */
+	private void unschedulePercentage(double percentage) {
 		int j = 0;
 		while(j < (int) (Data.getInstance().nExm * percentage)) {
 			Exam chosen = Data.getInstance().getExams().get(rand.nextInt(Data.getInstance().nExm));
 			// TODO: lots of accesses to isScheduled, which is slow... shuffle exams, put into list and unschedule first part of the list?
-			if(chosen != null && s.isScheduled(chosen)) {
-				s.unschedule(chosen);
+			if(chosen != null && isScheduled(chosen)) {
+				unschedule(chosen);
 				j++;
 			}
 		}
-
-		while(!s.createSolution()) ;
-		return s;
 	}
 
 	Iterable<? extends Map.Entry<Exam, Integer>> export() {

@@ -35,6 +35,7 @@ class LocalSearch {
 //			System.out.println("Ho " + sloA.size() + " buchi a disposizione");
 			double bestC = sol.examCost(e);
 			for(Integer s : sloA) {
+				// TODO: check that it was scheduled
 				sol.unschedule(e);
 				sol.schedule(e, s);
 				double newC = sol.examCost(e);
@@ -44,6 +45,7 @@ class LocalSearch {
 				}
 
 			}
+			// TODO: check that it was scheduled
 			sol.unschedule(e);
 			sol.schedule(e, bestSlo);
 		}

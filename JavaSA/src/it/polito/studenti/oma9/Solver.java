@@ -16,18 +16,16 @@ public class Solver implements Runnable {
 	@Override
 	public void run() {
 		Solution feasible = new Solution();
-		feasible.createSolution();
 
 		// TODO: do we need a local search right at the beginning?
-		Solution betterNeighbor = new Solution(feasible);
-		LocalSearch.optimize(betterNeighbor, 0.01);
+		Solution optimized = new Solution(feasible);
+		LocalSearch.optimize(optimized, 0.05);
 
-		System.out.println();
-		System.out.println(Thread.currentThread().getName() + " Initial solution: " + feasible.solutionCost());
-		System.out.println(Thread.currentThread().getName() + " LS solution: " + betterNeighbor.solutionCost());
-		double delta = feasible.solutionCost() - betterNeighbor.solutionCost();
+		System.out.println(Thread.currentThread().getName() + " Initial solution:\t" + feasible.solutionCost() + "\n" +
+				"         LS solution:\t" + optimized.solutionCost());
+		double delta = feasible.solutionCost() - optimized.solutionCost();
 
 		// 0.69 obtained from logaritmo (TODO: spiegare 'sta cosa)
-		SimulatedAnnealing.optimize(betterNeighbor, delta / 0.69, endTime);
+		SimulatedAnnealing.optimize(optimized, delta / 0.69, endTime);
 	}
 }
