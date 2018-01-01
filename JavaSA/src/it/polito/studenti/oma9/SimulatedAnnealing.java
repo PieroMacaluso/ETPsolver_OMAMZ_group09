@@ -20,7 +20,7 @@ class SimulatedAnnealing {
 		double totalDuration = Duration.between(startTime, endTime).toMillis();
 		double temperature = initialTemperature;
 		double relativeTemperature;
-		int noImprovement = 0;
+		double currentCost, neighborCost;
 
 		//System.out.println(Thread.currentThread().getName() + " started SA with: " + initial.solutionCost());
 		Solution current = new Solution(initial);
@@ -35,20 +35,22 @@ class SimulatedAnnealing {
 			// Optimize current solution using local search
 			// TODO: se prende una soluzione peggiore, che è già ultra-ottimizzata, al giro successivo rifà almeno 1 passo di LS senza senso qui (senza senso perché il miglioramento richiesto è più alto)
 			LocalSearch.optimize(current, 0.1 * relativeTemperature); // TODO: explain 0.1 (10%), even though it's random
-			if(Data.getInstance().compareAndUpdateBest(current)) noImprovement = 0; else noImprovement++;
+			Data.getInstance().compareAndUpdateBest(current);
+			currentCost = current.solutionCost();
 
 			// Then create a neighbor and optimize it
 			Solution neighbor = current.createNeighbor(0.22); // TODO: explain 0.2 which was 0.3 (~1/3)
 			LocalSearch.optimize(neighbor, 0.1 * relativeTemperature); // TODO: explain 0.03 (3%)
-			if(!Data.getInstance().compareAndUpdateBest(neighbor)) noImprovement = 0; else noImprovement++;
+			Data.getInstance().compareAndUpdateBest(neighbor);
+			neighborCost = neighbor.solutionCost();
 
 			// Is it an improvement over current (thread-local) solution?
-			if(neighbor.solutionCost() < current.solutionCost()) {
+			if(neighborCost < currentCost) {
 				// It's better, take it
 				current = neighbor;
 			} else {
 				// It's worse, but don't discard it yet, calculate probability and a random number instead
-				double probability = probability(current.solutionCost(), neighbor.solutionCost(), temperature);
+				double probability = probability(currentCost, neighborCost, temperature);
 				double random = rng.nextDouble();
 				// Probability decreases from 1 to 0 as time goes on, so if random number is less than probability take it!
 				//noinspection StatementWithEmptyBody

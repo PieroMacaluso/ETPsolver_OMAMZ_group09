@@ -260,13 +260,13 @@ class Solution {
 
 	/**
 	 * Return cost of current solution according to objective function
+	 * Avoiding the division by nStu (since it's just a scaling factor) didn't provide any significant performance enhancement.
 	 *
 	 * @return cost
 	 */
 	double solutionCost() {
 		return cost / Data.getInstance().nStu;
 	}
-
 
 	/**
 	 * Create a neighbor solution starting from current solution, "unscheduling" a percentage of the exams
