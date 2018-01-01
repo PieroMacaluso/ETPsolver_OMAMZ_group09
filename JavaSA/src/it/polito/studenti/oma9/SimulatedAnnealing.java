@@ -56,15 +56,6 @@ class SimulatedAnnealing {
 					//System.out.println(Thread.currentThread().getName() + " accepted worse solution\t" + neighbor.solutionCost() + "\t(got " + String.format("%4.2f < %4.2f)", random, probability));
 					current = neighbor;
 				} else {
-					// TODO: rimuovere questa parte?
-					double restartProbability = probability(Data.getInstance().getBest(), current.solutionCost(), temperature);
-					random = rng.nextDouble();
-					if(random * (10.0 / noImprovement) < restartProbability) {
-						current = new Solution();
-						LocalSearch.optimize(current, 0.05 * relativeTemperature);
-						noImprovement = 0;
-						System.out.printf(Thread.currentThread().getName() + " restarting with %.6f after %d non-improving solutions (got %4.2f < %4.2f)\n", current.solutionCost(), noImprovement, random, restartProbability);
-					}
 					//System.out.println(Thread.currentThread().getName() + " discarded              \t" + neighbor.solutionCost() + "\t(got " + String.format("%4.2f > %4.2f)", random, probability));
 				}
 			}
