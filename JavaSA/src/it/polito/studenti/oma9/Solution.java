@@ -51,7 +51,7 @@ class Solution {
 		List<Exam> sortedExams;
 		int failures = 0;
 		final int nExm = Data.getInstance().nExm;
-		final int limit = nExm / 2;
+		final int limit = nExm / 3; // TODO: explain limit
 		boolean allScheduled = false;
 		final Collection<Exam> allExams = Data.getInstance().getExams().values();
 
@@ -62,6 +62,7 @@ class Solution {
 
 			if(timetable.size() >= nExm) {
 				// Should never be >, actually
+				// Should never happen at all, really: createNeighbor now checks if anything was unscheduled before rescheduling
 				System.out.println(Thread.currentThread().getName() + " pointless rescheduling");
 				return true;
 			}
@@ -278,9 +279,15 @@ class Solution {
 		Solution neighbor = null; // This just prevents the compiler from complaining, but it's guaranteed to be set before returning...
 		boolean done = false;
 
+		// TODO: se la % è bassa c'è il rischio che unscheduli 2 esami incastratissimi che ci stanno solo in quel buco e subito ricrea la stessa soluzione? (sì)
+		// l'alternativa facile è NON far dipendere la % dalla temperatura, com'era prima...
+		if(percentage < 0.04) {
+			System.out.println(Thread.currentThread().getName() + " aborting neighbor generation...");
+		}
 		while(!done) {
 			neighbor = new Solution(this);
 			done = neighbor.unschedulePercentage(percentage) || neighbor.tryScheduleRemaining();
+			if(!done) System.out.println(Thread.currentThread().getName() + " retrying neighbor generation...");
 		}
 
 		return neighbor;

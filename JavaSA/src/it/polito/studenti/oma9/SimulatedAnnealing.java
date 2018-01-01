@@ -36,7 +36,7 @@ class SimulatedAnnealing {
 			Data.getInstance().compareAndUpdateBest(current);
 
 			// Then create a neighbor and optimize it
-			Solution neighbor = current.createNeighbor(0.2 * relativeTemperature); // TODO: explain 0.2 which was 0.3 (~1/3)
+			Solution neighbor = current.createNeighbor(0.2); // TODO: explain 0.2 which was 0.3 (~1/3)
 			LocalSearch.optimize(neighbor, 0.03 * relativeTemperature); // TODO: explain 0.03 (3%)
 			Data.getInstance().compareAndUpdateBest(neighbor);
 
