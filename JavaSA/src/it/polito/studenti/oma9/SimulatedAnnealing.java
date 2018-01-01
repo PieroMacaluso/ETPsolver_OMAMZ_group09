@@ -19,19 +19,25 @@ class SimulatedAnnealing {
 		ThreadLocalRandom rng = ThreadLocalRandom.current();
 		double totalDuration = Duration.between(startTime, endTime).toMillis();
 		double temperature = initialTemperature;
+		double relativeTemperature;
 
-		System.out.println(Thread.currentThread().getName() + " started SA with: " + initial.solutionCost());
+		//System.out.println(Thread.currentThread().getName() + " started SA with: " + initial.solutionCost());
 		Solution current = new Solution(initial);
 
 		// Until the end of time
 		while(!(toEnd = Duration.between(LocalTime.now(), endTime)).isNegative()) {
+			// To optimize more as time goes on
+			relativeTemperature = Math.sqrt(temperature / initialTemperature); // TODO: explain the sqrt thing
+			//System.out.printf(Thread.currentThread().getName() + " relative temperature: %4.2f\n", relativeTemperature);
+
 			// Optimize current solution using local search
-			LocalSearch.optimize(current, 0.05);
+			// TODO: se prende una soluzione peggiore, che è già ultra-ottimizzata, al giro successivo rifà almeno 1 passo di LS senza senso qui (senza senso perché il miglioramento richiesto è più alto)
+			LocalSearch.optimize(current, 0.1 * relativeTemperature); // TODO: explain 0.1 (10%), even though it's random
 			Data.getInstance().compareAndUpdateBest(current);
 
 			// Then create a neighbor and optimize it
-			Solution neighbor = current.createNeighbor(0.3); // TODO: explain 0.3
-			LocalSearch.optimize(neighbor, 0.05);
+			Solution neighbor = current.createNeighbor(0.2 * relativeTemperature); // TODO: explain 0.2 which was 0.3 (~1/3)
+			LocalSearch.optimize(neighbor, 0.03 * relativeTemperature); // TODO: explain 0.03 (3%)
 			Data.getInstance().compareAndUpdateBest(neighbor);
 
 			// Is it an improvement over current (thread-local) solution?

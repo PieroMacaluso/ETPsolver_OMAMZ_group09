@@ -8,9 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-//import java.time.Duration;
-//import java.time.LocalTime;
-
 class Data {
 	private static Data instance;
 	private double best = Double.POSITIVE_INFINITY;
