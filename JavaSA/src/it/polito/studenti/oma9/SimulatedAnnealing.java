@@ -3,6 +3,7 @@ package it.polito.studenti.oma9;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.Temporal;
+import java.util.concurrent.ThreadLocalRandom;
 
 class SimulatedAnnealing {
 	/**
@@ -17,43 +18,41 @@ class SimulatedAnnealing {
 		Temporal startTime = LocalTime.now();
 		Duration toEnd;
 		Duration total = Duration.between(startTime, endTime);
+		ThreadLocalRandom rng = ThreadLocalRandom.current();
 
-		Solution x = new Solution(initial);
-		System.out.println(Thread.currentThread().getName() + " Initial solution: " + initial.solutionCost());
+		System.out.println(Thread.currentThread().getName() + " started SA with: " + initial.solutionCost());
+		Solution current = new Solution(initial);
 
 //		for(int i = 0; i < numberOfIterations; i++) {
 		while(!(toEnd = Duration.between(LocalTime.now(), endTime)).isNegative()) {
-			double cost = x.solutionCost();
 			// Check if current solution is better (and save it)
-			boolean better = Data.getInstance().compareAndUpdateBest(x);
-			if(better) {
-				System.out.println("NEW BEST\t" + cost + "\t remaining: " + Duration.between(LocalTime.now(), endTime) + " s");
-			}
-			LocalSearch.optimize(x, 0.1); // TODO: BUT WHY? Compare to best again, maybe?
+			//boolean better = Data.getInstance().compareAndUpdateBest(current);
+			Data.getInstance().compareAndUpdateBest(current);
+//			if(better) {
+//				System.out.println("NEW BEST\t" + cost + "\t remaining: " + Duration.between(LocalTime.now(), endTime) + " s");
+//			}
+			LocalSearch.optimize(current, 0.1); // TODO: BUT WHY? Compare to best again, maybe?
 
-			//Data neigh = neigh.get(rand.nextInt(neighPop));
-			Solution neigh = x.createNeighbor(0.321);
-			LocalSearch.optimize(neigh, 0.1);
-			double newF = neigh.solutionCost();
+			Solution neighbor = current.createNeighbor(0.3); // TODO: explain 0.3
+			LocalSearch.optimize(neighbor, 0.1);
 
-			// If the solution found is bad, instead of discarding them, use it as current solution randomly (following the probability in the method PR)
-			if(newF > cost) {
+			if(Data.getInstance().compareAndUpdateBest(current)) {
+				// It's better
+				current = new Solution(neighbor);
+			} else {
+				// It's worse, but don't discard it yet: use it as current solution randomly (following the probability in the method PR)
 				// Calculate probability p_ with method PR and probability randomly
-				double p_ = PR(cost, newF, temperature);
-				double p = Math.random();
+				double p_ = PR(current.solutionCost(), neighbor.solutionCost(), temperature);
+				double p = rng.nextDouble();
 				// if p_ > p discard the solution, otherwise take it!
 				//noinspection StatementWithEmptyBody
 				if(p_ > p) {
-					System.out.println("Discarded" + "\t" + newF + " (probability " + String.format("%4.2f > %4.2f)", p_, p));
+					System.out.println("Discarded" + "\t" + neighbor.solutionCost() + " (probability " + String.format("%4.2f > %4.2f)", p_, p));
 //                    System.out.println("No");
 				} else {
-					System.out.println("Prob new!" + "\t" + newF);
-					x = new Solution(neigh);
+					System.out.println("Prob new!" + "\t" + neighbor.solutionCost());
+					current = new Solution(neighbor);
 				}
-			} // If the solution found is good take it!
-			else {
-				System.out.println("Found new!" + "\t" + newF);
-				x = new Solution(neigh);
 			}
 
 			// Lower the temperature
@@ -61,7 +60,8 @@ class SimulatedAnnealing {
 			temperature = initialTemperature * coolingRate;
 			//System.out.println("Temperature: " + temperature);
 		}
-		System.out.println(Thread.currentThread().getName() + " Initial solution: " + initial.solutionCost());
+		// To see where we started when at the end
+		//System.out.println(Thread.currentThread().getName() + " Initial solution: " + initial.solutionCost());
 	}
 
 

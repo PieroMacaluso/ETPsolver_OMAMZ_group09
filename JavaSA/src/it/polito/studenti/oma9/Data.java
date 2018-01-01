@@ -187,7 +187,12 @@ class Data {
 	 */
 	boolean compareAndUpdateBest(Solution candidate) {
 		double cost = candidate.solutionCost();
-		return compareAndUpdateBestSynchronized(cost, candidate);
+		//noinspection SimplifiableIfStatement
+		if(cost >= this.best) {
+			return false;
+		} else {
+			return compareAndUpdateBestSynchronized(cost, candidate);
+		}
 	}
 
 	/**
@@ -199,6 +204,9 @@ class Data {
 
 	/**
 	 * @see Data#compareAndUpdateBest(Solution)
+	 *
+	 * TODO: this should be synchronized or else esplode tutto: se thread-1 trova 160 e thread-2 trova 155 in simultanea e prima c'era 170, cercano di scrivere la soluzione e se passa prima thread-2 viene scritta quella di thread-1, che è peggiore...
+	 * TODO: in alternativa, gli ho fatto fare 2 volte il controllo sul costo; in tale circostanza thread-1 si blocca in attesa di thread-2 ma almeno non lo sovrascrive...
 	 */
 	private synchronized boolean compareAndUpdateBestSynchronized(double cost, Solution candidate) {
 		System.out.println(Thread.currentThread().getName() + " entering critical section");
@@ -206,6 +214,7 @@ class Data {
 			System.out.println(Thread.currentThread().getName() + " leaving critical section (worse)");
 			return false;
 		} else {
+			System.out.println(Thread.currentThread().getName() + " found a new best: " + cost + " < " + this.best);
 			this.best = cost;
 			saveSolution(candidate);
 			System.out.println(Thread.currentThread().getName() + " leaving critical section (NEW BEST)");

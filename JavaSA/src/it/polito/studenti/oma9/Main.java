@@ -4,12 +4,15 @@ import java.io.FileNotFoundException;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
 
 	public static void main(String[] args) {
 		Temporal start = LocalTime.now();
 		Temporal endTime;
+		List<Thread> workers;
 		int seconds = 0;
 		String instance = "";
 
@@ -45,9 +48,25 @@ public class Main {
 		}
 
 		endTime = start.plus(seconds, ChronoUnit.SECONDS);
-		// TODO: actually run in a thread
-		new Solver(endTime).run();
-		// Print of the solution
+		//int cores = Runtime.getRuntime().availableProcessors();
+		int cores = 1;
+		System.out.println("Running " + cores + " threads...");
+		workers = new ArrayList<>(cores);
+		for(int i = 0; i < cores; i++) {
+			Thread worker = new Thread(new Solver(endTime));
+			workers.add(i, worker);
+			worker.start();
+		}
+		for(int i = 0; i < cores; i++) {
+			// Workers of the world, unite!
+			// TODO: remove comunismo improvviso ↑
+			try {
+				workers.get(i).join();
+			} catch(InterruptedException e) {
+				System.out.println("Main thread interrupted :(");
+			}
+		}
+		// Print final solution
 		System.out.println("Final solution: " + Data.getInstance().getBest());
 	}
 }
