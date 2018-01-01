@@ -13,7 +13,7 @@ import java.util.Scanner;
 
 class Data {
 	private static Data instance;
-	private double best = Double.MAX_VALUE;
+	private double best = Double.POSITIVE_INFINITY;
 	final int nExm;
 	final int nStu;
 	final int nSlo;

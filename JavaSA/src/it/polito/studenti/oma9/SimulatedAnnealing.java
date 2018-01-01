@@ -25,32 +25,30 @@ class SimulatedAnnealing {
 
 //		for(int i = 0; i < numberOfIterations; i++) {
 		while(!(toEnd = Duration.between(LocalTime.now(), endTime)).isNegative()) {
-			// Check if current solution is better (and save it)
-			//boolean better = Data.getInstance().compareAndUpdateBest(current);
+			LocalSearch.optimize(current, 0.05);
 			Data.getInstance().compareAndUpdateBest(current);
-//			if(better) {
+			//boolean better = Data.getInstance().compareAndUpdateBest(current);
+//						if(better) {
 //				System.out.println("NEW BEST\t" + cost + "\t remaining: " + Duration.between(LocalTime.now(), endTime) + " s");
 //			}
-			LocalSearch.optimize(current, 0.1); // TODO: BUT WHY? Compare to best again, maybe?
 
 			Solution neighbor = current.createNeighbor(0.3); // TODO: explain 0.3
-			LocalSearch.optimize(neighbor, 0.1);
+			LocalSearch.optimize(neighbor, 0.05);
+			Data.getInstance().compareAndUpdateBest(neighbor);
 
-			if(Data.getInstance().compareAndUpdateBest(current)) {
+			if(neighbor.solutionCost() < current.solutionCost()) {
 				// It's better
-				current = new Solution(neighbor);
+				current = new Solution(neighbor); // TODO: why cloning instead of assigning it directly?
 			} else {
-				// It's worse, but don't discard it yet: use it as current solution randomly (following the probability in the method PR)
-				// Calculate probability p_ with method PR and probability randomly
-				double p_ = PR(current.solutionCost(), neighbor.solutionCost(), temperature);
-				double p = rng.nextDouble();
-				// if p_ > p discard the solution, otherwise take it!
+				// It's worse, but don't discard it yet: use it as current solution randomly
+				double probability = probability(current.solutionCost(), neighbor.solutionCost(), temperature);
+				double random = rng.nextDouble();
+				// if probability > p discard the solution, otherwise take it!
 				//noinspection StatementWithEmptyBody
-				if(p_ > p) {
-					System.out.println("Discarded" + "\t" + neighbor.solutionCost() + " (probability " + String.format("%4.2f > %4.2f)", p_, p));
-//                    System.out.println("No");
+				if(random < probability) {
+					//System.out.println("Discarded" + "\t" + neighbor.solutionCost() + "\t(got " + String.format("%4.2f < %4.2f)", random, probability));
 				} else {
-					System.out.println("Prob new!" + "\t" + neighbor.solutionCost());
+					//System.out.println("Prob new!" + "\t" + neighbor.solutionCost());
 					current = new Solution(neighbor);
 				}
 			}
@@ -66,9 +64,14 @@ class SimulatedAnnealing {
 
 
 	/**
-	 * Calculate exponential probability starting from the evalutation of the two solution and the current temperature
+	 * Calculate exponential probability starting from the evaluation of the two solution and the current temperature
 	 */
-	private static double PR(double f1, double f2, double t) {
-		return Math.exp(-(f2 - f1) / t);
+	private static double probability(double currentCost, double neighborCost, double temperature) {
+		//System.out.println("This: " + currentCost + " other: " + neighborCost);
+		if(Math.exp(-(neighborCost - currentCost) / temperature) > 1.0) {
+			System.out.println("Sta esplodendo tutto!");
+			System.out.println("Best: " + currentCost + " other: " + neighborCost);
+		}
+		return Math.exp(-(neighborCost - currentCost) / temperature);
 	}
 }

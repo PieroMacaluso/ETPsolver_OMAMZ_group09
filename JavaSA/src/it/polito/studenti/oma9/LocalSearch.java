@@ -16,14 +16,14 @@ class LocalSearch {
 	static void optimize(Solution sol, double delta) {
 		double next = sol.solutionCost();
 		double prev = Double.MAX_VALUE;
-		int i = 0;
+		//int i = 0;
 		while((prev - next) / prev > delta) {
 			prev = next;
 			next = optimizeOnce(sol);
-//			System.out.println("Ottimizzazione pari a: " + 100 * (prev - next) / prev + "%");
-			i++;
+			//System.out.println("Ottimizzazione pari a: " + 100 * (prev - next) / prev + "%, richiesto " + delta * 100 + "%");
+			//i++;
 		}
-//		System.out.println("" + i + " giri di LS compiuti con gaudio");
+		//System.out.println("" + i + " giri di LS compiuti con gaudio");
 	}
 
 	private static double optimizeOnce(Solution sol) {
