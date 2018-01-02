@@ -11,6 +11,7 @@ class Solution {
 	private ThreadLocalRandom rand = ThreadLocalRandom.current();
 	private double cost;
 	private static final double[] precomputedPowers = {32, 16, 8, 4, 2, 1};
+	private final Map<Exam, Integer> unavailableTimeslots = new HashMap<>(500);
 
 	/**
 	 * Clone another solution, basically.
@@ -65,12 +66,16 @@ class Solution {
 				return true;
 			}
 
+			resetUnavailableTimeslotCache();
+
 			sortedExams = allExams.stream()
 					.filter((Exam exam) -> !this.isScheduled(exam))
-					.sorted(Comparator.comparing(this::countUnavailableTimeslots)
+					.sorted(Comparator.comparing(this::countUnavailableTimeslotsCached)
 							.thenComparing(Exam::nConflictingExams)
 							.reversed())
 					.collect(Collectors.toList());
+
+			resetUnavailableTimeslotCache();
 
 			if(sortedExams.size() == 0) {
 				return true;
@@ -137,6 +142,24 @@ class Solution {
 	 */
 	Integer getTimeslot(Exam exam) {
 		return timetable.get(exam);
+	}
+
+	private void resetUnavailableTimeslotCache() {
+		unavailableTimeslots.clear();
+	}
+
+	/**
+	 * @see Solution#countUnavailableTimeslots(Exam)
+	 *
+	 * @return number of slots (from cache)
+	 */
+	private Integer countUnavailableTimeslotsCached(Exam exam) {
+		Integer count = unavailableTimeslots.get(exam);
+		if(count == null) {
+			count = countUnavailableTimeslots(exam);
+			unavailableTimeslots.put(exam, count);
+		}
+		return count;
 	}
 
 	/**
@@ -346,7 +369,7 @@ class Solution {
 		while(!done) {
 			neighbor = new Solution(this);
 			done = neighbor.unschedulePercentage(percentage) || neighbor.tryScheduleRemaining();
-			if(!done) System.out.println(Thread.currentThread().getName() + " retrying neighbor generation...");
+			//if(!done) System.out.println(Thread.currentThread().getName() + " retrying neighbor generation...");
 		}
 
 		return neighbor;
