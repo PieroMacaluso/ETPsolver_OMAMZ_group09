@@ -33,9 +33,8 @@ class SimulatedAnnealing {
 			//System.out.printf(Thread.currentThread().getName() + " relative temperature: %4.2f\n", relativeTemperature);
 
 			// Optimize current solution using local search
-			// TODO: se prende una soluzione peggiore, che è già ultra-ottimizzata, al giro successivo rifà almeno 1 passo di LS senza senso qui (senza senso perché il miglioramento richiesto è più alto)
-			LocalSearch.optimize(current, 0.1 * relativeTemperature); // TODO: explain 0.1 (10%), even though it's random
-			Data.getInstance().compareAndUpdateBest(current);
+			//LocalSearch.optimize(current, 0.1 * relativeTemperature); // TODO: explain 0.1 (10%), even though it's random
+			//Data.getInstance().compareAndUpdateBest(current);
 			currentCost = current.solutionCost();
 
 			// Then create a neighbor and optimize it

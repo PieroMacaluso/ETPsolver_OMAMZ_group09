@@ -18,7 +18,7 @@ class LocalSearch {
 		double next = sol.solutionCost();
 		double prev = Double.MAX_VALUE;
 		//int i = 1;
-		while((prev - next) / prev >= delta) {
+		while((prev - next) / prev > delta) {
 			prev = next;
 			next = optimizeOnce(sol);
 			//if(i > 1) System.out.printf(Thread.currentThread().getName() + " LS step %-2d improvement:\t%4.2f%%,\trequired:\t%4.2f%%\n", i, 100 * (prev - next) / prev, delta * 100);
