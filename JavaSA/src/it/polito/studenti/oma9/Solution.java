@@ -232,6 +232,22 @@ class Solution {
 	}
 
 	/**
+	 * Find distance between two allocated exams.
+	 * Returns -1 if at least one hasn't been scheduled.
+	 *
+	 * @param e1  Exam
+	 * @param ts2 Timeslot
+	 * @return distance
+	 */
+	private int getDistanceSlo(Exam e1, Integer ts2) {
+		Integer ts1 = timetable.get(e1);
+		if(ts1 == null || ts2 == null) {
+			return -1;
+		}
+		return Math.abs(ts2 - ts1);
+	}
+
+	/**
 	 * Cost of a single exam, calculated according to objective function.
 	 * Conflicting exams that aren't yet scheduled don't increase penalty.
 	 *
@@ -243,6 +259,40 @@ class Solution {
 		for(Exam conflicting : exam.conflicts) {
 			// Measure distance
 			int d = getDistance(conflicting, exam);
+			// If conflicting exam hasn't been scheduled
+			if(d < 0) {
+				// keep looping
+				continue;
+			}
+			// If they're scheduled to the same time slot
+			if(d == 0) {
+				// This shouldn't happen, hopefully
+				System.out.println("Infeasible solution!");
+				return Double.MAX_VALUE;
+			}
+			// If they're close enough to trigger a penalty
+			if(d <= 5) {
+				// Calculate penalty
+				sum += precomputedPowers[d] * Data.getInstance().conflictsBetween(exam, conflicting);
+				//System.out.println("Conflict between " + exam.conflictingStudentsCounter.getOrDefault(conflicting, 0) + " students (exam " + exam.getExmID() + " with " + conflicting.getExmID() + ")");
+			}
+		}
+		return sum;
+	}
+
+	/**
+	 * Cost of a single exam, calculated according to objective function.
+	 * Conflicting exams that aren't yet scheduled don't increase penalty.
+	 *
+	 * @return exam cost
+	 */
+
+	double examCostPrevision(Exam exam, Integer slo) {
+		double sum = 0;
+		// Take every conflicting exam
+		for(Exam conflicting : exam.conflicts) {
+			// Measure distance
+			int d = getDistanceSlo(conflicting, slo);
 			// If conflicting exam hasn't been scheduled
 			if(d < 0) {
 				// keep looping
