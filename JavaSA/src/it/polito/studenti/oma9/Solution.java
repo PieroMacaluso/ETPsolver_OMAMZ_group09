@@ -287,8 +287,9 @@ class Solution {
 
 		// TODO: se la % è bassa c'è il rischio che unscheduli 2 esami incastratissimi che ci stanno solo in quel buco e subito ricrea la stessa soluzione? (sì)
 		// l'alternativa facile è NON far dipendere la % dalla temperatura, com'era prima...
-		if(percentage < 0.04) {
-			System.out.println(Thread.currentThread().getName() + " aborting neighbor generation...");
+		if(percentage < 0.05) {
+			System.out.printf(Thread.currentThread().getName() + " changing percentage to 5%% (from %4.2f)...\n", percentage*100);
+			percentage = 0.05;
 		}
 		while(!done) {
 			neighbor = new Solution(this);
