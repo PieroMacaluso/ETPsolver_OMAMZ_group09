@@ -1,10 +1,10 @@
 package it.polito.studenti.oma9;
 
+import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 class Exam implements Comparable<Exam> {
-	Set<Exam> conflicts = new TreeSet<>();
+	Set<Exam> conflicts = new HashSet<>();
 	final int id;
 
 	/**
