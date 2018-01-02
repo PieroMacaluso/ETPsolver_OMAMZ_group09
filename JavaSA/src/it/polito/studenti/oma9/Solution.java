@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 class Solution {
 	// TODO: capire se hashmap è più veloce (O(1) vs O(logn), in teoria...)
-	private Map<Exam, Integer> timetable = new HashMap<>(Data.getInstance().nExm * 2, (float) 1.0);
+	private Map<Exam, Integer> timetable = new HashMap<>(Data.nExm * 2, (float) 1.0);
 	//private Map<Exam, Integer> timetable = new TreeMap<>();
 	private ThreadLocalRandom rand = ThreadLocalRandom.current();
 	private double cost;
@@ -48,7 +48,7 @@ class Solution {
 	private boolean tryScheduleRemaining() {
 		List<Exam> sortedExams;
 		int failures = 0;
-		final int nExm = Data.getInstance().nExm;
+		final int nExm = Data.nExm;
 		final int limit = nExm / 3; // TODO: explain limit
 		boolean allScheduled = false;
 		final Collection<Exam> allExams = Data.getInstance().getExams().values();
@@ -145,7 +145,7 @@ class Solution {
 	 * @return number of slots
 	 */
 	private int countUnavailableTimeslots(Exam exam) {
-		Set<Integer> unavailable = new HashSet<>(Data.getInstance().nExm * 2, (float) 1.0);
+		Set<Integer> unavailable = new HashSet<>(Data.nExm * 2, (float) 1.0);
 
 		// For each conflicting exam
 		for(Exam conflicting : exam.conflicts) {
@@ -169,10 +169,10 @@ class Solution {
 	 * @return set of available time slots
 	 */
 	Set<Integer> getAvailableTimeslots(Exam exam) {
-		Set<Integer> all = new HashSet<>(Data.getInstance().nSlo * 2, (float) 1.0);
+		Set<Integer> all = new HashSet<>(Data.nSlo * 2, (float) 1.0);
 
 		// Start from all timeslots
-		for(int i = 1; i <= Data.getInstance().nSlo; i++) {
+		for(int i = 1; i <= Data.nSlo; i++) {
 			all.add(i);
 		}
 
@@ -197,7 +197,7 @@ class Solution {
 	 */
 	private void scheduleRand(Exam e, Set<Integer> availableTimeslots) {
 		if(availableTimeslots.size() == 0) {
-			return;
+			System.out.println("WARNING: scheduleRand called with no available timeslot");
 		}
 
 		int n = rand.nextInt(availableTimeslots.size());
@@ -210,8 +210,6 @@ class Solution {
 			}
 			i++;
 		}
-
-		throw new RuntimeException("Bad things are happening");
 	}
 
 	/**
@@ -255,6 +253,8 @@ class Solution {
 	 */
 	double examCost(Exam exam) {
 		double sum = 0;
+		Data data = Data.getInstance();
+
 		// Take every conflicting exam
 		for(Exam conflicting : exam.conflicts) {
 			// Measure distance
@@ -273,7 +273,7 @@ class Solution {
 			// If they're close enough to trigger a penalty
 			if(d <= 5) {
 				// Calculate penalty
-				sum += precomputedPowers[d] * Data.getInstance().conflictsBetween(exam, conflicting);
+				sum += precomputedPowers[d] * data.conflictsBetween(exam, conflicting);
 				//System.out.println("Conflict between " + exam.conflictingStudentsCounter.getOrDefault(conflicting, 0) + " students (exam " + exam.getExmID() + " with " + conflicting.getExmID() + ")");
 			}
 		}
@@ -289,6 +289,8 @@ class Solution {
 
 	double examCostPrevision(Exam exam, Integer slo) {
 		double sum = 0;
+		Data data = Data.getInstance();
+
 		// Take every conflicting exam
 		for(Exam conflicting : exam.conflicts) {
 			// Measure distance
@@ -307,7 +309,7 @@ class Solution {
 			// If they're close enough to trigger a penalty
 			if(d <= 5) {
 				// Calculate penalty
-				sum += precomputedPowers[d] * Data.getInstance().conflictsBetween(exam, conflicting);
+				sum += precomputedPowers[d] * data.conflictsBetween(exam, conflicting);
 				//System.out.println("Conflict between " + exam.conflictingStudentsCounter.getOrDefault(conflicting, 0) + " students (exam " + exam.getExmID() + " with " + conflicting.getExmID() + ")");
 			}
 		}
@@ -321,7 +323,7 @@ class Solution {
 	 * @return cost
 	 */
 	double solutionCost() {
-		return cost / Data.getInstance().nStu;
+		return cost / Data.nStu;
 	}
 
 	/**
@@ -358,7 +360,7 @@ class Solution {
 	 */
 	private boolean unschedulePercentage(double percentage) {
 		int j = 0;
-		final int nExm = Data.getInstance().nExm;
+		final int nExm = Data.nExm;
 		final int limit = (int) (nExm * percentage);
 		ArrayList<Exam> shuffled;
 

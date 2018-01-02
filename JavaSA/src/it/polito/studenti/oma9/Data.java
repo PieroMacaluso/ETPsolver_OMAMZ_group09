@@ -11,9 +11,9 @@ import java.util.Scanner;
 class Data {
 	private static Data instance;
 	private double best = Double.POSITIVE_INFINITY;
-	final int nExm;
-	final int nStu;
-	final int nSlo;
+	static int nExm;
+	static int nStu;
+	static int nSlo;
 	private final Map<Integer, Student> students = new HashMap<>();
 	private final Map<Integer, Exam> exams = new HashMap<>();
 	private int[][] conflicts;

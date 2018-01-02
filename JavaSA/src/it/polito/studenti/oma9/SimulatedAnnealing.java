@@ -21,6 +21,7 @@ class SimulatedAnnealing {
 		double temperature = initialTemperature;
 		double relativeTemperature;
 		double currentCost, neighborCost;
+		Data data = Data.getInstance();
 
 		//System.out.println(Thread.currentThread().getName() + " started SA with: " + initial.solutionCost());
 		Solution current = new Solution(initial);
@@ -40,7 +41,7 @@ class SimulatedAnnealing {
 			// Then create a neighbor and optimize it
 			Solution neighbor = current.createNeighbor(0.3 * relativeTemperature); // TODO: 0.3 and 0.2 are good, 0.1 gives results all over the place (one run ends with a world record, next run with an horrible solution), 0.22 looked pleasant and worked well
 			LocalSearch.optimize(neighbor, 0.1 * relativeTemperature); // TODO: explain 0.1 (10%)
-			Data.getInstance().compareAndUpdateBest(neighbor);
+			data.compareAndUpdateBest(neighbor);
 			neighborCost = neighbor.solutionCost();
 
 			// Is it an improvement over current (thread-local) solution?
