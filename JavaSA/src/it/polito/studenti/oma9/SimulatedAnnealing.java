@@ -38,7 +38,7 @@ class SimulatedAnnealing {
 			currentCost = current.solutionCost();
 
 			// Then create a neighbor and optimize it
-			Solution neighbor = current.createNeighbor(0.9 * relativeTemperature); // TODO: 0.3 and 0.2 are good, 0.1 gives results all over the place (one run ends with a world record, next run with an horrible solution), 0.22 looked pleasant and worked well
+			Solution neighbor = current.createNeighbor(0.3 * relativeTemperature); // TODO: 0.3 and 0.2 are good, 0.1 gives results all over the place (one run ends with a world record, next run with an horrible solution), 0.22 looked pleasant and worked well
 			LocalSearch.optimize(neighbor, 0.1 * relativeTemperature); // TODO: explain 0.1 (10%)
 			Data.getInstance().compareAndUpdateBest(neighbor);
 			neighborCost = neighbor.solutionCost();
