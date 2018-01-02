@@ -236,36 +236,19 @@ class Solution {
 	}
 
 	/**
-	 * Find distance between two allocated exams.
-	 * Returns -1 if at least one hasn't been scheduled.
+	 * Find distance between an exam and a time slot.
+	 * Returns -1 if exam hasn't been scheduled.
 	 *
-	 * @param e1 Exam
-	 * @param e2 Other exam
+	 * @param exam  Exam
+	 * @param timeslot Timeslot
 	 * @return distance
 	 */
-	private int getDistance(Exam e1, Exam e2) {
-		Integer ts1 = timetable.get(e1);
-		Integer ts2 = timetable.get(e2);
-		if(ts1 == null || ts2 == null) {
+	private int getDistance(Exam exam, Integer timeslot) {
+		Integer examTimeslot = timetable.get(exam);
+		if(examTimeslot == null) {
 			return -1;
 		}
-		return Math.abs(ts2 - ts1);
-	}
-
-	/**
-	 * Find distance between two allocated exams.
-	 * Returns -1 if at least one hasn't been scheduled.
-	 *
-	 * @param e1  Exam
-	 * @param ts2 Timeslot
-	 * @return distance
-	 */
-	private int getDistanceSlo(Exam e1, Integer ts2) {
-		Integer ts1 = timetable.get(e1);
-		if(ts1 == null) {
-			return -1;
-		}
-		return Math.abs(ts2 - ts1);
+		return Math.abs(timeslot - examTimeslot);
 	}
 
 	/**
@@ -275,48 +258,23 @@ class Solution {
 	 * @return exam cost
 	 */
 	double examCost(Exam exam) {
-		double sum = 0;
-		Data data = Data.getInstance();
-
-		// Take every conflicting exam
-		for(Exam conflicting : exam.conflicts) {
-			// Measure distance
-			int d = getDistance(conflicting, exam);
-			// If conflicting exam hasn't been scheduled
-			if(d < 0) {
-				// keep looping
-				continue;
-			}
-			// If they're scheduled to the same time slot
-			if(d == 0) {
-				// This shouldn't happen, hopefully
-				System.out.println("Infeasible solution!");
-				return Double.MAX_VALUE;
-			}
-			// If they're close enough to trigger a penalty
-			if(d <= 5) {
-				// Calculate penalty
-				sum += precomputedPowers[d] * data.conflictsBetween(exam, conflicting);
-				//System.out.println("Conflict between " + exam.conflictingStudentsCounter.getOrDefault(conflicting, 0) + " students (exam " + exam.getExmID() + " with " + conflicting.getExmID() + ")");
-			}
-		}
-		return sum;
+		return examCostSlot(exam, timetable.get(exam));
 	}
 
 	/**
-	 * Cost of a single exam if it were in another timeslot, calculated according to objective function.
+	 * Cost of a single exam if it were in specified timeslot, calculated according to objective function.
 	 * Conflicting exams that aren't yet scheduled don't increase penalty.
 	 *
 	 * @return exam cost
 	 */
-	double examCostPrevision(Exam exam, Integer slot) {
+	double examCostSlot(Exam exam, Integer slot) {
 		double sum = 0;
 		Data data = Data.getInstance();
 
 		// Take every conflicting exam
 		for(Exam conflicting : exam.conflicts) {
 			// Measure distance
-			int d = getDistanceSlo(conflicting, slot);
+			int d = getDistance(conflicting, slot);
 			// If conflicting exam hasn't been scheduled
 			if(d < 0) {
 				// keep looping
@@ -332,7 +290,6 @@ class Solution {
 			if(d <= 5) {
 				// Calculate penalty
 				sum += precomputedPowers[d] * data.conflictsBetween(exam, conflicting);
-				//System.out.println("Conflict between " + exam.conflictingStudentsCounter.getOrDefault(conflicting, 0) + " students (exam " + exam.getExmID() + " with " + conflicting.getExmID() + ")");
 			}
 		}
 		return sum;
@@ -361,9 +318,9 @@ class Solution {
 
 		// TODO: se la % è bassa c'è il rischio che unscheduli 2 esami incastratissimi che ci stanno solo in quel buco e subito ricrea la stessa soluzione? (sì)
 		// l'alternativa facile è NON far dipendere la % dalla temperatura, com'era prima...
-		if(percentage < 0.05) {
+		if(percentage < 0.1) {
 			//System.out.printf(Thread.currentThread().getName() + " changing percentage to 5%% (from %4.2f)...\n", percentage*100);
-			percentage = 0.05;
+			percentage = 0.1;
 		}
 		while(!done) {
 			neighbor = new Solution(this);

@@ -39,7 +39,10 @@ class SimulatedAnnealing {
 			currentCost = current.solutionCost();
 
 			// Then create a neighbor and optimize it
-			Solution neighbor = current.createNeighbor(0.3 * relativeTemperature); // TODO: 0.3 and 0.2 are good, 0.1 gives results all over the place (one run ends with a world record, next run with an horrible solution), 0.22 looked pleasant and worked well
+			// TODO: explain.
+			// 0.3 and 0.2 are good, 0.1 gives results all over the place (one run ends with a world record, next run with an horrible solution), 0.22 looked pleasant and worked well.
+			// Using relativeTemperature gives consistently better solutions in instance 4 by around 1%, from limited testing
+			Solution neighbor = current.createNeighbor(0.3 * relativeTemperature);
 			LocalSearch.optimize(neighbor, 0.1 * relativeTemperature); // TODO: explain 0.1 (10%)
 			data.compareAndUpdateBest(neighbor);
 			neighborCost = neighbor.solutionCost();
@@ -71,7 +74,7 @@ class SimulatedAnnealing {
 
 
 	/**
-	 * Calculate exponential probability starting from the evaluation of the two solution and the current temperature
+	 * Calculate exponential probability from cost of current solutions, and current temperature
 	 */
 	private static double probability(double currentCost, double neighborCost, double temperature) {
 		return Math.exp((currentCost - neighborCost) / temperature);

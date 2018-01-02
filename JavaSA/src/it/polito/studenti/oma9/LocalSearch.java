@@ -16,53 +16,44 @@ class LocalSearch {
 	@SuppressWarnings("SameParameterValue")
 	static void optimize(Solution sol, double delta) {
 		double next = sol.solutionCost();
-		double prev = Double.MAX_VALUE;
+		double prev;
 		//int i = 1;
-		while((prev - next) / prev > delta) {
+		do {
 			prev = next;
 			next = optimizeOnce(sol);
 			//if(i > 1) System.out.printf(Thread.currentThread().getName() + " LS step %-2d improvement:\t%4.2f%%,\trequired:\t%4.2f%%\n", i, 100 * (prev - next) / prev, delta * 100);
 			//i++;
-		}
+		} while((prev - next) / prev > delta);
 	}
 
 	private static double optimizeOnce(Solution sol) {
-		Integer bestSlo;
-		for(Map.Entry en : entriesSortedByValues(Data.getInstance().getExams())) {
-			Exam e = (Exam) en.getValue();
-			bestSlo = sol.getTimeslot(e);
-			Set<Integer> sloA = sol.getAvailableTimeslots(e);
-//			System.out.println("Ho " + sloA.size() + " buchi a disposizione");
-			double bestC = sol.examCost(e);
-			for(Integer s : sloA) {
-				double newC = sol.examCostPrevision(e, s);
-				if(newC < bestC) {
-					bestSlo = s;
-					bestC = newC;
+		// For each exam
+		for(Exam exam : Data.getInstance().getExams().values()) {
+			// Get its timeslot
+			Integer initialSlot = sol.getTimeslot(exam);
+			// Assume its current slot is the best one, until proven wrong
+			Integer bestSlot = initialSlot;
+			double bestCost = sol.examCost(exam);
+
+			// Where else could it be placed?
+			Set<Integer> available = sol.getAvailableTimeslots(exam);
+			for(Integer newSlot : available) {
+				// How much would that exam cost, if placed there?
+				double newCost = sol.examCostSlot(exam, newSlot);
+				// Is that an improvement?
+				if(newCost < bestCost) {
+					// Mark it as best
+					bestSlot = newSlot;
+					bestCost = newCost;
 				}
 			}
-			// TODO: check that it was scheduled
-			if(bestSlo != bestC) {
-				sol.unschedule(e);
-				sol.schedule(e, bestSlo);
+			// If a better slot was found, move it there
+			if(!initialSlot.equals(bestSlot)) {
+				sol.unschedule(exam);
+				sol.schedule(exam, bestSlot);
 			}
 		}
+
 		return sol.solutionCost();
-	}
-
-	private static <K, V extends Comparable<? super V>>
-	SortedSet<Map.Entry<K, V>> entriesSortedByValues(Map<K, V> map) {
-		SortedSet<Map.Entry<K, V>> sortedEntries = new TreeSet<Map.Entry<K, V>>(
-				new Comparator<Map.Entry<K, V>>() {
-					@Override
-					public int compare(Map.Entry<K, V> e1, Map.Entry<K, V> e2) {
-						int res = e1.getValue().compareTo(e2.getValue());
-
-						return res == 0 ? 1 : res;
-					}
-				}
-		);
-		sortedEntries.addAll(map.entrySet());
-		return sortedEntries;
 	}
 }
