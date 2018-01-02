@@ -169,7 +169,7 @@ class Solution {
 	 * @return set of available time slots
 	 */
 	Set<Integer> getAvailableTimeslots(Exam exam) {
-		Set<Integer> all = new HashSet<>();
+		Set<Integer> all = new HashSet<>(Data.getInstance().nSlo * 2, (float) 1.0);
 
 		// Start from all timeslots
 		for(int i = 1; i <= Data.getInstance().nSlo; i++) {
@@ -288,7 +288,7 @@ class Solution {
 		// TODO: se la % è bassa c'è il rischio che unscheduli 2 esami incastratissimi che ci stanno solo in quel buco e subito ricrea la stessa soluzione? (sì)
 		// l'alternativa facile è NON far dipendere la % dalla temperatura, com'era prima...
 		if(percentage < 0.05) {
-			System.out.printf(Thread.currentThread().getName() + " changing percentage to 5%% (from %4.2f)...\n", percentage*100);
+			//System.out.printf(Thread.currentThread().getName() + " changing percentage to 5%% (from %4.2f)...\n", percentage*100);
 			percentage = 0.05;
 		}
 		while(!done) {
