@@ -58,7 +58,7 @@ class LocalSearch {
 					public int compare(Map.Entry<K, V> e1, Map.Entry<K, V> e2) {
 						int res = e1.getValue().compareTo(e2.getValue());
 
-						return res != 0 ? res : 1;
+						return res == 0 ? 1 : res;
 					}
 				}
 		);

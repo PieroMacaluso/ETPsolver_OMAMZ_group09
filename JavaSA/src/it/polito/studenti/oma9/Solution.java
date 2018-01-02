@@ -262,7 +262,7 @@ class Solution {
 	 */
 	private int getDistanceSlo(Exam e1, Integer ts2) {
 		Integer ts1 = timetable.get(e1);
-		if(ts1 == null || ts2 == null) {
+		if(ts1 == null) {
 			return -1;
 		}
 		return Math.abs(ts2 - ts1);
@@ -304,20 +304,19 @@ class Solution {
 	}
 
 	/**
-	 * Cost of a single exam, calculated according to objective function.
+	 * Cost of a single exam if it were in another timeslot, calculated according to objective function.
 	 * Conflicting exams that aren't yet scheduled don't increase penalty.
 	 *
 	 * @return exam cost
 	 */
-
-	double examCostPrevision(Exam exam, Integer slo) {
+	double examCostPrevision(Exam exam, Integer slot) {
 		double sum = 0;
 		Data data = Data.getInstance();
 
 		// Take every conflicting exam
 		for(Exam conflicting : exam.conflicts) {
 			// Measure distance
-			int d = getDistanceSlo(conflicting, slo);
+			int d = getDistanceSlo(conflicting, slot);
 			// If conflicting exam hasn't been scheduled
 			if(d < 0) {
 				// keep looping
