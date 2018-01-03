@@ -3,7 +3,7 @@ package it.polito.studenti.oma9;
 import java.util.HashSet;
 import java.util.Set;
 
-public class TimetableSwap {
+class TimetableSwap {
 	private TimetableSwap() {
 	}
 

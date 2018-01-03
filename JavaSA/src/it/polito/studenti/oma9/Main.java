@@ -57,14 +57,14 @@ public class Main {
 			workers.add(i, worker);
 			worker.start();
 		}
-		for(int i = 0; i < cores; i++) {
-			// Workers of the world, unite!
-			// TODO: remove comunismo improvviso ↑
-			try {
+
+		try {
+			for(int i = 0; i < cores; i++) {
+				// Workers of the world, unite!
 				workers.get(i).join();
-			} catch(InterruptedException e) {
-				System.out.println("Main thread interrupted :(");
 			}
+		} catch(InterruptedException e) {
+			System.out.println("Main thread interrupted, terminating...");
 		}
 		// Print final solution
 		System.out.println("Final solution: " + Data.getInstance().getBest());

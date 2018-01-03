@@ -13,11 +13,11 @@ class Data {
 	static int nExm;
 	static int nStu;
 	static int nSlo;
+	private final File solutionFile;
 	private final Map<Integer, Student> students = new HashMap<>();
 	private final Map<Integer, Exam> exams = new HashMap<>();
-	private final SortedSet<Exam> orderExm;
+	private SortedSet<Exam> examsByConflicts;
 	private int[][] conflicts;
-	private final File solutionFile;
 
 	/**
 	 * Create object representing problem data.
@@ -40,10 +40,6 @@ class Data {
 		nStu = readStudents(sStu);
 
 		buildConflicts();
-		orderExm = Data.getInstance().getExams().values().stream()
-				.sorted(Comparator.comparing(Exam::nConflictingExams)
-						.reversed())
-				.collect(Collectors.toCollection(TreeSet::new));
 	}
 
 	Map<Integer, Exam> getExams() {
@@ -131,8 +127,6 @@ class Data {
 	 * Build conflicts map.
 	 */
 	private void buildConflicts() {
-		//LocalTime start = LocalTime.now();
-		//System.out.println("Begin building conflict map (new method)");
 		conflicts = new int[nExm + 1][nExm + 1];
 
 		for(Student student : students.values()) {
@@ -149,21 +143,9 @@ class Data {
 			}
 		}
 
-		//int total = 0;
-//		for(int i = 1; i <= nExm; i++) {
-//			for(int j = i + 1; j <= nExm; j++) {
-//				if(conflicts[i][j] != 0) {
-//					Exam one = this.exams.get(i);
-//					Exam two = this.exams.get(j);
-//					Integer numberOfConflicts = conflicts[i][j];
-//					one.setConflictCounter(two, numberOfConflicts);
-//					two.setConflictCounter(one, numberOfConflicts);
-//					//total += 2;
-//				}
-//			}
-//		}
-
-		//System.out.println("Finished building conflict map, " + total + " conflicting exam couples, took: " + Duration.between(start, LocalTime.now()));
+		examsByConflicts = exams.values().stream()
+				.sorted(Comparator.comparing(Exam::nConflictingExams).reversed())
+				.collect(Collectors.toCollection(TreeSet::new));
 	}
 
 	/**
@@ -180,7 +162,7 @@ class Data {
 	/**
 	 * Is this solution better than the best?
 	 * If yes, save it to file.
-	 *
+	 * <p>
 	 * This calls a synchronized function internally, so for all intents and purposes it's synchronized.
 	 *
 	 * @return true if new solution is better
@@ -239,8 +221,8 @@ class Data {
 
 	}
 
-	public SortedSet<Exam> getOrderExm() {
-		return orderExm;
+	SortedSet<Exam> getExamsByConflicts() {
+		return examsByConflicts;
 	}
 }
 

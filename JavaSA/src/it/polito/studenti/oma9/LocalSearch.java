@@ -1,8 +1,6 @@
 package it.polito.studenti.oma9;
 
 import java.util.*;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 class LocalSearch {
 
@@ -32,7 +30,7 @@ class LocalSearch {
 		// For each exam
 
 
-		for(Exam exam : Data.getInstance().getOrderExm()) {
+		for(Exam exam : Data.getInstance().getExamsByConflicts()) {
 			// Get its timeslot
 			Integer initialSlot = sol.getTimeslot(exam);
 			// Assume its current slot is the best one, until proven wrong

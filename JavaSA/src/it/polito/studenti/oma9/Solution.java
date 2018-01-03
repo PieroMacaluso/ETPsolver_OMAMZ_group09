@@ -2,14 +2,11 @@ package it.polito.studenti.oma9;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 class Solution {
-	// TODO: capire se hashmap è più veloce (O(1) vs O(logn), in teoria...)
 	private Map<Exam, Integer> timetable = new HashMap<>(Data.nExm * 2, (float) 1.0);
 	private Map<Integer, Set<Exam>> time = new HashMap<>(Data.nSlo * 2, (float) 1.0);
-	//private Map<Exam, Integer> timetable = new TreeMap<>();
 	private ThreadLocalRandom rand = ThreadLocalRandom.current();
 	private double cost;
 	private static final double[] precomputedPowers = {32, 16, 8, 4, 2, 1};
@@ -61,55 +58,65 @@ class Solution {
 	 * @return true if valid, false if creation failed
 	 */
 	private boolean tryScheduleRemaining() {
-		List<Exam> sortedExams;
 		int failures = 0;
 		final int nExm = Data.nExm;
 		final int limit = nExm / 3; // TODO: explain limit
 		boolean allScheduled = false;
-		final Collection<Exam> allExams = Data.getInstance().getExams().values();
+		// Put all not-yet-scheduled exams into a list, we'll need to sort them...
+		List<Exam> unscheduledExams = new ArrayList<>(Data.nExm + 1);
+		Data.getInstance().getExams().values().stream().filter((Exam exam) -> !this.isScheduled(exam)).forEachOrdered(unscheduledExams::add);
+		// ...with this comparator: by number of unavailable timeslots (ascending) and by number of conflicting exams (ascending)
+		// This should put exams that are more difficult to schedule at the end of the list
+		Comparator<Exam> comparator = Comparator.comparing(this::countUnavailableTimeslotsCached).thenComparing(Exam::nConflictingExams);
 
+		// Nothing to schedule, nothing to do
+		if(unscheduledExams.size() <= 0) {
+			System.out.println(Thread.currentThread().getName() + " pointless rescheduling");
+			return true;
+		}
+
+		// Until all exams have been scheduled
 		while(!allScheduled) {
+			// If too many exams were unschedulable, return
 			if(failures > limit) {
 				return false;
 			}
 
-			if(timetable.size() >= nExm) {
-				// Should never be >, actually
-				// Should never happen at all, really: createNeighbor now checks if anything was unscheduled before rescheduling
-				System.out.println(Thread.currentThread().getName() + " pointless rescheduling");
-				return true;
-			}
-
+			// Reset cache, since it depends on solution not changing and it probably has changed from last run
 			resetUnavailableTimeslotCache();
 
-			sortedExams = allExams.stream()
-					.filter((Exam exam) -> !this.isScheduled(exam))
-					.sorted(Comparator.comparing(this::countUnavailableTimeslotsCached)
-							.thenComparing(Exam::nConflictingExams)
-							.reversed())
-					.collect(Collectors.toList());
+			// Sort all not-yet-scheduled exams. This should do about n·log(n) comparisons, so 2·n·log(n) calls to this::countUnavailableTimeslots).
+			// That method is relatively slow and there are just n exams, so by using a caching layer (this::countUnavailableTimeslotsCached)
+			// we can call countUnavailableTimeslots just n times and get a (much faster) cache hit the remaining times.
+			unscheduledExams.sort(comparator);
 
+			// Reset cache again, to avoid using it accidentally and to save some memory
 			resetUnavailableTimeslotCache();
 
-			if(sortedExams.size() == 0) {
-				return true;
-			}
-
-			Exam candidate = sortedExams.get(0);
+			// Pick last exam from list and see where it could be placed
+			int last = unscheduledExams.size() - 1;
+			Exam candidate = unscheduledExams.get(last);
 			Set<Integer> availableTimeslots = this.getAvailableTimeslots(candidate);
 
 			if(availableTimeslots.isEmpty()) {
-				// System.out.println("No slots available");
-				failures++;
+				// If answer is "nowhere", unschedule every conflicting exam and retry
 				for(Exam conflicting : candidate.conflicts) {
 					if(this.isScheduled(conflicting)) {
 						this.unschedule(conflicting);
+						unscheduledExams.add(conflicting);
 					}
 				}
+				failures++;
 			} else {
+				// If there are available slots, choose one at random
 				this.scheduleRand(candidate, availableTimeslots);
-				if(sortedExams.size() <= 1) {
+				// Was that the last exam to schedule?
+				if(last <= 0) {
+					// Done!
 					allScheduled = true;
+				} else {
+					// Remove it.
+					unscheduledExams.remove(last);
 				}
 			}
 
