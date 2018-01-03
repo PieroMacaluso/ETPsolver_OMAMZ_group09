@@ -1,6 +1,8 @@
 package it.polito.studenti.oma9;
 
 import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 class LocalSearch {
 
@@ -10,7 +12,7 @@ class LocalSearch {
 	/**
 	 * Deep optimization.
 	 *
-	 * @param sol start from there
+	 * @param sol   start from there
 	 * @param delta keep improving only if improvement is greater than this
 	 */
 	@SuppressWarnings("SameParameterValue")
@@ -28,7 +30,9 @@ class LocalSearch {
 
 	private static double optimizeOnce(Solution sol) {
 		// For each exam
-		for(Exam exam : Data.getInstance().getExams().values()) {
+
+
+		for(Exam exam : Data.getInstance().getOrderExm()) {
 			// Get its timeslot
 			Integer initialSlot = sol.getTimeslot(exam);
 			// Assume its current slot is the best one, until proven wrong

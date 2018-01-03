@@ -4,9 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.Collectors;
 
 class Data {
 	private static Data instance;
@@ -16,6 +15,7 @@ class Data {
 	static int nSlo;
 	private final Map<Integer, Student> students = new HashMap<>();
 	private final Map<Integer, Exam> exams = new HashMap<>();
+	private final SortedSet<Exam> orderExm;
 	private int[][] conflicts;
 	private final File solutionFile;
 
@@ -40,6 +40,10 @@ class Data {
 		nStu = readStudents(sStu);
 
 		buildConflicts();
+		orderExm = Data.getInstance().getExams().values().stream()
+				.sorted(Comparator.comparing(Exam::nConflictingExams)
+						.reversed())
+				.collect(Collectors.toCollection(TreeSet::new));
 	}
 
 	Map<Integer, Exam> getExams() {
@@ -233,6 +237,10 @@ class Data {
 			throw new RuntimeException();
 		}
 
+	}
+
+	public SortedSet<Exam> getOrderExm() {
+		return orderExm;
 	}
 }
 
