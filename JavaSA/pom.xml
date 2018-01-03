@@ -81,11 +81,11 @@
                             </jre>
                             <versionInfo>
                                 <fileVersion>1.0.0.0</fileVersion>
-                                <txtFileVersion>txt file version?</txtFileVersion>
+                                <txtFileVersion>1.0</txtFileVersion>
                                 <fileDescription>ETPsolver_OMAMZ_group09</fileDescription>
                                 <copyright>ETPsolver_OMAMZ_group09</copyright>
                                 <productVersion>1.0.0.0</productVersion>
-                                <txtProductVersion>txt product version</txtProductVersion>
+                                <txtProductVersion>1.0</txtProductVersion>
                                 <productName>ETPsolver_OMAMZ_group09</productName>
                                 <internalName>ETPsolver_OMAMZ_group09</internalName>
                                 <originalFilename>ETPsolver_OMAMZ_group09.exe</originalFilename>
