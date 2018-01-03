@@ -15,7 +15,7 @@ class Data {
 	private final File solutionFile;
 	private final Map<Integer, Student> students = new HashMap<>();
 	private final Map<Integer, Exam> exams = new HashMap<>();
-	private final List<Exam> examsByConflicts = new ArrayList<>(100);
+	private final List<Exam> examsByConflicts;
 	private int[][] conflicts;
 
 	/**
@@ -38,6 +38,7 @@ class Data {
 		nExm = readExams(sExm);
 		nStu = readStudents(sStu);
 
+		examsByConflicts =  new ArrayList<>(nExm + 1);
 		buildConflicts();
 	}
 
