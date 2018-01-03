@@ -1,6 +1,7 @@
 package it.polito.studenti.oma9;
 
 import java.io.FileNotFoundException;
+import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
@@ -68,5 +69,6 @@ public class Main {
 		}
 		// Print final solution
 		System.out.println("Final solution: " + Data.getInstance().getBest());
+		System.out.println("Elapsed time: " + Duration.between(start, LocalTime.now()));
 	}
 }
