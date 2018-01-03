@@ -39,4 +39,9 @@ class Exam implements Comparable<Exam> {
 	public int compareTo(Exam exam) {
 		return this.id - exam.id;
 	}
+
+	@Override
+	public String toString() {
+		return Integer.toString(this.id);
+	}
 }

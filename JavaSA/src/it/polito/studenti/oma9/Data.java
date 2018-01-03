@@ -15,8 +15,9 @@ class Data {
 	private final File solutionFile;
 	private final Map<Integer, Student> students = new HashMap<>();
 	private final Map<Integer, Exam> exams = new HashMap<>();
+	private final Map<Exam, Integer> temp = new HashMap<>();
 	private final List<Exam> examsByConflicts;
-	private int[][] conflicts;
+	private final int[][] conflicts;
 
 	/**
 	 * Create object representing problem data.
@@ -39,7 +40,9 @@ class Data {
 		nStu = readStudents(sStu);
 
 		examsByConflicts =  new ArrayList<>(nExm + 1);
+		conflicts = new int[nExm + 1][nExm + 1];
 		buildConflicts();
+		buildExamsByConflicts();
 	}
 
 	Map<Integer, Exam> getExams() {
@@ -126,8 +129,6 @@ class Data {
 	 * Build conflicts map.
 	 */
 	private void buildConflicts() {
-		conflicts = new int[nExm + 1][nExm + 1];
-
 		for(Student student : students.values()) {
 			for(Exam exam : student.getExams().values()) {
 				for(Exam other : student.getExams().values()) {
@@ -141,9 +142,39 @@ class Data {
 				}
 			}
 		}
+	}
 
+	private void buildExamsByConflicts() {
 		examsByConflicts.addAll(exams.values());
 		examsByConflicts.sort(Comparator.comparing(Exam::nConflictingExams).reversed());
+		//examsByConflicts.sort(this::conflictComparator);
+	}
+
+	private int conflictComparator(Exam one, Exam two) {
+		if(one == two) {
+			return 1;
+		}
+
+		int conflictsOne = temp.getOrDefault(one, -1);
+		int conflictsTwo = temp.getOrDefault(two, -1);
+
+		if(conflictsOne == -1) {
+			conflictsOne = 0;
+			for(Exam other : one.conflicts) {
+				conflictsOne += conflictsBetween(one, other);
+			}
+			temp.put(one, conflictsOne);
+		}
+
+		if(conflictsTwo == -1) {
+			conflictsTwo = 0;
+			for(Exam other : one.conflicts) {
+				conflictsTwo += conflictsBetween(one, other);
+			}
+			temp.put(two, conflictsTwo);
+		}
+
+		return conflictsTwo - conflictsOne;
 	}
 
 	/**
