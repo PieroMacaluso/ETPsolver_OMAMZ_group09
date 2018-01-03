@@ -68,7 +68,7 @@ public class Main {
 			System.out.println("Main thread interrupted, terminating...");
 		}
 		// Print final solution
-		System.out.println("Final solution: " + Data.getInstance().getBest());
 		System.out.println("Elapsed time: " + Duration.between(start, LocalTime.now()));
+		System.out.println("Final solution: " + Data.getInstance().getBest());
 	}
 }
