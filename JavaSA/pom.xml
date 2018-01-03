@@ -55,6 +55,45 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                <artifactId>launch4j-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>l4j-clui</id>
+                        <phase>package</phase>
+                        <goals><goal>launch4j</goal></goals>
+                        <configuration>
+                            <headerType>console</headerType>
+                            <outfile>target/ETPsolver_OMAMZ_group09.exe</outfile>
+                            <jar>target/ETPsolver_OMAMZ_group09.jar</jar>
+                            <errTitle>encc</errTitle>
+                            <classPath>
+                                <mainClass>it.polito.studenti.oma9.Main</mainClass>
+                                <addDependencies>false</addDependencies>
+                                <preCp>anything</preCp>
+                            </classPath>
+                            <jre>
+                                <minVersion>1.8.0</minVersion>
+                                <opts>
+                                    <opt>-Djava.endorsed.dirs=./endorsed</opt>
+                                </opts>
+                            </jre>
+                            <versionInfo>
+                                <fileVersion>1.0.0.0</fileVersion>
+                                <txtFileVersion>txt file version?</txtFileVersion>
+                                <fileDescription>ETPsolver_OMAMZ_group09</fileDescription>
+                                <copyright>ETPsolver_OMAMZ_group09</copyright>
+                                <productVersion>1.0.0.0</productVersion>
+                                <txtProductVersion>txt product version</txtProductVersion>
+                                <productName>ETPsolver_OMAMZ_group09</productName>
+                                <internalName>ETPsolver_OMAMZ_group09</internalName>
+                                <originalFilename>ETPsolver_OMAMZ_group09.exe</originalFilename>
+                            </versionInfo>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
