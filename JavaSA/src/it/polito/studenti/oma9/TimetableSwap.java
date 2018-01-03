@@ -13,7 +13,7 @@ class TimetableSwap {
 				Solution newSol = new Solution(sol);
 				swapTimeslots(newSol, i, j);
 				if(newSol.solutionCost() < sol.solutionCost()) {
-					sol = new Solution(newSol);
+					sol = newSol;
 				}
 			}
 		}
@@ -27,12 +27,9 @@ class TimetableSwap {
 			sol.unschedule(e);
 		for(Exam e : exj)
 			sol.unschedule(e);
-
 		for(Exam e : exi)
 			sol.schedule(e, j);
 		for(Exam e : exj)
 			sol.schedule(e, i);
-
-
 	}
 }

@@ -44,7 +44,7 @@ class SimulatedAnnealing {
 			// Using relativeTemperature gives consistently better solutions in instance 4 by around 1%, from limited testing
 			Solution neighbor = current.createNeighbor(0.3 * relativeTemperature);
 			LocalSearch.optimize(neighbor, 0.1 * relativeTemperature); // TODO: explain 0.1 (10%)
-			//neighbor = TimetableSwap.optimize(neighbor);
+			neighbor = TimetableSwap.optimize(neighbor);
 			data.compareAndUpdateBest(neighbor);
 			neighborCost = neighbor.solutionCost();
 

@@ -28,8 +28,6 @@ class LocalSearch {
 
 	private static double optimizeOnce(Solution sol) {
 		// For each exam
-
-
 		for(Exam exam : Data.getInstance().getExamsByConflicts()) {
 			// Get its timeslot
 			Integer initialSlot = sol.getTimeslot(exam);

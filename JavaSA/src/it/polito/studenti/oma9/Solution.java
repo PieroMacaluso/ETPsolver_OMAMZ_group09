@@ -2,11 +2,10 @@ package it.polito.studenti.oma9;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 class Solution {
 	private Map<Exam, Integer> timetable = new HashMap<>(Data.nExm * 2, (float) 1.0);
-	private Map<Integer, Set<Exam>> time = new HashMap<>(Data.nSlo * 2, (float) 1.0);
+	private List<Set<Exam>> reverseTimetable = new ArrayList<>(Data.nSlo + 2);
 	private ThreadLocalRandom rand = ThreadLocalRandom.current();
 	private double cost;
 	private static final double[] precomputedPowers = {32, 16, 8, 4, 2, 1};
@@ -18,26 +17,27 @@ class Solution {
 	 * @param other solution
 	 */
 	Solution(Solution other) {
-		createTime();
-		for(Map.Entry<Integer, Set<Exam>> entry : other.time.entrySet()) {
-			time.get(entry.getKey()).addAll(entry.getValue());
-		}
 		timetable.putAll(other.timetable);
 		cost = other.cost;
 
+		initializeReverseTimetable();
+		for(int i = 0; i <= Data.nSlo; i++) {
+			reverseTimetable.get(i).addAll(other.reverseTimetable.get(i));
+		}
 	}
 
 	/**
 	 * Create a new, random, feasible solution.
 	 */
 	Solution() {
-		createTime();
+		initializeReverseTimetable();
 		createSolution();
 	}
 
-	private void createTime() {
+	private void initializeReverseTimetable() {
+		reverseTimetable.add(new HashSet<>());
 		for(int i = 1; i <= Data.nSlo; i++) {
-			time.put(i, new HashSet<>());
+			reverseTimetable.add(new HashSet<>());
 		}
 	}
 
@@ -132,7 +132,7 @@ class Solution {
 	 */
 	void schedule(Exam exam, int ts) {
 		timetable.put(exam, ts);
-		time.get(ts).add(exam);
+		reverseTimetable.get(ts).add(exam);
 		cost += examCost(exam);
 	}
 
@@ -143,7 +143,7 @@ class Solution {
 	 */
 	void unschedule(Exam exam) {
 		cost -= examCost(exam);
-		time.get(this.getTimeslot(exam)).remove(exam);
+		reverseTimetable.get(this.getTimeslot(exam)).remove(exam);
 		timetable.remove(exam);
 	}
 
@@ -387,7 +387,7 @@ class Solution {
 		return timetable.entrySet();
 	}
 
-	public Set<Exam> getExamsInSlot(Integer slo) {
-		return time.get(slo);
+	Set<Exam> getExamsInSlot(Integer slo) {
+		return reverseTimetable.get(slo);
 	}
 }
