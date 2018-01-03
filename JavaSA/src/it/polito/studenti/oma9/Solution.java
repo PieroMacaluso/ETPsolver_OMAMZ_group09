@@ -2,11 +2,13 @@ package it.polito.studenti.oma9;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 class Solution {
 	// TODO: capire se hashmap è più veloce (O(1) vs O(logn), in teoria...)
 	private Map<Exam, Integer> timetable = new HashMap<>(Data.nExm * 2, (float) 1.0);
+	private Map<Integer, Set<Exam>> time = new HashMap<>(Data.nSlo * 2, (float) 1.0);
 	//private Map<Exam, Integer> timetable = new TreeMap<>();
 	private ThreadLocalRandom rand = ThreadLocalRandom.current();
 	private double cost;
@@ -19,15 +21,27 @@ class Solution {
 	 * @param other solution
 	 */
 	Solution(Solution other) {
+		createTime();
+		for(Map.Entry<Integer, Set<Exam>> entry : other.time.entrySet()) {
+			time.get(entry.getKey()).addAll(entry.getValue());
+		}
 		timetable.putAll(other.timetable);
 		cost = other.cost;
+
 	}
 
 	/**
 	 * Create a new, random, feasible solution.
 	 */
 	Solution() {
+		createTime();
 		createSolution();
+	}
+
+	private void createTime() {
+		for(int i = 1; i <= Data.nSlo; i++) {
+			time.put(i, new HashSet<>());
+		}
 	}
 
 	/**
@@ -111,6 +125,7 @@ class Solution {
 	 */
 	void schedule(Exam exam, int ts) {
 		timetable.put(exam, ts);
+		time.get(ts).add(exam);
 		cost += examCost(exam);
 	}
 
@@ -121,6 +136,7 @@ class Solution {
 	 */
 	void unschedule(Exam exam) {
 		cost -= examCost(exam);
+		time.get(this.getTimeslot(exam)).remove(exam);
 		timetable.remove(exam);
 	}
 
@@ -362,5 +378,9 @@ class Solution {
 
 	Iterable<? extends Map.Entry<Exam, Integer>> export() {
 		return timetable.entrySet();
+	}
+
+	public Set<Exam> getExamsInSlot(Integer slo) {
+		return time.get(slo);
 	}
 }
