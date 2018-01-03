@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 class Data {
 	private static Data instance;
@@ -16,7 +15,7 @@ class Data {
 	private final File solutionFile;
 	private final Map<Integer, Student> students = new HashMap<>();
 	private final Map<Integer, Exam> exams = new HashMap<>();
-	private SortedSet<Exam> examsByConflicts;
+	private final List<Exam> examsByConflicts = new ArrayList<>(100);
 	private int[][] conflicts;
 
 	/**
@@ -122,7 +121,6 @@ class Data {
 		return Integer.parseInt(line);
 	}
 
-
 	/**
 	 * Build conflicts map.
 	 */
@@ -143,9 +141,8 @@ class Data {
 			}
 		}
 
-		examsByConflicts = exams.values().stream()
-				.sorted(Comparator.comparing(Exam::nConflictingExams).reversed())
-				.collect(Collectors.toCollection(TreeSet::new));
+		examsByConflicts.addAll(exams.values());
+		examsByConflicts.sort(Comparator.comparing(Exam::nConflictingExams).reversed());
 	}
 
 	/**
@@ -221,7 +218,7 @@ class Data {
 
 	}
 
-	SortedSet<Exam> getExamsByConflicts() {
+	List<Exam> getExamsByConflicts() {
 		return examsByConflicts;
 	}
 }
