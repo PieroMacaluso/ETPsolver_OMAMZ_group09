@@ -51,7 +51,7 @@ public class Main {
 		endTime = start.plus(seconds, ChronoUnit.SECONDS);
 		int cores = Runtime.getRuntime().availableProcessors();
 		//int cores = 1;
-		System.out.println("Running " + cores + " threads...");
+//		System.out.println("Running " + cores + " threads...");
 		workers = new ArrayList<>(cores);
 		for(int i = 0; i < cores; i++) {
 			Thread worker = new Thread(new Solver(endTime));
@@ -68,7 +68,7 @@ public class Main {
 			System.out.println("Main thread interrupted, terminating...");
 		}
 		// Print final solution
-		System.out.println("Elapsed time: " + Duration.between(start, LocalTime.now()));
-		System.out.println("Final solution: " + Data.getInstance().getBest());
+//		System.out.println("Elapsed time: " + Duration.between(start, LocalTime.now()));
+		System.out.println(/*"Final solution: " + */Data.getInstance().getBest());
 	}
 }
