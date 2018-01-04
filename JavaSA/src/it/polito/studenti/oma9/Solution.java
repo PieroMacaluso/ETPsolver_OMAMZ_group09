@@ -24,6 +24,7 @@ class Solution {
 		for(int i = 1; i <= Data.nSlo; i++) {
 			reverseTimetable.get(i).addAll(other.reverseTimetable.get(i));
 		}
+		verificaSchifo();
 	}
 
 	/**
@@ -35,10 +36,11 @@ class Solution {
 			clearSolution();
 			valid = tryScheduleRemaining();
 		}
+		verificaSchifo();
 	}
 
 	/**
-	 * Deletes timetable and reverse timetable and initialized them again, effectively clearing current solution
+	 * Deletes timetable and reverse timetable and initializes them again, effectively clearing current solution
 	 */
 	private void clearSolution() {
 		timetable.clear();
@@ -65,9 +67,11 @@ class Solution {
 		final int nExm = Data.nExm;
 		final int limit = nExm / 3; // TODO: explain limit
 		boolean allScheduled = false;
-		// Put all not-yet-scheduled exams into a list, we'll need to sort them...
+		// Put all not-yet-scheduled exams into a list (and a set for faster lookups), we'll need to sort them...
 		List<Exam> unscheduledExams = new ArrayList<>(Data.nExm + 1);
-		Data.getInstance().getExams().values().stream().filter((Exam exam) -> !this.isScheduled(exam)).forEachOrdered(unscheduledExams::add);
+		Set<Exam> unscheduledExamsSet = new HashSet<>(Data.nExm * 2, (float) 1.0);
+		Data.getInstance().getExams().values().stream().filter((Exam exam) -> !this.isScheduled(exam)).forEach(unscheduledExams::add);
+		unscheduledExamsSet.addAll(unscheduledExams);
 		// ...with this comparator: by number of unavailable timeslots (ascending) and by number of conflicting exams (ascending)
 		// This should put exams that are more difficult to schedule at the end of the list
 		Comparator<Exam> comparator = Comparator.comparing(this::countUnavailableTimeslotsCached).thenComparing(Exam::nConflictingExams);
@@ -104,7 +108,7 @@ class Solution {
 			if(availableTimeslots.isEmpty()) {
 				// If answer is "nowhere", unschedule every conflicting exam and retry
 				for(Exam conflicting : candidate.conflicts) {
-					if(this.isScheduled(conflicting)) {
+					if(!unscheduledExamsSet.contains(conflicting) && this.isScheduled(conflicting)) {
 						this.unschedule(conflicting);
 						unscheduledExams.add(conflicting);
 					}
@@ -120,6 +124,7 @@ class Solution {
 				} else {
 					// Remove it.
 					unscheduledExams.remove(last);
+					unscheduledExamsSet.remove(candidate);
 				}
 			}
 
@@ -361,13 +366,15 @@ class Solution {
 		// TODO: se la % è bassa c'è il rischio che unscheduli 2 esami incastratissimi che ci stanno solo in quel buco e subito ricrea la stessa soluzione? (sì)
 		// l'alternativa facile è NON far dipendere la % dalla temperatura, com'era prima...
 		if(percentage < 0.1) {
-			//System.out.printf(Thread.currentThread().getName() + " changing percentage to 5%% (from %4.2f)...\n", percentage*100);
+			//System.out.printf(Thread.currentThread().getName() + " changing percentage to 10%% (from %4.2f)...\n", percentage*100);
 			percentage = 0.1;
 		}
 		while(!done) {
 			neighbor = new Solution(this);
 			done = neighbor.unschedulePercentage(percentage) || neighbor.tryScheduleRemaining();
-			if(!done) System.out.println(Thread.currentThread().getName() + " retrying neighbor generation...");
+			if(!done) {
+				System.out.println(Thread.currentThread().getName() + " retrying neighbor generation...");
+			}
 		}
 
 		return neighbor;
@@ -407,6 +414,21 @@ class Solution {
 	}
 
 	Set<Exam> getExamsInSlot(Integer timeslot) {
+		if(!verificaSchifo()) {
+			System.out.println("SCHIFO!");
+		}
 		return reverseTimetable.get(timeslot);
+	}
+
+	private boolean verificaSchifo() {
+		int count = 0;
+		for(int i = 1; i <= Data.nSlo; i++) {
+			count += reverseTimetable.get(i).size();
+		}
+		if(count == Data.nExm) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }
