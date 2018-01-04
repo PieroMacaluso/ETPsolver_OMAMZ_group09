@@ -138,8 +138,16 @@ class Solution {
 		reverseTimetable.get(ts).add(exam);
 		cost += examCost(exam);
 
-		if(!) {
-			System.out.println("MISMATCH SCHEDULE");
+		for(int i = 1; i < reverseTimetable.size(); i++) {
+			if(i == ts) {
+				continue;
+			}
+			for(Exam e : reverseTimetable.get(i)) {
+				if(e == exam) {
+					System.out.println("MISMATCH SCHEDULE");
+				}
+			}
+			break;
 		}
 	}
 
