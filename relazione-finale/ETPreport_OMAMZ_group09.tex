@@ -85,9 +85,33 @@
 	
 	An attempt was made to introduce nondeterminism in the previously mentioned greedy algorithm. This was achieved by randomizing the order in which time slots are examined: again, this never yielded a single feasible solution, even after hundreds of runs.
 	
-	\subsection{FFS Algorithm}
+	\subsection{Greedy 3 (``Timeslots and Conflicts'')}
 	
-	\dots
+	This time we tried to give a profitable order to the exams. Initially, we decided to order them by the number of conflicts at the start of the algorithm and to give them a random timeslot from the one available and feasible for the current exam. This solution was simple but led us to a solution only with \textit{instance01}, so we decided to order the exams in another way: first by the number of unavailable timeslots (timeslots with exams in conflict) and then by the number of conflicts. 
+	
+	\begin{algorithm}[H]
+		%\KwData{dati}
+		%\KwResult{risultato}
+		%initialization\;
+		create a list of ordered exam by (number of unavailable slot, number of conflicts)\;
+		\While{there are exam to be scheduled in the list}{
+			set \textit{E} as the first exam in the ordered list\;
+			set \textit{T} as a random timeslot from the feasible ones\;
+			assign E to T\;
+			remove E from the list\;
+			reorder list of exam\;
+		}	
+		\caption{Algorithm with Timeslots and Conflicts order}
+	\end{algorithm}
+
+	This was a great step forward, but there was still no solutions from the other instances.
+
+	
+	\subsection{Greedy 4 (``First Feasible Solution Creation'')}
+	
+	\subsection{Greedy 5 (``Cached First Feasible Solution Creation'')}
+	
+	
 	
 	\section{Further solutions generation}
 	
