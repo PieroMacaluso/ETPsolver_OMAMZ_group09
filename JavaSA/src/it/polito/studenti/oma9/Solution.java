@@ -20,8 +20,8 @@ class Solution {
 		timetable.putAll(other.timetable);
 		cost = other.cost;
 
-		initializeReverseTimetable();
-		for(int i = 0; i <= Data.nSlo; i++) {
+		clearReverseTimetable();
+		for(int i = 1; i <= Data.nSlo; i++) {
 			reverseTimetable.get(i).addAll(other.reverseTimetable.get(i));
 		}
 	}
@@ -30,31 +30,34 @@ class Solution {
 	 * Create a new, random, feasible solution.
 	 */
 	Solution() {
-		initializeReverseTimetable();
-		createSolution();
+		boolean valid = false;
+		while(!valid) {
+			clearSolution();
+			valid = tryScheduleRemaining();
+		}
 	}
 
-	private void initializeReverseTimetable() {
-		reverseTimetable.add(new HashSet<>());
+	/**
+	 * Deletes timetable and reverse timetable and initialized them again, effectively clearing current solution
+	 */
+	private void clearSolution() {
+		timetable.clear();
+		clearReverseTimetable();
+	}
+
+	/**
+	 * Clears reverse timetable and initializes it again
+	 */
+	private void clearReverseTimetable() {
+		reverseTimetable.add(null);
 		for(int i = 1; i <= Data.nSlo; i++) {
 			reverseTimetable.add(new HashSet<>());
 		}
 	}
 
 	/**
-	 * Schedule all remaining exams and make sure the solution will be feasible.
-	 */
-	private void createSolution() {
-		boolean valid = false;
-		while(!valid) {
-			valid = tryScheduleRemaining();
-		}
-	}
-
-	/**
 	 * Attempt to schedule all remaining exams, to create a feasible solution
 	 *
-	 * @see Solution#createSolution()
 	 * @return true if valid, false if creation failed
 	 */
 	private boolean tryScheduleRemaining() {
@@ -134,6 +137,10 @@ class Solution {
 		timetable.put(exam, ts);
 		reverseTimetable.get(ts).add(exam);
 		cost += examCost(exam);
+
+		if(!) {
+			System.out.println("MISMATCH SCHEDULE");
+		}
 	}
 
 	/**
@@ -142,6 +149,10 @@ class Solution {
 	 * @param exam exam
 	 */
 	void unschedule(Exam exam) {
+		if(!reverseTimetable.get(this.getTimeslot(exam)).contains(exam)) {
+			System.out.println("MISMATCH UNSCHEDULE");
+		}
+
 		cost -= examCost(exam);
 		reverseTimetable.get(this.getTimeslot(exam)).remove(exam);
 		timetable.remove(exam);
@@ -348,7 +359,7 @@ class Solution {
 		while(!done) {
 			neighbor = new Solution(this);
 			done = neighbor.unschedulePercentage(percentage) || neighbor.tryScheduleRemaining();
-			//if(!done) System.out.println(Thread.currentThread().getName() + " retrying neighbor generation...");
+			if(!done) System.out.println(Thread.currentThread().getName() + " retrying neighbor generation...");
 		}
 
 		return neighbor;

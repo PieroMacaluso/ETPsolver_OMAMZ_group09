@@ -20,16 +20,16 @@ class TimetableSwap {
 		return sol;
 	}
 
-	private static void swapTimeslots(Solution sol, Integer i, Integer j) {
-		Set<Exam> exi = new HashSet<>(sol.getExamsInSlot(i));
-		Set<Exam> exj = new HashSet<>(sol.getExamsInSlot(j));
-		for(Exam e : exi)
-			sol.unschedule(e);
-		for(Exam e : exj)
-			sol.unschedule(e);
-		for(Exam e : exi)
-			sol.schedule(e, j);
-		for(Exam e : exj)
-			sol.schedule(e, i);
+	private static void swapTimeslots(Solution solution, Integer ts1, Integer ts2) {
+		Set<Exam> examsTs1 = new HashSet<>(solution.getExamsInSlot(ts1));
+		Set<Exam> examsTs2 = new HashSet<>(solution.getExamsInSlot(ts2));
+		for(Exam exam : examsTs1)
+			solution.unschedule(exam);
+		for(Exam exam : examsTs2)
+			solution.unschedule(exam);
+		for(Exam exam : examsTs1)
+			solution.schedule(exam, ts2);
+		for(Exam exam : examsTs2)
+			solution.schedule(exam, ts1);
 	}
 }
