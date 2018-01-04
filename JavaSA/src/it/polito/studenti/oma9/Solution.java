@@ -9,7 +9,7 @@ class Solution {
 	private ThreadLocalRandom rand = ThreadLocalRandom.current();
 	private double cost;
 	private static final double[] precomputedPowers = {32, 16, 8, 4, 2, 1};
-	private final Map<Exam, Integer> unavailableTimeslots = new HashMap<>(500);
+	private final Map<Exam, Integer> unavailableTimeslots = new HashMap<>(Data.nExm * 2,  (float) 1.0);
 
 	/**
 	 * Clone another solution, basically.
@@ -24,7 +24,6 @@ class Solution {
 		for(int i = 1; i <= Data.nSlo; i++) {
 			reverseTimetable.get(i).addAll(other.reverseTimetable.get(i));
 		}
-		verificaSchifo();
 	}
 
 	/**
@@ -36,7 +35,6 @@ class Solution {
 			clearSolution();
 			valid = tryScheduleRemaining();
 		}
-		verificaSchifo();
 	}
 
 	/**
@@ -51,6 +49,7 @@ class Solution {
 	 * Clears reverse timetable and initializes it again
 	 */
 	private void clearReverseTimetable() {
+		reverseTimetable.clear();
 		reverseTimetable.add(null);
 		for(int i = 1; i <= Data.nSlo; i++) {
 			reverseTimetable.add(new HashSet<>());
@@ -142,18 +141,6 @@ class Solution {
 		timetable.put(exam, ts);
 		reverseTimetable.get(ts).add(exam);
 		cost += examCost(exam);
-
-		for(int i = 1; i < reverseTimetable.size(); i++) {
-			if(i == ts) {
-				continue;
-			}
-			for(Exam e : reverseTimetable.get(i)) {
-				if(e == exam) {
-					System.out.println("MISMATCH SCHEDULE");
-				}
-			}
-			break;
-		}
 	}
 
 	/**
@@ -162,10 +149,6 @@ class Solution {
 	 * @param exam exam
 	 */
 	void unschedule(Exam exam) {
-		if(!reverseTimetable.get(this.getTimeslot(exam)).contains(exam)) {
-			System.out.println("MISMATCH UNSCHEDULE");
-		}
-
 		cost -= examCost(exam);
 		reverseTimetable.get(this.getTimeslot(exam)).remove(exam);
 		timetable.remove(exam);
@@ -268,6 +251,7 @@ class Solution {
 	private void scheduleRand(Exam e, Set<Integer> availableTimeslots) {
 		if(availableTimeslots.size() == 0) {
 			System.out.println("WARNING: scheduleRand called with no available timeslot");
+			return;
 		}
 
 		int n = rand.nextInt(availableTimeslots.size());
@@ -414,21 +398,7 @@ class Solution {
 	}
 
 	Set<Exam> getExamsInSlot(Integer timeslot) {
-		if(!verificaSchifo()) {
-			System.out.println("SCHIFO!");
-		}
 		return reverseTimetable.get(timeslot);
 	}
 
-	private boolean verificaSchifo() {
-		int count = 0;
-		for(int i = 1; i <= Data.nSlo; i++) {
-			count += reverseTimetable.get(i).size();
-		}
-		if(count == Data.nExm) {
-			return true;
-		} else {
-			return false;
-		}
-	}
 }
