@@ -81,7 +81,7 @@ class Solution {
 		// Until all exams have been scheduled
 		while(!allScheduled) {
 			// If too many exams were unschedulable, return
-			if(failures > limit) {
+			if(failures >= limit) {
 				return false;
 			}
 
@@ -406,7 +406,7 @@ class Solution {
 		return timetable.entrySet();
 	}
 
-	Set<Exam> getExamsInSlot(Integer slo) {
-		return reverseTimetable.get(slo);
+	Set<Exam> getExamsInSlot(Integer timeslot) {
+		return reverseTimetable.get(timeslot);
 	}
 }
