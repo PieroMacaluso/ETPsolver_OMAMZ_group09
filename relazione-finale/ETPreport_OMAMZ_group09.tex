@@ -89,29 +89,59 @@
 	
 	This time we tried to give a profitable order to the exams. Initially, we decided to order them by the number of conflicts at the start of the algorithm and to give them a random timeslot from the one available and feasible for the current exam. This solution was simple but led us to a solution only with \textit{instance01}, so we decided to order the exams in another way: first by the number of unavailable timeslots (timeslots with exams in conflict) and then by the number of conflicts. 
 	
-	\begin{algorithm}[H]
-		%\KwData{dati}
-		%\KwResult{risultato}
-		%initialization\;
-		create a list of ordered exam by (number of unavailable slot, number of conflicts)\;
-		\While{there are exam to be scheduled in the list}{
-			set \textit{E} as the first exam in the ordered list\;
-			set \textit{T} as a random timeslot from the feasible ones\;
-			assign E to T\;
-			remove E from the list\;
-			reorder list of exam\;
-		}	
-		\caption{Algorithm with Timeslots and Conflicts order}
-	\end{algorithm}
+%	\begin{algorithm}[H]
+%		%\KwData{dati}
+%		%\KwResult{risultato}
+%		%initialization\;
+%		create a list of ordered exam by (number of unavailable slot, number of conflicts)\;
+%		\While{there are exam to be scheduled in the list}{
+%			set \textit{E} as the first exam in the ordered list\;
+%			set \textit{T} as a random timeslot from the feasible ones\;
+%			assign E to T\;
+%			remove E from the list\;
+%			reorder list of exam\;
+%		}	
+%		\caption{Algorithm with Timeslots and Conflicts order}
+%	\end{algorithm}
 
-	This was a great step forward, but there was still no solutions from the other instances.
+	But even so, there was still no solutions from the other instances.
 
 	
 	\subsection{Greedy 4 (``First Feasible Solution Creation'')}
 	
+	With the previous algorithm, the tipping point was the absence of available and feasible timeslot for the current exam. So we decided to unschedule all the conflicting exam of the one which triggers the point of no return.
+	In order to avoid other unstable situations, we fixed a maximum number of "restarting situation": if this limit is exceeded, the algorithm restores the initial state of the solution and restart the ordered-random allocation. This was a great step forward, working with all instances. There was only one problem: in more complex instance it takes more time to get a feasible solution 
+	
+	\begin{algorithm}[H]
+		%\KwData{dati}
+		%\KwResult{risultato}
+		%initialization\;
+		save the initial state\;
+		set \textit{I} equal to 0\;
+		create a list of ordered exam by (number of unavailable slot, number of conflicts)\;
+		\While{there are exam to be scheduled in the list}{
+			\If{\textit{I} >= limit}{
+				restore previous state, block the loop and restart algorithm\;
+			}
+			set \textit{E} as the first exam in the ordered list\;
+			\If{there are feasible timeslot available}{
+				set \textit{T} as a random timeslot from the feasible ones\;
+				assign E to T\;
+				remove E from the list\;
+			}\Else{
+				Deschedule all conflicting exam of E\;
+				Increment \textit{I}				
+			}
+			reorder list of exam\;
+		}	
+		\caption{Algorithm with Timeslots and Conflicts order}
+	\end{algorithm}
+	
+	 This was a great step forward, working with all instances. There was only one problem: in more complex instance it takes more time to get a feasible solution (30 seconds).
+	
 	\subsection{Greedy 5 (``Cached First Feasible Solution Creation'')}
 	
-	
+	\dots
 	
 	\section{Further solutions generation}
 	
@@ -119,7 +149,7 @@
 	
 	We tried running a genetic algorithm implementation anyway, with ``Random'' and ``Greedy 2'' initial solutions especially. It worked fine in the test instance, reaching the optimum solution in around 5-10 iterations with single-point crossover and a mutation (assigning a random time slot to an exam) probability of $0.1$, on real instances it never produced a feasible solution, not even after thousands of iterations.
 	
-	\subsection{Simulated mutant genetic annealing of doom\texttrademark}
+	\subsection{Mutant Simulated Annealing\texttrademark}
 	
 	\dots
 	
