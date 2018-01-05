@@ -60,24 +60,25 @@
 	
 	\subsection{Greedy 1 (``Extremely Stupid Greedy'')}
 	
-	We tried to implement a very simplistic greedy algorithm:
+	We tried to implement a very simplistic greedy algorithm that iterates over each exam, finds the first available time slot by iterating over all time slots and checking conflicts, and placing it there. The aim was mainly to see what a feasible solution ``looked like''.
 	
-	\begin{algorithm}[H]
-		%\KwData{dati}
-		%\KwResult{risultato}
-		%initialization\;
-		\ForEach{exam}{
-			\ForEach{timeslot}{
-				\If{exam can be scheduled in timeslot}{
-					assign exam to timeslot\;
-					break (evaluate next exam)\;
-				}
-			}
-		}
-		\caption{The very simplistic greedy algorithm}
-	\end{algorithm}
+	%\begin{algorithm}[H]
+	%	%\KwData{dati}
+	%	%\KwResult{risultato}
+	%	%initialization\;
+	%	\
+	%	\ForEach{exam}{
+	%		\While{}{
+	%			\If{exam can be scheduled in timeslot}{
+	%				assign exam to timeslot\;
+	%				break (evaluate next exam)\;
+	%			}
+	%		}
+	%	}
+	%	\caption{The very simplistic greedy algorithm}
+	%\end{algorithm}
 
-	This never yielded a feasible solution, as when it got near the end of the exam list there were no more non-conflicting time slots available.
+	This never yielded a feasible solution for any of the real instances, as when it got near the end of the exam list there were no more non-conflicting time slots available.
 	
 	It should be noted that this algorithm is deterministic, as it always produced the same solution.
 	
@@ -87,61 +88,69 @@
 	
 	\subsection{Greedy 3 (``Timeslots and Conflicts'')}
 	
-	This time we tried to give a profitable order to the exams. Initially, we decided to order them by the number of conflicts at the start of the algorithm and to give them a random timeslot from the one available and feasible for the current exam. This solution was simple but led us to a solution only with \textit{instance01}, so we decided to order the exams in another way: first by the number of unavailable timeslots (timeslots with exams in conflict) and then by the number of conflicts. 
+	We tried sorting exams by some more meaningful criteria than their ID, and then assigning a random available time slot to each exam in that order.
 	
-%	\begin{algorithm}[H]
+	Initially we sorted them by number of conflicting exams. This solution was simple but found feasible solutions only for \textit{instance01}, so we decided to sort them first by the number of unavailable timeslots (timeslots with conflicting exams already scheduled), then by the number of conflicts. Since the order depends on current solution (each time an exam is scheduled, the ``number of unavailable timeslots'' for some other exams change), the list needed to be sorted again at each step.
+	
+	\begin{algorithm}[H]
 %		%\KwData{dati}
 %		%\KwResult{risultato}
 %		%initialization\;
-%		create a list of ordered exam by (number of unavailable slot, number of conflicts)\;
-%		\While{there are exam to be scheduled in the list}{
-%			set \textit{E} as the first exam in the ordered list\;
-%			set \textit{T} as a random timeslot from the feasible ones\;
-%			assign E to T\;
-%			remove E from the list\;
-%			reorder list of exam\;
-%		}	
-%		\caption{Algorithm with Timeslots and Conflicts order}
-%	\end{algorithm}
+		$list \gets \text{all exams to be scheduled, sorted by }\textit{(number of unavailable slot, number of conflicts)}$\;
+		\While{$list\text{ is not empty}$}{
+			$E \gets \textit{ first element from }list$\;
+			$T \gets \textit{ random available timeslot}$\;
+			schedule $E$ in $T$\;
+			remove $E$ from $list$\;
+			sort $list$ again\;
+		}	
+		\caption{Algorithm with Timeslots and Conflicts sorting}
+	\end{algorithm}
 
-	But even so, there was still no solutions from the other instances.
-
+	But even so, there were still no feasible solutions for the other instances.
 	
 	\subsection{Greedy 4 (``First Feasible Solution Creation'')}
 	
-	With the previous algorithm, the tipping point was the absence of available and feasible timeslot for the current exam. So we decided to unschedule all the conflicting exam of the one which triggers the point of no return.
-	In order to avoid other unstable situations, we fixed a maximum number of "restarting situation": if this limit is exceeded, the algorithm restores the initial state of the solution and restart the ordered-random allocation. This was a great step forward, working with all instances. There was only one problem: in more complex instance it takes more time to get a feasible solution 
+	With the previous algorithm, the tipping point was the absence of available timeslost for the current exam when getting near the ond of the list.
+	
+	So we decided to unschedule all the conflicting exams of the current one when that situation was encountered, sort and retry scheduling them again.
+	
+	In order to avoid unstable or ``oscillating'' situations, we fixed a maximum number of ``retires'': if this limit is exceeded, the algorithm restarts from an empty solution (or from a different partial neighbor, see \ref{neighbors}). This was a great step forward, as it worked with all instances. There was only one problem: in more complex instance it takes more time to get a feasible solution.
 	
 	\begin{algorithm}[H]
 		%\KwData{dati}
 		%\KwResult{risultato}
 		%initialization\;
-		save the initial state\;
-		set \textit{I} equal to 0\;
-		create a list of ordered exam by (number of unavailable slot, number of conflicts)\;
-		\While{there are exam to be scheduled in the list}{
+		$backup \gets \text{current solution (even an empty one)}$\;
+		$sol \gets \text{current solution (even an empty one)}$\;
+		$I \gets 0$\;
+		$list \gets \text{all exams to be scheduled, sorted by }\textit{(number of unavailable slot, number of conflicts)}$\;
+		\While{$list$ is not empty}{
 			\If{\textit{I} >= limit}{
-				restore previous state, block the loop and restart algorithm\;
+				$sol \gets backup$\;
+				restart the alogithm\;
 			}
-			set \textit{E} as the first exam in the ordered list\;
-			\If{there are feasible timeslot available}{
-				set \textit{T} as a random timeslot from the feasible ones\;
-				assign E to T\;
-				remove E from the list\;
-			}\Else{
-				Deschedule all conflicting exam of E\;
-				Increment \textit{I}				
+			$E \gets \textit{ first element from }list$\;
+			$T \gets \textit{ random available timeslot}$\;
+			\eIf{$T$ is valid (not null)}{
+				schedule $E$ in $T$\;
+				remove $E$ from $list$\;
+			}{
+				\ForEach{conflicting exam $C$ of $E$}{
+					unschedule $C$\;
+				}
+				$I \gets I + 1$\;
 			}
-			reorder list of exam\;
+			sort $list$ again\;
 		}	
-		\caption{Algorithm with Timeslots and Conflicts order}
+		\caption{First Feasible Solution algorithm}
 	\end{algorithm}
 	
-	 This was a great step forward, working with all instances. There was only one problem: in more complex instance it takes more time to get a feasible solution (30 seconds).
+	 This was a great step forward, working with all instances. There was only one problem: in larger instances, like \textit{instance06}, it took a lot of time to generate an initial solution.
 	
 	\subsection{Greedy 5 (``Cached First Feasible Solution Creation'')}
 	
-	\dots
+	
 	
 	\section{Further solutions generation}
 	
