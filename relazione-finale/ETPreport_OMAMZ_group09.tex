@@ -1,5 +1,5 @@
 \documentclass[11pt, a4paper, leqno]{article}
-\usepackage[italian]{babel}
+\usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{parskip}
@@ -109,26 +109,24 @@
 
 	But even so, there were still no feasible solutions for the other instances.
 	
-	\subsection{Greedy 4 (``First Feasible Solution Creation'')}
+	\subsection{Greedy 4 (``Timeslots, Conflicts and Unscheduling'')}
 	
-	With the previous algorithm, the tipping point was the absence of available timeslost for the current exam when getting near the ond of the list.
+	With the previous algorithm, the tipping point was the absence of available timeslost for the current exam when getting near the end of the list.
 	
 	So we decided to unschedule all the conflicting exams of the current one when that situation was encountered, sort and retry scheduling them again.
 	
-	In order to avoid unstable or ``oscillating'' situations, we fixed a maximum number of ``retires'': if this limit is exceeded, the algorithm restarts from an empty solution (or from a different partial neighbor, see \ref{neighbors}). This was a great step forward, as it worked with all instances. There was only one problem: in more complex instance it takes more time to get a feasible solution.
+	In order to avoid unstable or ``oscillating'' situations, we fixed a maximum number of ``retires'': if this limit is exceeded, the algorithm returns anyway leaving an infeasible solution, which will be discarded and another attempt will be made, from a different initial solution. This was a great step forward, as it worked with all instances. There was only one problem: in more complex instance it takes more time to get a feasible solution.
 	
 	\begin{algorithm}[H]
-		%\KwData{dati}
-		%\KwResult{risultato}
-		%initialization\;
-		$backup \gets \text{current solution (even an empty one)}$\;
-		$sol \gets \text{current solution (even an empty one)}$\;
+%		$backup \gets \text{current solution (even an empty one)}$\;
+%		$sol \gets \text{current solution (even an empty one)}$\;
 		$I \gets 0$\;
 		$list \gets \text{all exams to be scheduled, sorted by }\textit{(number of unavailable slot, number of conflicts)}$\;
 		\While{$list$ is not empty}{
 			\If{\textit{I} >= limit}{
-				$sol \gets backup$\;
-				restart the alogithm\;
+				\Return{no feasible solution found}\;
+%				$sol \gets backup$\;
+%				restart the alogithm\;
 			}
 			$E \gets \textit{ first element from }list$\;
 			$T \gets \textit{ random available timeslot}$\;
@@ -142,24 +140,84 @@
 				$I \gets I + 1$\;
 			}
 			sort $list$ again\;
-		}	
+		}
+		\Return{feasible solution found}\;
 		\caption{First Feasible Solution algorithm}
 	\end{algorithm}
 	
 	 This was a great step forward, working with all instances. There was only one problem: in larger instances, like \textit{instance06}, it took a lot of time to generate an initial solution.
 	
-	\subsection{Greedy 5 (``Cached First Feasible Solution Creation'')}
+	\subsection{Greedy 5 (``Cached Timeslots, Conflicts and Unscheduling'')}
 	
+	We used a profiler multiple times to optimize the code of our program and find performance bottlenecks: while most optimizations are implementation details (e.g. using \textsc{HashMap}s with low load factors instead of \textsc{TreeMap}s), this one is almost algorithmic: when sorting $list$, the ``number of unavailable timeslots'' had to be computed each time, since it depends on which exams are currently scheduled or not.
 	
+	That required, for each exam, to iterate over its conflicting exams, checking if and were are they scheduled, which is a slow procedure.
+	
+	The problem is that, being part of a comparison function, it was run approximately $2\cdot n \log(n)$ times ($n \log(n)$ comparisons between 2 exams), $n$ being length of $list$. So we implemented a ``caching layer'' that stores the computed number of unavailable time slots in an hash map, so the slow computation is run exactly $n$ times and the remaing times a fast $\mathrm{O}(1)$ hash map access (cache hit) is used. The cache has to always be reset before sorting, since we deemed too complicated keeping it updated.
+	
+	This, coupled to a few other tweaks, brought down the average time for each run of the algorithm from 360 ms to 120 ms. Considering it was run hundreds of times in each thread, it is a considerable improvement.
+	
+	These are all successive improvements of the same algorithm, so in the end this is the only one we used.
 	
 	\section{Further solutions generation}
 	
 	\subsection{Genetic algorithm}
 	
-	We tried running a genetic algorithm implementation anyway, with ``Random'' and ``Greedy 2'' initial solutions especially. It worked fine in the test instance, reaching the optimum solution in around 5-10 iterations with single-point crossover and a mutation (assigning a random time slot to an exam) probability of $0.1$, on real instances it never produced a feasible solution, not even after thousands of iterations.
+	We tried running a genetic algorithm implementation, with ``Random'' and ``Greedy 2'' initial solutions especially. It worked fine on the test instance, reaching the optimum solution in around 5-10 iterations with single-point crossover and a mutation (assigning a random time slot to an exam) probability of $0.1$, however on real instances it never produced a feasible solution, not even after thousands of iterations.
 	
-	\subsection{Mutant Simulated Annealing\texttrademark}
+	\subsection{Simulated Annealing 1}
+	\label{neighbors}
 	
-	\dots
+	We decided to use a simulated annealing algorithm, implemented in its most standard form, as a starting point.
+	
+	\subsubsection{Temperature, probability and delta}
+	
+	Probability is calculated according to the standard formula: $exp\left(\frac{\mathrm{currentCost}-\mathrm{neighborCost}}{\mathrm{temperature}}\right)$.
+	
+	Temperature is calculated according to qualcosa, il delta according to qualcosa pure lui.
+	
+	\subsubsection{Neighbor generation}
+	
+	Nieghbor solutions are generated by taking the current (feasible) solution, unscheduling a percentage of all the exams and rescheduling them with ``Greedy 4'' and later ``Greedy 5'' algorithm.
+	
+	After some experiments, we found that unscheduling between $20\%$ and $30\%$ of exams gave the best and most consistent results, unscheduling around $10\%$ sometimes gave exceptional solution while other times some horrible ones, while unscheduling more than $50\%$ of exams was too slow on larger instances.
+	
+	Ultimately we settled on sarting from $30\%$ and decreasing the percentage as time goes on according to temperature. We also placed a lower limit of $10\%$: if calculated percentage is less than $10\%$, it is set to $10\%$. This makes the decrease nonlinear, but doesn't really seem to affect the generated solutions in a bad way and it was easy to code.
+	
+	Since the two Greedy algorithms may fail, when that happens neighbor generation is retried with a different set of unscheduled exams. This happens very rarely in all instances, but very often in \textit{instance02}.
+	
+	\subsection{Simulated annealing 2}
+	
+	We enhanced simulated annealing 1 by adding a local search on each generated solution (initial or neighbor). Our local search works like this:
+	
+	\begin{algorithm}[H]
+		%		$sol \gets \text{current solution (even an empty one)}$\;
+		$list \gets \text{all exams to be scheduled, sorted by }\textit{number of conflicts}$\;
+		\ForEach{exam $E$ in $list$}{
+			$T \gets \text{timeslot where }E\text{ is scheduled}$\;
+			$C \gets \text{cost of exam }E\text{ in }T\text{ time slot according to objective function}$\;
+			\ForEach{timeslot $T'\neq T$}{
+				$C' \gets \text{cost of exam }E\text{ in }T'\text{ time slot according to objective function}$\;
+				\If{$C'<C$}{
+					schedule $E$ in $T'$\;
+					$C \gets C'$\;
+				}
+			}
+		}
+		\caption{Local search}
+	\end{algorithm}
+
+	since each time an exam is rescheduled the cost (penalty) of any other exam may change, but the algorithm runs over exams only once, it may provide better optimizations if run multiple times. We exploited this fact by placing a minimum improvement percentage: if after each run the solution has improved by more than the minimum percentage, run local search again. The higher the required minimum improvement, the less times local search will be run.
+	
+	After some testing, we found that $10\%$ was a good starting point for initial solutions, as in most cases ran local search exactly once and yielded a solution better by around $5\%$ to $9\%$, which helped simulated annealing to get an even better solution sooner.
+	
+	We also decided to run local search on generated neighbors too, as often they were far worse than an optimized initial solution and so were never picked as ``better'' by simulated annealing. There, we started from $10\%$ and decreased the minimum improvement percentage linearly as time goes on, until almost $0\%$: in our testing we found that, even with percentages as low as $0.001\%$, local search terminates in at most 4 or 5 iterations, so there was no risk of letting the algorithm run forever.
+	
+	Our local search has linear time complexity in the number of exams, since time slots are always far less than exams, so it's very fast. Sorting exams isn't really done by this algorithm, as the values are computed when reading initial data and cannot change as the program runs.
+	
+	\subsection{Simulated annealing 3 (``Mutant Simulated Annealing\texttrademark'')}
+	
+	
+	
 	
 \end{document}
