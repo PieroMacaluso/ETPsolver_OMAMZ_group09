@@ -12,13 +12,17 @@
 \usepackage[compact]{titlesec}
 \usepackage{amsmath}
 \usepackage{amssymb}
+%\usepackage{titlesec}
 \usepackage[]{algorithm2e}
 
+%\titlespacing*{\section}{0pt}{0.5\baselineskip}{0.05\baselineskip}
+%\titlespacing*{\subsection}{0pt}{0.5\baselineskip}{0.05\baselineskip}
+
 \newcommand{\nome}[2]{
-\begin{minipage}[t]{0.185\linewidth}
-	\centering #1\par
-	\centering\small (#2)\par
-\end{minipage}
+	\begin{minipage}[t]{0.185\linewidth}
+		\centering #1\par
+		\centering\small (#2)\par
+	\end{minipage}
 }
 
 % Questo era utile per evidenziare le cose "dubbie e da correggere"
@@ -41,61 +45,28 @@
 		\nome{Ludovico Pavesi}{s246422}
 		\nome{Alberto Romano}{s254036} % 164371
 	\end{center}
-
-	\section{Building conflict matrix}
 	
-	Was done by taking each couple of exams and counting students enrolled in both. This was agonizingly slow, taking about 20 seconds on istance 6.
-	
-	Also, it was a mistake since before that it worked differently but the entire data structure has been changed multiple times.
-	
-	It was later improved by iterating over students once and, for each student, taking every couple of exams they're enrolled in and incrementing the right cell in the conflict matrix.
-	
-	Finding this performance problem (which appeared by mistake, mind you) required us to use a profiler, but nobody cares about stuff that's really useful in the real world and we'll almost surely use in future (these absurd algorithms... most of us will never see them again).
-
 	\section{Initial solution generation}
 	
 	\subsection{Random}
 	
 	Initially we tried generating random starting solutions: that is, to each exam assign a random time slot. This was very fast, but even after thousands of runs we couldn't find even a single feasible solution on ``real'' instances. It worked on the ``test'' instance, however.
 	
-	\subsection{Greedy 1 (``Extremely Stupid Greedy'')}
+	\subsection{Greedy 1.0 (``Extremely Stupid But Also Cultured Greedy'')}
 	
-	We tried to implement a very simplistic greedy algorithm that iterates over each exam, finds the first available time slot by iterating over all time slots and checking conflicts, and placing it there. The aim was mainly to see what a feasible solution ``looked like''.
-	
-	%\begin{algorithm}[H]
-	%	%\KwData{dati}
-	%	%\KwResult{risultato}
-	%	%initialization\;
-	%	\
-	%	\ForEach{exam}{
-	%		\While{}{
-	%			\If{exam can be scheduled in timeslot}{
-	%				assign exam to timeslot\;
-	%				break (evaluate next exam)\;
-	%			}
-	%		}
-	%	}
-	%	\caption{The very simplistic greedy algorithm}
-	%\end{algorithm}
-
+	We tried to implement a very simplistic greedy algorithm that iterates over each exam, picks an available (non conflicting) timeslot at random, and schedules the exam there.\\
 	This never yielded a feasible solution for any of the real instances, as when it got near the end of the exam list there were no more non-conflicting time slots available.
 	
-	It should be noted that this algorithm is deterministic, as it always produced the same solution.
+	\subsection{Greedy 2.0 (``Timeslots and Conflicts'')}
 	
-	\subsection{Greedy 2 (``Slightly More Cultured Greedy'')}
-	
-	An attempt was made to introduce nondeterminism in the previously mentioned greedy algorithm. This was achieved by randomizing the order in which time slots are examined: again, this never yielded a single feasible solution, even after hundreds of runs.
-	
-	\subsection{Greedy 3 (``Timeslots and Conflicts'')}
-	
-	We tried sorting exams by some more meaningful criteria than their ID, and then assigning a random available time slot to each exam in that order.
+	We tried sorting exams by some more meaningful criteria than their ID, and then assigning a random available timeslot to each exam in that order.
 	
 	Initially we sorted them by number of conflicting exams. This solution was simple but found feasible solutions only for \textit{instance01}, so we decided to sort them first by the number of unavailable timeslots (timeslots with conflicting exams already scheduled), then by the number of conflicts. Since the order depends on current solution (each time an exam is scheduled, the ``number of unavailable timeslots'' for some other exams change), the list needed to be sorted again at each step.
 	
 	\begin{algorithm}[H]
-%		%\KwData{dati}
-%		%\KwResult{risultato}
-%		%initialization\;
+		%		%\KwData{dati}
+		%		%\KwResult{risultato}
+		%		%initialization\;
 		$list \gets \text{all exams to be scheduled, sorted by }\textit{(number of unavailable slot, number of conflicts)}$\;
 		\While{$list\text{ is not empty}$}{
 			$E \gets \textit{ first element from }list$\;
@@ -106,27 +77,27 @@
 		}	
 		\caption{Algorithm with Timeslots and Conflicts sorting}
 	\end{algorithm}
-
+	
 	But even so, there were still no feasible solutions for the other instances.
 	
-	\subsection{Greedy 4 (``Timeslots, Conflicts and Unscheduling'')}
+	\subsection{Greedy 3.0 (``Timeslots, Conflicts and Unscheduling'')}
 	
-	With the previous algorithm, the tipping point was the absence of available timeslost for the current exam when getting near the end of the list.
+	With the previous algorithm, the tipping point was the absence of available timeslots for the current exam when getting near the end of the list.
 	
 	So we decided to unschedule all the conflicting exams of the current one when that situation was encountered, sort and retry scheduling them again.
 	
-	In order to avoid unstable or ``oscillating'' situations, we fixed a maximum number of ``retires'': if this limit is exceeded, the algorithm returns anyway leaving an infeasible solution, which will be discarded and another attempt will be made, from a different initial solution or a different neighbor (see \ref{neighbors}). This was a great step forward, as it worked with all instances. There was only one problem: in more complex instance it takes more time to get a feasible solution.
+	In order to avoid unstable or ``oscillating'' situations, we fixed a maximum number of ``retries'': if this limit is exceeded, the algorithm returns anyway leaving an infeasible solution, which will be discarded and another attempt will be made, from a different initial solution or a different neighbor (see \ref{neighbors}). This was a great step forward, as it worked with all instances. There was only one problem: in more complex instance it takes more time to get a feasible solution.
 	
 	\begin{algorithm}[H]
-%		$backup \gets \text{current solution (even an empty one)}$\;
-%		$sol \gets \text{current solution (even an empty one)}$\;
+		%		$backup \gets \text{current solution (even an empty one)}$\;
+		%		$sol \gets \text{current solution (even an empty one)}$\;
 		$retries \gets 0$\;
 		$list \gets \text{exams to be scheduled sorted by }\textit{number of unavailable slot, number of conflicting exams}$\;
 		\While{$list$ is not empty}{
 			\If{\textit{retries} > limit}{
 				\Return{no feasible solution found}\;
-%				$sol \gets backup$\;
-%				restart the alogithm\;
+				%				$sol \gets backup$\;
+				%				restart the alogithm\;
 			}
 			$E \gets \textit{ first element from }list$\;
 			$T \gets \textit{ random available timeslot}$\;
@@ -145,10 +116,8 @@
 		\caption{Timeslots, Conflicts and Unscheduling}
 	\end{algorithm}
 	
-	 This was a great step forward, working with all instances. There was only one problem: in larger instances, like \textit{instance06}, it took a lot of time to generate an initial solution.
-	 
-	 We also tried sorting by ``number of unavailable slot, then number of conflicting students'', but that seemed to yield more infeasible solutions and the feasible ones weren't any better than before.
-	
+	This was a great step forward, working with all instances. There was only one problem: in larger instances, like \textit{instance06}, it took a lot of time to generate an initial solution.\\
+	We also tried sorting by ``number of unavailable slot, then number of conflicting students'', but that seemed to yield more infeasible solutions and the feasible ones weren't any better than before.\\
 	Retries limit has been set to $\frac{1}{3}$ of total exams, which gave acceptable results from empirical testing.
 	
 	\subsection{Greedy 5 (``Cached Timeslots, Conflicts and Unscheduling'')}
@@ -210,7 +179,7 @@
 		}
 		\caption{Local search}
 	\end{algorithm}
-
+	
 	since each time an exam is rescheduled the cost (penalty) of any other exam may change, but the algorithm runs over exams only once, it may provide better optimizations if run multiple times. We exploited this fact by placing a minimum improvement percentage: if after each run the solution has improved by more than the minimum percentage, run local search again. The higher the required minimum improvement, the less times local search will be run.
 	
 	After some testing, we found that $10\%$ was a good starting point for initial solutions, as in most cases ran local search at most twice and yielded a solution better by around $5\%$ (\textit{instance01}, runs once) to $20\%$ (\textit{instance02} and \textit{instance06}, runs twice most of the times), which helped simulated annealing to get an even better solution sooner.
@@ -225,11 +194,17 @@
 	
 	It's relatively slow but solutions improve much faster and we get less failed neighbors generations, especially in dense instances like \textit{instance07} (don't know why).
 	
-	\section{Multithreading}
+	\section{Other considerations}
+	
+	\paragraph{Building conflict matrix}
+	
+	Was done by taking each couple of exams and counting students enrolled in both. This was agonizingly slow, taking about 20 seconds on \textit{instance06}. It was later improved by iterating over students once and, for each student, taking every couple of exams they're enrolled in and incrementing the right cell in the conflict matrix.
+	
+	\paragraph{Multithreading}
 	
 	Not really algorithmic, but worth mentioning: our program exploits the power of multiple cores, by running multiple independent threads. Each thread generates an initial solution and optimizes it as described until time runs out. Each time it find a solution better than its local one, it compares that with the best solution that other threads have found, and save it as the ``global'' best if it's better.
 	
-	\section{Running for longer than 30 seconds}
+	\paragraph{Running for longer than 30 seconds}
 	
 	Better solutions in around 2-3 minutes, then usually nothing relevant happens. Haven't tried for more than 5 minutes.
 	
