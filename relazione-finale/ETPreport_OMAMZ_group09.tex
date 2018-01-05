@@ -3,6 +3,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{parskip}
+\setlength{\parskip}{0.3\baselineskip}%
 \usepackage{libertine} % font bello
 \usepackage[paper=a4paper,top=1in,bottom=1.1in,right=1in,left=1in]{geometry} % margini
 
@@ -48,36 +49,35 @@
 	
 	\section{Initial solution generation}
 	
-	\subsection{Random}
+	\subsection{Initial attempts}
+	
+	\paragraph{Random}
 	
 	Initially we tried generating random starting solutions: that is, to each exam assign a random time slot. This was very fast, but even after thousands of runs we couldn't find even a single feasible solution on ``real'' instances. It worked on the ``test'' instance, however.
 	
-	\subsection{Greedy 1.0 (``Extremely Stupid But Also Cultured Greedy'')}
+	\paragraph{Greedy 1.0 (``Extremely Stupid But Also Cultured Greedy'')}
 	
-	We tried to implement a very simplistic greedy algorithm that iterates over each exam, picks an available (non conflicting) timeslot at random, and schedules the exam there.\\
+	We tried to implement a simplistic greedy algorithm that iterates over each exam, picks an available (non conflicting) timeslot at random, and schedules the exam there.\\
 	This never yielded a feasible solution for any of the real instances, as when it got near the end of the exam list there were no more non-conflicting time slots available.
 	
-	\subsection{Greedy 2.0 (``Timeslots and Conflicts'')}
+	\paragraph{Greedy 2.0 (``Timeslots and Conflicts'')}
 	
-	We tried sorting exams by some more meaningful criteria than their ID, and then assigning a random available timeslot to each exam in that order.
-	
-	Initially we sorted them by number of conflicting exams. This solution was simple but found feasible solutions only for \textit{instance01}, so we decided to sort them first by the number of unavailable timeslots (timeslots with conflicting exams already scheduled), then by the number of conflicts. Since the order depends on current solution (each time an exam is scheduled, the ``number of unavailable timeslots'' for some other exams change), the list needed to be sorted again at each step.
-	
-	\begin{algorithm}[H]
-		%		%\KwData{dati}
-		%		%\KwResult{risultato}
-		%		%initialization\;
-		$list \gets \text{all exams to be scheduled, sorted by }\textit{(number of unavailable slot, number of conflicts)}$\;
-		\While{$list\text{ is not empty}$}{
-			$E \gets \textit{ first element from }list$\;
-			$T \gets \textit{ random available timeslot}$\;
-			schedule $E$ in $T$\;
-			remove $E$ from $list$\;
-			sort $list$ again\;
-		}	
-		\caption{Algorithm with Timeslots and Conflicts sorting}
-	\end{algorithm}
-	
+	We tried sorting exams by some more meaningful criteria than their ID, i.e. by number of conflicting exams, and then assigning a random available timeslot to each exam in that order.\\
+	This solution was simple but found feasible solutions only for \textit{instance01}, so we decided to sort them first by the number of unavailable timeslots (timeslots with conflicting exams already scheduled), then by the number of conflicts. Since the order depends on current solution (each time an exam is scheduled, the ``number of unavailable timeslots'' for some other exams change), the list needed to be sorted again at each step.\\
+	%\begin{algorithm}[H]
+	%		%		%\KwData{dati}
+	%		%		%\KwResult{risultato}
+	%		%		%initialization\;
+	%		$list \gets \text{all exams to be scheduled, sorted by }\textit{(number of unavailable slot, number of conflicts)}$\;
+	%		\While{$list\text{ is not empty}$}{
+	%			$E \gets \textit{ first element from }list$\;
+	%			$T \gets \textit{ random available timeslot}$\;
+	%			schedule $E$ in $T$\;
+	%			remove $E$ from $list$\;
+	%			sort $list$ again\;
+	%		}	
+	%		\caption{Algorithm with Timeslots and Conflicts sorting}
+	%	\end{algorithm}
 	But even so, there were still no feasible solutions for the other instances.
 	
 	\subsection{Greedy 3.0 (``Timeslots, Conflicts and Unscheduling'')}
@@ -87,6 +87,14 @@
 	So we decided to unschedule all the conflicting exams of the current one when that situation was encountered, sort and retry scheduling them again.
 	
 	In order to avoid unstable or ``oscillating'' situations, we fixed a maximum number of ``retries'': if this limit is exceeded, the algorithm returns anyway leaving an infeasible solution, which will be discarded and another attempt will be made, from a different initial solution or a different neighbor (see \ref{neighbors}). This was a great step forward, as it worked with all instances. There was only one problem: in more complex instance it takes more time to get a feasible solution.
+	
+	We also tried sorting by ``number of unavailable slot, then number of conflicting students'', but that seemed to yield more infeasible solutions and the feasible ones weren't any better than before.
+	
+	Retries limit has been set to $\frac{1}{3}$ of total exams, which gave acceptable results from empirical testing.
+	
+	This algorithm was a great step forward, working with all instances. There was only one problem: in larger instances, like \textit{instance06}, it took a lot of time to generate an initial solution. With the use a profiler, we determined that the slowdown was due to the ``number of unavailable timeslots'' procedure that required, for each exam, to iterate over its conflicting exams, checking if and were are they scheduled.
+	
+	It needed to compute $n$ values, but being part of a comparison function, it was run approximately $2\cdot n \log(n)$ times ($n \log(n)$ comparisons between 2 exams), $n$ being length of $list$. We implemented a ``caching layer'' based on an \textsc{HashMap}, reset each time before sorting, and that greatly improved performance
 	
 	\begin{algorithm}[H]
 		%		$backup \gets \text{current solution (even an empty one)}$\;
@@ -116,39 +124,22 @@
 		\caption{Timeslots, Conflicts and Unscheduling}
 	\end{algorithm}
 	
-	This was a great step forward, working with all instances. There was only one problem: in larger instances, like \textit{instance06}, it took a lot of time to generate an initial solution.\\
-	We also tried sorting by ``number of unavailable slot, then number of conflicting students'', but that seemed to yield more infeasible solutions and the feasible ones weren't any better than before.\\
-	Retries limit has been set to $\frac{1}{3}$ of total exams, which gave acceptable results from empirical testing.
-	
-	\subsection{Greedy 5 (``Cached Timeslots, Conflicts and Unscheduling'')}
-	
-	We used a profiler multiple times to optimize the code of our program and find performance bottlenecks: while most optimizations are implementation details (e.g. using \textsc{HashMap}s with low load factors instead of \textsc{TreeMap}s), this one is almost algorithmic: when sorting $list$, the ``number of unavailable timeslots'' had to be computed each time, since it depends on which exams are currently scheduled or not.
-	
-	That required, for each exam, to iterate over its conflicting exams, checking if and were are they scheduled, which is a slow procedure.
-	
-	The problem is that, being part of a comparison function, it was run approximately $2\cdot n \log(n)$ times ($n \log(n)$ comparisons between 2 exams), $n$ being length of $list$. So we implemented a ``caching layer'' that stores the computed number of unavailable time slots in an hash map, so the slow computation is run exactly $n$ times and the remaing times a fast $\mathrm{O}(1)$ hash map access (cache hit) is used. The cache has to always be reset before sorting, since we deemed too complicated keeping it updated.
-	
-	This, coupled to a few other tweaks, brought down the average time for each run of the algorithm from 360 ms to 120 ms. Considering it was run hundreds of times in each thread, it is a considerable improvement.
-	
-	These are all successive improvements of the same algorithm, so in the end this is the only one we used.
-	
 	\section{Further solutions generation}
 	
 	\subsection{Genetic algorithm}
+	We tried running a genetic algorithm implementation, with ``Random'' and ``Greedy 1.0'' initial solutions especially. It worked fine on the test instance, however on real instances it never produced a feasible solution, not even after thousands of iterations.
 	
-	We tried running a genetic algorithm implementation, with ``Random'' and ``Greedy 2'' initial solutions especially. It worked fine on the test instance, reaching the optimum solution in around 5-10 iterations with single-point crossover and a mutation (assigning a random time slot to an exam) probability of $0.1$, however on real instances it never produced a feasible solution, not even after thousands of iterations.
-	
-	\subsection{Simulated Annealing 1}
+	\subsection{Simulated Annealing 1.0}
 	
 	We decided to use a simulated annealing algorithm, implemented in its most standard form, as a starting point.
 	
-	\subsubsection{Temperature, probability and delta}
+	\paragraph{Temperature, probability and delta}
 	
 	Probability is calculated according to the standard formula: $exp\left(\frac{\mathrm{currentCost}-\mathrm{neighborCost}}{\mathrm{temperature}}\right)$.
 	
-	Temperature is calculated according to qualcosa, il delta according to qualcosa pure lui.
+	As probability should start from 0.5, we inverted that formula and used initial solution cost as $\mathrm{neighborCost}$ and the cost of that same solution optimized with local search as $\mathrm{currentCost}$ to obtain the initial temperature.
 	
-	\subsubsection{Neighbor generation}
+	\paragraph{Neighbor generation}
 	\label{neighbors}
 	
 	Nieghbor solutions are generated by taking the current (feasible) solution, unscheduling a percentage of all the exams and rescheduling them with ``Greedy 4'' and later ``Greedy 5'' algorithm.
@@ -159,7 +150,7 @@
 	
 	Since the two Greedy algorithms may fail, when that happens neighbor generation is retried with a different set of unscheduled exams. This happens very rarely in all instances, but very often in \textit{instance02}.
 	
-	\subsection{Simulated annealing 2}
+	\subsection{Simulated annealing 2.0}
 	
 	We enhanced simulated annealing 1 by adding a local search on each generated solution (initial or neighbor). Our local search works like this:
 	
@@ -188,7 +179,7 @@
 	
 	Our local search has linear time complexity in the number of exams, since time slots are always far less than exams, so it's very fast. Sorting exams isn't really done by this algorithm, as the values are computed when reading initial data and cannot change as the program runs.
 	
-	\subsection{Simulated annealing 3 (``Mutant Simulated Annealing\texttrademark'')}
+	\subsection{Simulated annealing 3.0 (``Mutant Simulated Annealing\texttrademark'')}
 	
 	We further enhanced simulated annealing by adding a timetable swapping algorithm, which runs after local search in neighbor generation. It simply tries to swap all exams for each couple of time slots, and does it if the solution improves. The complexity is around O($t^2\cdot n$), where $t$ is the number of timeslots and $n$ is the number of exams (solution has to be copied before being edited, and it contains a map from exams to assigned timeslot).
 	
@@ -208,5 +199,10 @@
 	
 	Better solutions in around 2-3 minutes, then usually nothing relevant happens. Haven't tried for more than 5 minutes.
 	
+	\paragraph{Profiling}
+	
+	We used a profiler multiple times to optimize the code of our program and find performance bottlenecks: while most optimizations are implementation details (e.g. using \textsc{HashMap}s with low load factors instead of \textsc{TreeMap}s), this one is almost algorithmic: when sorting $list$, the ``number of unavailable timeslots'' had to be computed each time, since it depends on which exams are currently scheduled or not.
+	
+	This, coupled to a few other tweaks, brought down the average time for each run of the algorithm from 360 ms to 120 ms. Considering it was run hundreds of times in each thread, it is a considerable improvement.
 	
 \end{document}
