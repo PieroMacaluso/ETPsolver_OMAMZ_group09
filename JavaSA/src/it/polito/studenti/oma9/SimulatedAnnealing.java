@@ -24,7 +24,7 @@ class SimulatedAnnealing {
 		Data data = Data.getInstance();
 
 		//System.out.println(Thread.currentThread().getName() + " started SA with: " + initial.solutionCost());
-		Solution current = new Solution(initial);
+		Solution current = initial;
 
 		// Until the end of time
 		while(!(toEnd = Duration.between(LocalTime.now(), endTime)).isNegative()) {
@@ -45,13 +45,13 @@ class SimulatedAnnealing {
 			Solution neighbor = current.createNeighbor(0.3 * relativeTemperature);
 			LocalSearch.optimize(neighbor, 0.1 * relativeTemperature); // TODO: explain 0.1 (10%)
 			neighbor = TimetableSwap.optimize(neighbor);
-			data.compareAndUpdateBest(neighbor);
 			neighborCost = neighbor.solutionCost();
 
 			// Is it an improvement over current (thread-local) solution?
 			if(neighborCost < currentCost) {
 				// It's better, take it
 				current = neighbor;
+				data.compareAndUpdateBest(current);
 			} else {
 				// It's worse, but don't discard it yet, calculate probability and a random number instead
 				double probability = probability(currentCost, neighborCost, temperature);
