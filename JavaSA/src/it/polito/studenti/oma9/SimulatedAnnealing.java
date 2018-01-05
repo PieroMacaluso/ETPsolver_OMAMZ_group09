@@ -43,8 +43,8 @@ class SimulatedAnnealing {
 			// 0.3 and 0.2 are good, 0.1 gives results all over the place (one run ends with a world record, next run with an horrible solution), 0.22 looked pleasant and worked well.
 			// Using relativeTemperature gives consistently better solutions in instance 4 by around 1%, from limited testing
 			Solution neighbor = current.createNeighbor(0.3 * relativeTemperature);
-			LocalSearch.optimize(neighbor, 0.1 * relativeTemperature); // TODO: explain 0.1 (10%)
 			neighbor = TimetableSwap.optimize(neighbor);
+			LocalSearch.optimize(neighbor, 0.1 * relativeTemperature); // TODO: explain 0.1 (10%)
 			neighborCost = neighbor.solutionCost();
 
 			// Is it an improvement over current (thread-local) solution?
