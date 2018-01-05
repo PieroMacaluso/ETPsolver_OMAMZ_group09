@@ -8,10 +8,10 @@ class LocalSearch {
 	}
 
 	/**
-	 * Deep optimization.
+	 * Optimize solution while delta between previous and obtained solution is above supplied minimum delta
 	 *
 	 * @param sol   start from there
-	 * @param delta keep improving only if improvement is greater than this
+	 * @param delta minimum delta, keep improving only if improvement is greater than this
 	 */
 	@SuppressWarnings("SameParameterValue")
 	static void optimize(Solution sol, double delta) {
@@ -26,6 +26,12 @@ class LocalSearch {
 		} while((prev - next) / prev > delta);
 	}
 
+	/**
+	 * Try to place each exam in a better timeslot, if it exists
+	 *
+	 * @param sol current solution
+	 * @return cost of optimized solution
+	 */
 	private static double optimizeOnce(Solution sol) {
 		// For each exam
 		for(Exam exam : Data.getInstance().getExamsByConflicts()) {

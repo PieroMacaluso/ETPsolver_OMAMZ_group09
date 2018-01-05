@@ -7,6 +7,12 @@ class TimetableSwap {
 	private TimetableSwap() {
 	}
 
+	/**
+	 * Try to swap every couple of slots, do it if it improves the cost.
+	 *
+	 * @param sol current solution
+	 * @return best solution
+	 */
 	static Solution optimize(Solution sol) {
 		for(int i = 1; i <= Data.nSlo; i++) {
 			for(int j = i + 1; j <= Data.nSlo; j++) {
@@ -20,6 +26,9 @@ class TimetableSwap {
 		return sol;
 	}
 
+	/**
+	 * Swap two timeslots
+	 */
 	private static void swapTimeslots(Solution solution, Integer ts1, Integer ts2) {
 		Set<Exam> examsTs1 = new HashSet<>(solution.getExamsInSlot(ts1));
 		Set<Exam> examsTs2 = new HashSet<>(solution.getExamsInSlot(ts2));

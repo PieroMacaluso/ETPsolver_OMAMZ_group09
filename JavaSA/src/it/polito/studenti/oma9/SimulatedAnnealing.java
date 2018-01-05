@@ -29,22 +29,17 @@ class SimulatedAnnealing {
 		// Until the end of time
 		while(!(toEnd = Duration.between(LocalTime.now(), endTime)).isNegative()) {
 			// To optimize more as time goes on
-			//relativeTemperature = Math.sqrt(temperature / initialTemperature); // TODO: explain the sqrt thing
 			relativeTemperature = temperature / initialTemperature;
 			//System.out.printf(Thread.currentThread().getName() + " relative temperature: %4.2f\n", relativeTemperature);
 
-			// Optimize current solution using local search, or don't
-			//LocalSearch.optimize(current, 0.1 * relativeTemperature); // TODO: explain 0.1 (10%), even though it's random
-			//Data.getInstance().compareAndUpdateBest(current);
+			// Update current cost
 			currentCost = current.solutionCost();
 
 			// Then create a neighbor and optimize it
-			// TODO: explain.
-			// 0.3 and 0.2 are good, 0.1 gives results all over the place (one run ends with a world record, next run with an horrible solution), 0.22 looked pleasant and worked well.
 			// Using relativeTemperature gives consistently better solutions in instance 4 by around 1%, from limited testing
 			Solution neighbor = current.createNeighbor(0.3 * relativeTemperature);
 			neighbor = TimetableSwap.optimize(neighbor);
-			LocalSearch.optimize(neighbor, 0.1 * relativeTemperature); // TODO: explain 0.1 (10%)
+			LocalSearch.optimize(neighbor, 0.1 * relativeTemperature);
 			neighborCost = neighbor.solutionCost();
 
 			// Is it an improvement over current (thread-local) solution?

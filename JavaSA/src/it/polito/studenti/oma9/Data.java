@@ -130,8 +130,8 @@ class Data {
 	 */
 	private void buildConflicts() {
 		for(Student student : students.values()) {
-			for(Exam exam : student.getExams().values()) {
-				for(Exam other : student.getExams().values()) {
+			for(Exam exam : student.getExams()) {
+				for(Exam other : student.getExams()) {
 					if(exam.compareTo(other) < 0) {
 						exam.addConflict(other);
 						other.addConflict(exam);
@@ -147,34 +147,6 @@ class Data {
 	private void buildExamsByConflicts() {
 		examsByConflicts.addAll(exams.values());
 		examsByConflicts.sort(Comparator.comparing(Exam::nConflictingExams).reversed());
-		//examsByConflicts.sort(this::conflictComparator);
-	}
-
-	private int conflictComparator(Exam one, Exam two) {
-		if(one == two) {
-			return 1;
-		}
-
-		int conflictsOne = temp.getOrDefault(one, -1);
-		int conflictsTwo = temp.getOrDefault(two, -1);
-
-		if(conflictsOne == -1) {
-			conflictsOne = 0;
-			for(Exam other : one.conflicts) {
-				conflictsOne += conflictsBetween(one, other);
-			}
-			temp.put(one, conflictsOne);
-		}
-
-		if(conflictsTwo == -1) {
-			conflictsTwo = 0;
-			for(Exam other : one.conflicts) {
-				conflictsTwo += conflictsBetween(one, other);
-			}
-			temp.put(two, conflictsTwo);
-		}
-
-		return conflictsTwo - conflictsOne;
 	}
 
 	/**
@@ -191,7 +163,7 @@ class Data {
 	/**
 	 * Is this solution better than the best?
 	 * If yes, save it to file.
-	 * <p>
+	 *
 	 * This calls a synchronized function internally, so for all intents and purposes it's synchronized.
 	 *
 	 * @return true if new solution is better

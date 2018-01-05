@@ -1,13 +1,13 @@
 package it.polito.studenti.oma9;
 
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.HashSet;
+import java.util.Set;
 
 class Student implements Comparable<Student> {
 	private final int id;
-	private Map<Integer, Exam> exams = new TreeMap<>();
+	private Set<Exam> exams = new HashSet<>();
 
-	Map<Integer, Exam> getExams() {
+	Set<Exam> getExams() {
 		return exams;
 	}
 
@@ -26,7 +26,7 @@ class Student implements Comparable<Student> {
 	 * @param e Exam
 	 */
 	void addExam(Exam e) {
-		exams.put(e.id, e);
+		exams.add(e);
 	}
 
 	@Override

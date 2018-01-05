@@ -64,7 +64,7 @@ class Solution {
 	private boolean tryScheduleRemaining() {
 		int failures = 0;
 		final int nExm = Data.nExm;
-		final int limit = nExm / 3; // TODO: explain limit
+		final int limit = nExm / 3;
 		boolean allScheduled = false;
 		// Put all not-yet-scheduled exams into a list (and a set for faster lookups), we'll need to sort them...
 		List<Exam> unscheduledExams = new ArrayList<>(Data.nExm + 1);
@@ -132,7 +132,7 @@ class Solution {
 	}
 
 	/**
-	 * Schedule exam in timeslot t
+	 * Schedule exam in timeslot
 	 *
 	 * @param exam exam
 	 * @param ts   timeslot
@@ -347,8 +347,6 @@ class Solution {
 		Solution neighbor = null; // This just prevents the compiler from complaining, but it's guaranteed to be set before returning...
 		boolean done = false;
 
-		// TODO: se la % è bassa c'è il rischio che unscheduli 2 esami incastratissimi che ci stanno solo in quel buco e subito ricrea la stessa soluzione? (sì)
-		// l'alternativa facile è NON far dipendere la % dalla temperatura, com'era prima...
 		if(percentage < 0.1) {
 			//System.out.printf(Thread.currentThread().getName() + " changing percentage to 10%% (from %4.2f)...\n", percentage*100);
 			percentage = 0.1;
@@ -385,10 +383,8 @@ class Solution {
 
 		while(j < limit) {
 			Exam chosen = shuffled.get(j);
-			//if(chosen != null && isScheduled(chosen)) {
-				unschedule(chosen);
-				j++;
-			//}
+			unschedule(chosen);
+			j++;
 		}
 		return false;
 	}
@@ -397,6 +393,9 @@ class Solution {
 		return timetable.entrySet();
 	}
 
+	/**
+	 * Which exams are scheduled in that timeslot?
+	 */
 	Set<Exam> getExamsInSlot(Integer timeslot) {
 		return reverseTimetable.get(timeslot);
 	}

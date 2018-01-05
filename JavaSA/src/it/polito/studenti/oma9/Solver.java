@@ -29,7 +29,7 @@ public class Solver implements Runnable {
 
 		System.out.printf(Thread.currentThread().getName() + " Initial solution: %.6f\n              LS solution: %.6f\n", unoptimizedCost, initial.solutionCost());
 
-		// Calculate delta and start SA. 0.69 obtained from logaritmo (TODO: spiegare 'sta cosa)
+		// Calculate delta and start SA.
 		delta = unoptimizedCost - initial.solutionCost();
 		SimulatedAnnealing.optimize(initial, delta / 0.69, endTime);
 	}
