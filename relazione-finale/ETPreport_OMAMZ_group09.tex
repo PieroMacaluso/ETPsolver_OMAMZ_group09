@@ -5,7 +5,7 @@
 \usepackage{parskip}
 \setlength{\parskip}{0.3\baselineskip}%
 \usepackage{libertine} % font bello
-\usepackage[paper=a4paper,top=1in,bottom=1.1in,right=1in,left=1in]{geometry} % margini
+\usepackage[paper=a4paper,top=0.5in,bottom=0.8in,right=0.6in,left=0.6in]{geometry} % margini
 
 \usepackage{enumitem} % liste più compatte (se ce ne saranno)
 %\setlist[enumerate]{itemsep=0.0em}
@@ -86,16 +86,6 @@
 	
 	So we decided to unschedule all the conflicting exams of the current one when that situation was encountered, sort and retry scheduling them again.
 	
-	In order to avoid unstable or ``oscillating'' situations, we fixed a maximum number of ``retries'': if this limit is exceeded, the algorithm returns anyway leaving an infeasible solution, which will be discarded and another attempt will be made, from a different initial solution or a different neighbor (see \ref{neighbors}). This was a great step forward, as it worked with all instances. There was only one problem: in more complex instance it takes more time to get a feasible solution.
-	
-	We also tried sorting by ``number of unavailable slot, then number of conflicting students'', but that seemed to yield more infeasible solutions and the feasible ones weren't any better than before.
-	
-	Retries limit has been set to $\frac{1}{3}$ of total exams, which gave acceptable results from empirical testing.
-	
-	This algorithm was a great step forward, working with all instances. There was only one problem: in larger instances, like \textit{instance06}, it took a lot of time to generate an initial solution. With the use a profiler, we determined that the slowdown was due to the ``number of unavailable timeslots'' procedure that required, for each exam, to iterate over its conflicting exams, checking if and were are they scheduled.
-	
-	It needed to compute $n$ values, but being part of a comparison function, it was run approximately $2\cdot n \log(n)$ times ($n \log(n)$ comparisons between 2 exams), $n$ being length of $list$. We implemented a ``caching layer'' based on an \textsc{HashMap}, reset each time before sorting, and that greatly improved performance
-	
 	\begin{algorithm}[H]
 		%		$backup \gets \text{current solution (even an empty one)}$\;
 		%		$sol \gets \text{current solution (even an empty one)}$\;
@@ -124,6 +114,16 @@
 		\caption{Timeslots, Conflicts and Unscheduling}
 	\end{algorithm}
 	
+	In order to avoid unstable or ``oscillating'' situations, we fixed a maximum number of ``retries'': if this limit is exceeded, the algorithm returns anyway leaving an infeasible solution, which will be discarded and another attempt will be made, from a different initial solution or a different neighbor (see \ref{neighbors}). This was a great step forward, as it worked with all instances. There was only one problem: in more complex instance it takes more time to get a feasible solution.
+	
+	We also tried sorting by ``number of unavailable slot, then number of conflicting students'', but that seemed to yield more infeasible solutions and the feasible ones weren't any better than before.
+	
+	Retries limit has been set to $\frac{1}{3}$ of total exams, which gave acceptable results from empirical testing.
+	
+	This algorithm was a great step forward, working with all instances. There was only one problem: in larger instances, like \textit{instance06}, it took a lot of time to generate an initial solution. With the use a profiler, we determined that the slowdown was due to the ``number of unavailable timeslots'' procedure that required, for each exam, to iterate over its conflicting exams, checking if and were are they scheduled.
+	
+	It needed to compute $n$ values, but being part of a comparison function, it was run approximately $2\cdot n \log(n)$ times ($n \log(n)$ comparisons between 2 exams), $n$ being length of $list$. We implemented a ``caching layer'' based on an \textsc{HashMap}, reset each time before sorting, and that greatly improved performance
+	
 	\section{Further solutions generation}
 	
 	\subsection{Genetic algorithm}
@@ -135,7 +135,7 @@
 	
 	\paragraph{Temperature, probability and delta}
 	
-	Probability is calculated according to the standard formula: $exp\left(\frac{\mathrm{currentCost}-\mathrm{neighborCost}}{\mathrm{temperature}}\right)$.
+	Probability standard formula used: $exp\left(\frac{\mathrm{currentCost}-\mathrm{neighborCost}}{\mathrm{temperature}}\right)$.
 	
 	We decided to start with a probability of $50\%$, we inverted that formula and used initial solution cost as $\mathrm{neighborCost}$ and the cost of that same solution optimized with local search (see \ref{local}) as $\mathrm{currentCost}$ to obtain the initial temperature. Temperature then decreases with time.
 	
@@ -150,10 +150,14 @@
 	
 	Since the Greedy algorithm may fail, when that happens neighbor generation is retried with a different set of unscheduled exams. This happens very rarely in all instances but often in \textit{instance02}.
 	
+	\subsection{Timetable swapping}
+	
+	We enhanced simulated annealing by adding a timetable swapping algorithm, which runs on the generated neighbor. It simply tries to swap all exams for each couple of time slots, and does it if the solution improves. It's relatively slow but solutions improve much faster.
+	
 	\subsection{Local search}
 	\label{local}
 	
-	We enhanced simulated annealing by adding a local search on each generated solution (initial or neighbor). Our local search works like this:
+	We further enhanced simulated annealing by adding a local search on each generated solution (initial or neighbor). Our local search works like this:
 	
 	\begin{algorithm}[H]
 		%		$sol \gets \text{current solution (even an empty one)}$\;
@@ -172,38 +176,28 @@
 		\caption{Local search}
 	\end{algorithm}
 	
-	since each time an exam is rescheduled the cost (penalty) of any other exam may change, but the algorithm runs over exams only once, it may provide better optimizations if run multiple times. We exploited this fact by placing a minimum improvement percentage: if after each run the solution has improved by more than the minimum percentage, run local search again. The higher the required minimum improvement, the less times local search will be run.
+	Since each time an exam is rescheduled, the cost (penalty) of any other exam may change but the algorithm runs over exams only once, it may provide better results if run multiple times. We exploited this fact by placing a minimum improvement percentage: if after each run the solution has improved by more than the minimum percentage, local search is run again. The higher the required minimum improvement, the less times local search will be run.
 	
-	After some testing, we found that $10\%$ was a good starting point for initial solutions, as in most cases ran local search at most twice and yielded a solution better by around $5\%$ (\textit{instance01}, runs once) to $20\%$ (\textit{instance02} and \textit{instance06}, runs twice most of the times), which helped simulated annealing to get an even better solution sooner.
+	After some testing, we found that $10\%$ was a good starting point for initial solutions, as in most cases ran local search once or twice and yielded a solution better by around $5\%$ (\textit{instance01}, runs once) to $20\%$ (\textit{instance02} and \textit{instance06}, runs twice most of the times), which helped simulated annealing to get an even better solution sooner.
 	
-	We also decided to run local search on generated neighbors too, as often they were far worse than an optimized initial solution and so were never picked as ``better'' by simulated annealing. There, we started from $10\%$ and decreased the minimum improvement percentage linearly as time goes on, until almost $0\%$: in our testing we found that, even with percentages as low as $0.001\%$, local search terminates in at most 5 iterations, so there was no risk of letting the algorithm run forever.
+	We decided to run local search on generated neighbors too, as often they were far worse than an optimized initial solution and so were never picked as ``better'' by simulated annealing. There, we start from $10\%$ and decreased the minimum improvement percentage linearly as time goes on, until almost $0\%$: in our testing we found that, even with percentages as low as $0.001\%$, local search terminates in at most 5 iterations, so there was no risk of letting the algorithm run forever.
 	
 	Our local search has linear time complexity in the number of exams, since time slots are always far less than exams, so it's very fast. Sorting exams isn't really done by this algorithm, as the values are computed when reading initial data and cannot change as the program runs.
 	
-	\subsection{Simulated annealing 3.0 (``Mutant Simulated Annealing\texttrademark'')}
-	
-	We further enhanced simulated annealing by adding a timetable swapping algorithm, which runs after local search in neighbor generation. It simply tries to swap all exams for each couple of time slots, and does it if the solution improves. The complexity is around O($t^2\cdot n$), where $t$ is the number of timeslots and $n$ is the number of exams (solution has to be copied before being edited, and it contains a map from exams to assigned timeslot).
-	
-	It's relatively slow but solutions improve much faster and we get less failed neighbors generations, especially in dense instances like \textit{instance07} (don't know why).
+	Doing timetable swaps before local search yields better average solutions in \textit{instance06} while it has no measurable effect on other instances, so we left it in that order.
 	
 	\section{Other considerations}
 	
-	\paragraph{Building conflict matrix}
-	
-	Was done by taking each couple of exams and counting students enrolled in both. This was agonizingly slow, taking about 20 seconds on \textit{instance06}. It was later improved by iterating over students once and, for each student, taking every couple of exams they're enrolled in and incrementing the right cell in the conflict matrix.
-	
 	\paragraph{Multithreading}
 	
-	Not really algorithmic, but worth mentioning: our program exploits the power of multiple cores, by running multiple independent threads. Each thread generates an initial solution and optimizes it as described until time runs out. Each time it find a solution better than its local one, it compares that with the best solution that other threads have found, and save it as the ``global'' best if it's better.
-	
-	\paragraph{Running for longer than 30 seconds}
-	
-	Better solutions in around 2-3 minutes, then usually nothing relevant happens. Haven't tried for more than 5 minutes.
+	Our program exploits the power of multiple cores, by running multiple independent threads. Each thread generates an initial solution and optimizes it as described until time runs out. Each time it improves it thread-local best solution, it compares that to the best solution that other threads have found, and save it as the ``global'' best if it's better.
 	
 	\paragraph{Profiling}
 	
-	We used a profiler multiple times to optimize the code of our program and find performance bottlenecks: while most optimizations are implementation details (e.g. using \textsc{HashMap}s with low load factors instead of \textsc{TreeMap}s), this one is almost algorithmic: when sorting $list$, the ``number of unavailable timeslots'' had to be computed each time, since it depends on which exams are currently scheduled or not.
+	We used a profiler multiple times to find performance bottlenecks in code. This for example suggested us the idea to add caching in the Greedy algorithm (which reduced its running time from 360 ms to 120 ms, a considerable improvement since it runs hundreds of times) and using \textsc{HashMap}s with low load factors instead of \textsc{TreeMap}s.
 	
-	This, coupled to a few other tweaks, brought down the average time for each run of the algorithm from 360 ms to 120 ms. Considering it was run hundreds of times in each thread, it is a considerable improvement.
+	\paragraph{Running for longer than 30 seconds}
+	
+	From limited testing, we found that the program yields increasingly better solutions for 2-3 minutes, then usually they stop improving. We haven't tried running  it for more than 5 minutes.
 	
 \end{document}
