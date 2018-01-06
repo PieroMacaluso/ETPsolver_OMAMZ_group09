@@ -1,0 +1,76 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% I, the copyright holder of this work, release this work into the
+%% public domain. This applies worldwide. In some countries this may
+%% not be legally possible; if so: I grant anyone the right to use
+%% this work for any purpose, without any conditions, unless such
+%% conditions are required by law.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass{beamer}
+\usetheme[faculty=phil]{fibeamer}
+\usepackage[utf8]{inputenc}
+\usepackage[
+  main=english, %% By using `czech` or `slovak` as the main locale
+                %% instead of `english`, you can typeset the
+                %% presentation in either Czech or Slovak,
+                %% respectively.
+  czech, slovak %% The additional keys allow foreign texts to be
+]{babel}        %% typeset as follows:
+%%
+%%   \begin{otherlanguage}{czech}   ... \end{otherlanguage}
+%%   \begin{otherlanguage}{slovak}  ... \end{otherlanguage}
+%%
+%% These macros specify information about the presentation
+\title{Examination Timetabling} %% that will be typeset on the
+\subtitle{Optimization Methods and Algorithms Group 9} %% title page.
+\author{s252894 - Piero Macaluso\\s246422 - Ludovico Pavesi\\s254036 - Alberto Romano\\s217189 - Lorenzo Manicone\\s246422 - Donato Tortoriello}
+%% These additional packages are used within the document:
+\usepackage{ragged2e}  % `\justifying` text
+\usepackage{booktabs}  % Tables
+\usepackage{tabularx}
+\usepackage{tikz}      % Diagrams
+\usetikzlibrary{calc, shapes, backgrounds}
+\usepackage{amsmath, amssymb}
+\usepackage{url}       % `\url`s
+\usepackage{listings}  % Code listings
+\frenchspacing
+\begin{document}
+  \frame{\maketitle}
+
+  \AtBeginSection[]{% Print an outline at the beginning of sections
+    \begin{frame}<beamer>
+      \frametitle{Outline for Section \thesection}
+      \tableofcontents[currentsection]
+    \end{frame}}
+
+   \section{Le cose che abbiamo provato}
+   
+   \begin{frame}
+   \frametitle{Tentativi ed errori}
+   Sono tanti e var\^i:
+   \begin{itemize}
+   	\item Digitare codice con le dita
+   	\item Dare testate al muro
+   	\item Piangere
+   \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{In sintesi}
+Il SA è bello
+\end{frame}
+
+\section{Le cose che hanno funzionato}
+
+\begin{frame}
+\frametitle{Things that worked}
+Il SA
+\end{frame}
+
+\section{Conclusioni}
+
+\begin{frame}
+\frametitle{Important findings}
+SA is g\"ud.
+\end{frame}
+\end{document}
