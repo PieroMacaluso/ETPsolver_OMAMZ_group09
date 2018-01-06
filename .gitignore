@@ -21,3 +21,4 @@ JavaSA/out/
 JavaSA/target/
 JavaSA/dependency-reduced-pom.xml
 instances/ETPchecker.exe
+.~lock.*#
