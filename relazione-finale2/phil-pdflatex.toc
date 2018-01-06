@@ -1,4 +1,0 @@
-\select@language {english}
-\beamer@sectionintoc {1}{Le cose che abbiamo provato}{2}{0}{1}
-\beamer@sectionintoc {2}{Le cose che hanno funzionato}{5}{0}{2}
-\beamer@sectionintoc {3}{Conclusioni}{7}{0}{3}
