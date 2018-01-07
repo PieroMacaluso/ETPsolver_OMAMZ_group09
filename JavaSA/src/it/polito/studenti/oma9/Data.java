@@ -15,7 +15,6 @@ class Data {
 	private final File solutionFile;
 	private final Map<Integer, Student> students = new HashMap<>();
 	private final Map<Integer, Exam> exams = new HashMap<>();
-	private final Map<Exam, Integer> temp = new HashMap<>();
 	private final List<Exam> examsByConflicts;
 	private final int[][] conflicts;
 
