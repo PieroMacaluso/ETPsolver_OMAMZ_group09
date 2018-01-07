@@ -55,15 +55,15 @@
 	
 	Initially we tried generating random starting solutions: that is, to each exam assign a random time slot. This was very fast, but even after thousands of runs we couldn't find even a single feasible solution on ``real'' instances. It worked on the ``test'' instance, however.
 	
-	\paragraph{Greedy 1.0 (``Extremely Stupid But Also Cultured Greedy'')}
+	\paragraph{Greedy 1.0 (``Extremely Simple Greedy'')}
 	
-	We tried to implement a simplistic greedy algorithm that iterates over each exam, picks an available (non conflicting) timeslot at random, and schedules the exam there.\\
+	We tried to implement a simplistic greedy algorithm that iterates over each exam, picks an available (non conflicting) time slot at random, and schedules the exam there.\\
 	This never yielded a feasible solution for any of the real instances, as when it got near the end of the exam list there were no more non-conflicting time slots available.
 	
-	\paragraph{Greedy 2.0 (``Timeslots and Conflicts'')}
+	\paragraph{Greedy 2.0 (``Time Slots and Conflicts'')}
 	
-	We tried sorting exams by some more meaningful criteria than their ID, i.e. by number of conflicting exams, and then assigning a random available timeslot to each exam in that order.\\
-	This solution was simple but found feasible solutions only for \textit{instance01}, so we decided to sort them first by the number of unavailable timeslots (timeslots with conflicting exams already scheduled), then by the number of conflicts. Since the order depends on current solution (each time an exam is scheduled, the ``number of unavailable timeslots'' for some other exams change), the list needed to be sorted again at each step.\\
+	We tried sorting exams by some more meaningful criteria than their ID, i.e. by number of conflicting exams, and then assigning a random available time slot to each exam in that order.\\
+	This solution was simple but found feasible solutions only for \textit{instance01}, so we decided to sort them first by the number of unavailable time slots (time slots with conflicting exams already scheduled), then by the number of conflicts. Since the order depends on current solution (each time an exam is scheduled, the ``number of unavailable time slots'' for some other exams change), the list needed to be sorted again at each step.\\
 	%\begin{algorithm}[H]
 	%		%		%\KwData{dati}
 	%		%		%\KwResult{risultato}
@@ -71,20 +71,20 @@
 	%		$list \gets \text{all exams to be scheduled, sorted by }\textit{(number of unavailable slot, number of conflicts)}$\;
 	%		\While{$list\text{ is not empty}$}{
 	%			$E \gets \textit{ first element from }list$\;
-	%			$T \gets \textit{ random available timeslot}$\;
+	%			$T \gets \textit{ random available time slot}$\;
 	%			schedule $E$ in $T$\;
 	%			remove $E$ from $list$\;
 	%			sort $list$ again\;
 	%		}	
-	%		\caption{Algorithm with Timeslots and Conflicts sorting}
+	%		\caption{Algorithm with time slots and Conflicts sorting}
 	%	\end{algorithm}
 	But even so, there were still no feasible solutions for the other instances.
+	% TODO: It is not Greeeeeeeeedy
+	\subsection{(Pseudo)Greedy 3.0 (``Time Slots, Conflicts and Unscheduling'')}
 	
-	\subsection{Greedy 3.0 (``Timeslots, Conflicts and Unscheduling'')}
+	With the previous algorithm, the tipping point was the absence of available time slots for the current exam when getting near the end of the list.
 	
-	With the previous algorithm, the tipping point was the absence of available timeslots for the current exam when getting near the end of the list.
-	
-	So we decided to unschedule all the conflicting exams of the current one when that situation was encountered, sort and retry scheduling them again.
+	So we decided to unschedule all the conflicting exams of the current one when that situation was encountered, sort and retry scheduling them again, which is almost a sort of backtrack.
 	
 	\begin{algorithm}[H]
 		%		$backup \gets \text{current solution (even an empty one)}$\;
@@ -98,7 +98,7 @@
 				%				restart the alogithm\;
 			}
 			$E \gets \textit{ first element from }list$\;
-			$T \gets \textit{ random available timeslot}$\;
+			$T \gets \textit{ random available time slot}$\;
 			\eIf{$T$ is valid (not null)}{
 				schedule $E$ in $T$\;
 				remove $E$ from $list$\;
@@ -111,18 +111,18 @@
 			sort $list$ again\;
 		}
 		\Return{feasible solution found}\;
-		\caption{Timeslots, Conflicts and Unscheduling}
+		\caption{Time Slots, Conflicts and Unscheduling}
 	\end{algorithm}
-	
-	In order to avoid unstable or ``oscillating'' situations, we fixed a maximum number of ``retries'': if this limit is exceeded, the algorithm returns anyway leaving an infeasible solution, which will be discarded and another attempt will be made, from a different initial solution or a different neighbor (see \ref{neighbors}). This was a great step forward, as it worked with all instances. There was only one problem: in more complex instance it takes more time to get a feasible solution.
+	\newpage
+	In order to avoid unstable or ``oscillating'' situations, we fixed a maximum number of ``retries'': if this limit is exceeded, the algorithm returns anyway leaving an infeasible solution, which will be discarded and another attempt will be made, from a different initial solution or a different neighbor (see \ref{neighbors}).
 	
 	We also tried sorting by ``number of unavailable slot, then number of conflicting students'', but that seemed to yield more infeasible solutions and the feasible ones weren't any better than before.
 	
 	Retries limit has been set to $\frac{1}{3}$ of total exams, which gave acceptable results from empirical testing.
 	
-	This algorithm was a great step forward, working with all instances. There was only one problem: in larger instances, like \textit{instance06}, it took a lot of time to generate an initial solution. With the use a profiler, we determined that the slowdown was due to the ``number of unavailable timeslots'' procedure that required, for each exam, to iterate over its conflicting exams, checking if and were are they scheduled.
+	This algorithm was a great step forward, working with all instances. There was only one problem: in larger instances, like \textit{instance06}, it took a lot of time to generate an initial solution. With the use a profiler, we determined that the slowdown was due to the ``number of unavailable time slots'' procedure that required, for each exam, to iterate over its conflicting exams, checking if and were are they scheduled.
 	
-	It needed to compute $n$ values, but being part of a comparison function, it was run approximately $2\cdot n \log(n)$ times ($n \log(n)$ comparisons between 2 exams), $n$ being length of $list$. We implemented a ``caching layer'' based on an \textsc{HashMap}, reset each time before sorting, and that greatly improved performance
+	It needed to compute $n$ values, but being part of a comparison function, it was run approximately $2\cdot n \log(n)$ times ($n \log(n)$ comparisons between 2 exams), $n$ being length of $list$. We implemented a ``caching layer'' based on an \textsc{HashMap}, reset each time before sorting, and that greatly improved performance.
 	
 	\section{Further solutions generation}
 	
@@ -163,9 +163,9 @@
 		%		$sol \gets \text{current solution (even an empty one)}$\;
 		$list \gets \text{all exams to be scheduled, sorted by }\textit{number of conflicts}$\;
 		\ForEach{exam $E$ in $list$}{
-			$T \gets \text{timeslot where }E\text{ is scheduled}$\;
+			$T \gets \text{time slot where }E\text{ is scheduled}$\;
 			$C \gets \text{cost of exam }E\text{ in }T\text{ time slot according to objective function}$\;
-			\ForEach{timeslot $T'\neq T$}{
+			\ForEach{time slot $T'\neq T$}{
 				$C' \gets \text{cost of exam }E\text{ in }T'\text{ time slot according to objective function}$\;
 				\If{$C'<C$}{
 					schedule $E$ in $T'$\;
@@ -188,7 +188,7 @@
 	
 	\section{Other considerations}
 	
-	\paragraph{Multithreading}
+	\paragraph{Multistart}
 	
 	Our program exploits the power of multiple cores, by running multiple independent threads. Each thread generates an initial solution and optimizes it as described until time runs out. Each time it improves it thread-local best solution, it compares that to the best solution that other threads have found, and save it as the ``global'' best if it's better.
 	
