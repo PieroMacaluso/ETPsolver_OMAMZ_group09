@@ -14,7 +14,6 @@
                 %% instead of `english`, you can typeset the
                 %% presentation in either Czech or Slovak,
                 %% respectively.
-  czech, slovak %% The additional keys allow foreign texts to be
 ]{babel}        %% typeset as follows:
 %%
 %%   \begin{otherlanguage}{czech}   ... \end{otherlanguage}
@@ -39,38 +38,77 @@
 
   \AtBeginSection[]{% Print an outline at the beginning of sections
     \begin{frame}<beamer>
-      \frametitle{Outline for Section \thesection}
+      \frametitle{Outline}
       \tableofcontents[currentsection]
     \end{frame}}
-
-   \section{Le cose che abbiamo provato}
+	
+	\section{Introduction}
+	\begin{frame}
+	\frametitle{\insertsection}
+	Our algorithm is based on:
+	\begin{itemize}
+		\item Simulated annealing
+		\item Local search
+		\item Swapping timetables
+		\item Multistart
+	\end{itemize}
+	\end{frame}
+	
+   \section{Initial solution generation}
    
-   \begin{frame}
-   \frametitle{Tentativi ed errori}
-   Sono tanti e var\^i:
-   \begin{itemize}
-   	\item Digitare codice con le dita
-   	\item Dare testate al muro
-   	\item Piangere
-   \end{itemize}
-\end{frame}
+   \subsection{Scheduling Exams}
+
+	\begin{frame}
+	   \frametitle{\insertsubsection}
+	ciao
+	\end{frame}
+
+   \subsection{Local Search}
+
+	\begin{frame}
+	   \frametitle{\insertsubsection}
+	ciao
+	\end{frame}
+
+\section{Simulated Mutant Annealing}
+
+\subsection{Temperature and Probability Calibration}
 
 \begin{frame}
-\frametitle{In sintesi}
-Il SA è bello
+\frametitle{\insertsubsection}
+ciao
 \end{frame}
 
-\section{Le cose che hanno funzionato}
+\subsection{Neighbor Generation/Mutation}
 
 \begin{frame}
-\frametitle{Things that worked}
-Il SA
+\frametitle{\insertsubsection}
+ciao
 \end{frame}
 
-\section{Conclusioni}
+\subsection{Time Slot Swap}
 
 \begin{frame}
-\frametitle{Important findings}
-SA is g\"ud.
+\frametitle{\insertsubsection}
+ciao
 \end{frame}
+
+\section{Conclusions}
+
+\subsection{Statistics}
+
+\begin{frame}
+\frametitle{\insertsubsection}
+ciao
+\end{frame}
+
+\subsection{The end}
+
+\begin{frame}
+\frametitle{\insertsubsection}
+Thanks for listening.
+\vfill
+P.s. code is avalable on Github: \href{https://github.com/pimack/OMA9}{github.com/pimack/OMA9}
+\end{frame}
+
 \end{document}
