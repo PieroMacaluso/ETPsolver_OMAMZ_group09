@@ -29,7 +29,7 @@ class Data {
 		File stuFile = new File(filename + ".stu");
 		File exmFile = new File(filename + ".exm");
 		File sloFile = new File(filename + ".slo");
-		solutionFile = new File(filename + ".sol");
+		solutionFile = new File(filename + "_OMAMZ_group09.sol");
 		Scanner sStu = new Scanner(stuFile);
 		Scanner sExm = new Scanner(exmFile);
 		Scanner sSlo = new Scanner(sloFile);
