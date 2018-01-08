@@ -6,7 +6,9 @@
 %% conditions are required by law.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\documentclass{beamer}
+\documentclass[notes]{beamer}       % print frame + notes
+%\documentclass[notes=only]{beamer}   % only notes
+%\documentclass{beamer} 
 \usetheme[faculty=phil]{fibeamer}
 \usepackage[utf8]{inputenc}
 \usepackage[
@@ -20,8 +22,9 @@
 %%   \begin{otherlanguage}{slovak}  ... \end{otherlanguage}
 %%
 %% These macros specify information about the presentation
-\title{Examination Timetabling} %% that will be typeset on the
-\subtitle{Optimization Methods and Algorithms Group 9} %% title page.
+% TODO: The date
+\title{Examination Timetabling Problem} %% that will be typeset on the
+\subtitle{Optimization Methods and Algorithms\\Group 9} %% title page.
 \author{s252894 - Piero Macaluso\\s246422 - Ludovico Pavesi\\s254036 - Alberto Romano\\s217189 - Lorenzo Manicone\\s246422 - Donato Tortoriello}
 %% These additional packages are used within the document:
 \usepackage{ragged2e}  % `\justifying` text
@@ -34,7 +37,8 @@
 \usepackage{listings}  % Code listings
 \frenchspacing
 \begin{document}
-  \frame{\maketitle}
+  \frame{\maketitle
+ 		\note{\textbf{Piero}: Hi, we are the Group 9 of the course Optimization Methods and Algorthms. This group is composed by me, Piero Macaluso, Ludovico Pavesi, Alberto Romano, Lorenzo Manicone and Donato Tortoriello.}}
 
   \AtBeginSection[]{% Print an outline at the beginning of sections
     \begin{frame}<beamer>
@@ -44,12 +48,13 @@
 	
 	\section{Introduction}
 	\begin{frame}
-	\frametitle{\insertsection}
+	\note{\textbf{Ludovico}: In our code we decided to use Simulated Annealing Metaheuristic with an implementation of Local Search and Timeslot swap. We managed to implement our code using thread in order to give to create n different path of research at the same time. The only thing that is in common and represents the critical part is the current best. Only one thread can access to the best cost at the same time.}
+	\frametitle{\thesection \ \insertsection}
 	Our algorithm is based on:
 	\begin{itemize}
-		\item Simulated annealing
+		\item Simulated annealing with mutations
 		\item Local search
-		\item Swapping timetables
+		\item Swapping time slot
 		\item Multistart
 	\end{itemize}
 	\end{frame}
@@ -58,15 +63,16 @@
    
    \subsection{Scheduling Exams}
 
-	\begin{frame}
-	   \frametitle{\insertsubsection}
+	\begin{frame}.
+	  \setbeamertemplate{footline}{} 
+	   \frametitle{\thesection.\thesubsection \ \insertsubsection}
 	ciao
 	\end{frame}
 
    \subsection{Local Search}
 
 	\begin{frame}
-	   \frametitle{\insertsubsection}
+	   \frametitle{\thesection.\thesubsection \ \insertsubsection}
 	ciao
 	\end{frame}
 
@@ -75,21 +81,21 @@
 \subsection{Temperature and Probability Calibration}
 
 \begin{frame}
-\frametitle{\insertsubsection}
+\frametitle{\thesection.\thesubsection \ \insertsubsection}
 ciao
 \end{frame}
 
 \subsection{Neighbor Generation/Mutation}
 
 \begin{frame}
-\frametitle{\insertsubsection}
+\frametitle{\thesection.\thesubsection \ \insertsubsection}
 ciao
 \end{frame}
 
 \subsection{Time Slot Swap}
 
 \begin{frame}
-\frametitle{\insertsubsection}
+\frametitle{\thesection.\thesubsection \ \insertsubsection}
 ciao
 \end{frame}
 
@@ -98,17 +104,16 @@ ciao
 \subsection{Statistics}
 
 \begin{frame}
-\frametitle{\insertsubsection}
+\frametitle{\thesection.\thesubsection \ \insertsubsection}
 ciao
 \end{frame}
 
 \subsection{The end}
 
 \begin{frame}
-\frametitle{\insertsubsection}
 Thanks for listening.
 \vfill
-P.s. code is avalable on Github: \href{https://github.com/pimack/OMA9}{github.com/pimack/OMA9}
+Our code is avalable on Github: \href{https://github.com/pimack/OMA9}{github.com/pimack/OMA9}
 \end{frame}
 
 \end{document}
