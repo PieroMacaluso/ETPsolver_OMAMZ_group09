@@ -150,14 +150,14 @@
 	
 	Since the Greedy algorithm may fail, when that happens neighbor generation is retried with a different set of unscheduled exams. This happens very rarely in all instances but often in \textit{instance02}.
 	
-	\subsection{Timetable swapping}
+	\subsection{Time slot swapping}
 	
-	We enhanced simulated annealing by adding a timetable swapping algorithm, which runs on the generated neighbor. It simply tries to swap all exams for each couple of time slots, and does it if the solution improves. It's relatively slow but solutions improve much faster.
+	We enhanced simulated annealing by adding a time slot swapping algorithm, which runs on the generated neighbor. It simply tries to swap all exams for each couple of time slots, and does it if the solution improves. It's relatively slow as it attempts $t^2$ swaps ($t$ being number of time slots) and each swap having a worst case complexity of O($e$) ($e$ is the number of exams) but solutions improve much faster.
 	
 	\subsection{Local search}
 	\label{local}
 	
-	We further enhanced simulated annealing by adding a local search on each generated solution (initial or neighbor). Our local search works like this:
+	We further enhanced simulated annealing by adding a ``best improvement'' local search on each generated solution (initial or neighbor). Our local search works like this:
 	
 	\begin{algorithm}[H]
 		%		$sol \gets \text{current solution (even an empty one)}$\;
@@ -182,7 +182,9 @@
 	
 	We decided to run local search on generated neighbors too, as often they were far worse than an optimized initial solution and so were never picked as ``better'' by simulated annealing. There, we start from $10\%$ and decreased the minimum improvement percentage linearly as time goes on, until almost $0\%$: in our testing we found that, even with percentages as low as $0.001\%$, local search terminates in at most 5 iterations, so there was no risk of letting the algorithm run forever.
 	
-	Our local search has linear time complexity in the number of exams, since time slots are always far less than exams, so it's very fast. Sorting exams isn't really done by this algorithm, as the values are computed when reading initial data and cannot change as the program runs.
+	Our local search has a neighbor size of $t\cdot e$, but since time slots are always far less than exams its worst case complexity is O($e$). Evaluating a solution requires iterating over every conflicting exam so it is O($e$), but the average case is much lower as not every exam conflicts with every other.
+	
+	Sorting exams isn't really done by this algorithm, as the values are computed when reading initial data and cannot change as the program runs.
 	
 	Doing timetable swaps before local search yields better average solutions in \textit{instance06} while it has no measurable effect on other instances, so we left it in that order.
 	
