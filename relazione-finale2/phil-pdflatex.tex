@@ -74,11 +74,11 @@
 	   \framesubtitle{Ordering Exams}
 	   
 	\textbf{Goal:} give a useful \alert{order} to the whole set of exams:
-	\begin{block}{Number of Time Slot Unavailable}
-		This is the number of time slots where there are exams in conflict with the current one. This number could be less than or \alert{equal} to the total number of time slots. This is not a constant value: it changes every time we schedule or unschedule an exam.
+	\begin{block}{Number of Unavailable Time Slots}
+		This is the number of time slots where there are exams in conflict with the current one.
 	\end{block}
 	\begin{block}{Number of Conflicts}
-		This is the number of conflicting exams with the current one. This number is a constant and it is given with the data of the problem.
+		This is the (constant) number of conflicting exams with the current one.
 	\end{block}
 	\end{frame}
 
@@ -87,8 +87,6 @@
 \framesubtitle{The First Critical Point}
 \begin{alertblock}{No More Feasible Slots}
 	In more complex instances our program gets stuck because the number of unavailable slots of the current exam reaches the maximum.
-	
-	The creation process is \alert{blocked}.
 \end{alertblock}
 \pause
 \begin{block}{Solution}
@@ -101,7 +99,7 @@
 \frametitle{\thesection.\thesubsection \ \insertsubsection}
 \framesubtitle{The Second Critical Point}
 \begin{alertblock}{Instable situations}
-	In more complex instances, sometimes the program gets in an endless procedure caused by the solution of the previous critical point. It tries to unschedule conflicting exams \alert{without finding the way to conclude} the creation process.
+	In more complex instances, sometimes the program gets in an endless procedure: it tries to unschedule conflicting exams \alert{without finding the way to conclude} the creation process.
 
 \end{alertblock}
 \pause
@@ -155,6 +153,20 @@
 	
 
    \subsection{Local Search}
+   
+   \begin{frame}
+   \frametitle{\thesection.\thesubsection \ \insertsubsection}
+   \framesubtitle{Characteristics of Local Search}
+   	
+   \begin{itemize}
+   	\item Best Improvement
+   	\item Generation of Neighborhood: O($e$)
+   	\item Solution Evaluation: O($e$)
+   	\item Real case less than O($e^2$), on average
+   	\item Repeates while improvement is above a minimum
+   \end{itemize}
+ 
+\end{frame}
 
 	\begin{frame}
 	   \frametitle{\thesection.\thesubsection \ \insertsubsection}
@@ -179,6 +191,17 @@
 	\end{algorithm}}
 \end{columns}
 	\end{frame}
+
+\begin{frame}
+\frametitle{\thesection.\thesubsection \ \insertsubsection}
+\framesubtitle{Results}
+
+\begin{itemize}
+	\item Provides the initial delta for Simulated Annealing
+	\item Minimum improvement of 10\% works well with given instances
+\end{itemize}
+
+\end{frame}
 
 \section{Simulated Mutant Annealing}
 
