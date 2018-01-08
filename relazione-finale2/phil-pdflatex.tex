@@ -158,15 +158,18 @@
 
 	\begin{frame}
 	   \frametitle{\thesection.\thesubsection \ \insertsubsection}
-	   \scalebox{.6}{
+	   \framesubtitle{The Pseudo-Code}
+	   	\begin{columns}[onlytextwidth]
+	   		\column{1\textwidth}
+	   \scalebox{.7}{
 	\begin{algorithm}[H]
 		%		$sol \gets \text{current solution (even an empty one)}$\;
 		$list \gets \text{all exams to be scheduled, sorted by }\textit{number of conflicts}$\;
 		\ForEach{exam $E$ in $list$}{
 			$T \gets \text{time slot where }E\text{ is scheduled}$\;
-			$C \gets \text{cost of exam }E\text{ in }T\text{ time slot according to objective function}$\;
+			$C \gets \text{cost of }E\text{ in }T\text{ according to objective function}$\;
 			\ForEach{time slot $T'\neq T$}{
-				$C' \gets \text{cost of exam }E\text{ in }T'\text{ time slot according to objective function}$\;
+				$C' \gets \text{cost of }E\text{ in }T'\text{ according to objective function}$\;
 				\If{$C'<C$}{
 					schedule $E$ in $T'$\;
 					$C \gets C'$\;
@@ -174,6 +177,7 @@
 			}
 		}
 	\end{algorithm}}
+\end{columns}
 	\end{frame}
 
 \section{Simulated Mutant Annealing}
