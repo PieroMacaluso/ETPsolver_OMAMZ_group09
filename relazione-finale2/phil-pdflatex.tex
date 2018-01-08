@@ -60,7 +60,7 @@
 	\begin{itemize}
 		\item Simulated annealing with mutations
 		\item Local search
-		\item Swapping time slot
+		\item Swapping time slots
 		\item Multistart
 	\end{itemize}
 	\end{frame}
@@ -73,24 +73,24 @@
 	   \frametitle{\thesection.\thesubsection \ \insertsubsection}
 	   \framesubtitle{Ordering Exams}
 	   
-	\textbf{Goal:} give a useful \alert{order} to the whole set of exams:
+	\textbf{Goal}: \alert{sort} in a useful way the whole set of exams:
 	\begin{block}{Number of Unavailable Time Slots}
-		This is the number of time slots where there are exams in conflict with the current one.
+		The number of time slots where there are exams in conflict with current one.
 	\end{block}
 	\begin{block}{Number of Conflicts}
-		This is the (constant) number of conflicting exams with the current one.
+		The (constant) number of conflicting exams with current one.
 	\end{block}
 	\end{frame}
 
 \begin{frame}
 \frametitle{\thesection.\thesubsection \ \insertsubsection}
 \framesubtitle{The First Critical Point}
-\begin{alertblock}{No More Feasible Slots}
-	In more complex instances our program gets stuck because the number of unavailable slots of the current exam reaches the maximum.
+\begin{alertblock}{No More Available Time Slots}
+	In most instances our program got stuck because when almost all exams have been scheduled, remaining ones have no available time slots.
 \end{alertblock}
-\pause
+%\pause
 \begin{block}{Solution}
-	 If the program goes in the tipping point, the software tries to find a way to escape \alert{unscheduling all conflicting exams} and continuing the loop till no exams to be scheduled remain.
+	 If the algorithm detects that it got stuck, it tries to ``escape'' by \alert{unscheduling all conflicting exams} and continuing to loop until all exams have been scheduled.
 \end{block}
 
 \end{frame}
@@ -98,15 +98,13 @@
 \begin{frame}
 \frametitle{\thesection.\thesubsection \ \insertsubsection}
 \framesubtitle{The Second Critical Point}
-\begin{alertblock}{Instable situations}
-	In more complex instances, sometimes the program gets in an endless procedure: it tries to unschedule conflicting exams \alert{without finding the way to conclude} the creation process.
+\begin{alertblock}{Unstable situations}
+	Sometimes the algorithm loops for too long or forever: it keeps unscheduling exams and never manages to schedule all of them.
 
 \end{alertblock}
-\pause
+%\pause
 \begin{block}{Solution}
-	\alert{Fixing a maximum number of retries}.
-	
-	If the software reaches this limit, the creation process restart from the initial point.
+	Setting a maximum number of retries (``unschedule all conflicting exams''). If limit is reached, return an incomplete solution that will be discarded. % il fatto che viene chiamato in un while e quindi riprova alla slide dopo
 \end{block}
 
 \end{frame}
@@ -121,7 +119,8 @@
 		%		$backup \gets \text{current solution (even an empty one)}$\;
 		%		$sol \gets \text{current solution (even an empty one)}$\;
 		$retries \gets 0$\;
-		$list \gets \text{exams to be scheduled sorted}$\;
+		$list \gets \text{exams to be scheduled}$\;
+		sort $list$\;
 		\While{$list$ is not empty}{
 			\If{\textit{retries} > limit}{
 				\Return{\alert{no feasible solution found}}\;
@@ -159,11 +158,12 @@
    \framesubtitle{Characteristics of Local Search}
    	
    \begin{itemize}
+   	\item Try to place every exam in currently best available time slot
    	\item Best Improvement
    	\item Generation of Neighborhood: O($e$)
    	\item Solution Evaluation: O($e$)
    	\item Real case less than O($e^2$), on average
-   	\item Repeates while improvement is above a minimum
+   	\item Repeats while improvement is above a minimum threshold
    \end{itemize}
  
 \end{frame}
@@ -198,7 +198,9 @@
 
 \begin{itemize}
 	\item Provides the initial delta for Simulated Annealing
-	\item Minimum improvement of 10\% works well with given instances
+	\item Minimum improvement of 10\% works well with given instances (1-2 iterations)
+	\item Stops in around 5 iterations even with 0.001\%
+	\item Minimum improvement depends on temperature % magari si può dire per spiegare il punto di sopra, o vice versa, per non scrivere proprio TUTTO?
 \end{itemize}
 
 \end{frame}
@@ -209,21 +211,50 @@
 
 \begin{frame}
 \frametitle{\thesection.\thesubsection \ \insertsubsection}
-ciao
+\begin{itemize}
+	% TODO: abbozzo
+	\item Probability calculated according to standard formula
+	\item Initial temperature to give 50\% initial probability
+\end{itemize}
 \end{frame}
 
 \subsection{Neighbor Generation/Mutation}
 
 \begin{frame}
 \frametitle{\thesection.\thesubsection \ \insertsubsection}
-ciao
+\begin{enumerate}
+	% TODO: abbozzo
+	\item Generate a neighbor by unscheduling a percentage of exams and rescheduling them
+	\item Apply local search
+	\item Apply time slot swapping
+	\item Compare with current (thread-local) solution
+	\item If improved, also compare with global best
+\end{enumerate}
+\end{frame}
+
+\begin{frame}
+\frametitle{\thesection.\thesubsection \ \insertsubsection}
+\framesubtitle{Parameter tuning}
+\begin{enumerate}
+	% TODO: abbozzo
+	\item Percentages decrease with temperature % non "linearly" perché unscheduled si ferma a 10% anche se andrebbe sotto, non è lineare
+	\item Unscheduled exams from 30\% to 10\%
+	\item More than 50\% too slow, 10\% mixed results % "below 10% was pointless" si aggiunge a voce
+	\item Local search minimum improvement from 10\% to almost 0\%
+\end{enumerate}
 \end{frame}
 
 \subsection{Time Slot Swap}
 
 \begin{frame}
 \frametitle{\thesection.\thesubsection \ \insertsubsection}
-ciao
+\begin{itemize}
+	% TODO: abbozzo
+	\item Try to swap every couple of time slots % sorvoliamo sulla complessità
+	\item Big improvements on most instances
+	\item Local search, then swap
+	\item Other way around didn't work very well on instance 6
+\end{itemize}
 \end{frame}
 
 \section{Conclusions}
@@ -232,7 +263,15 @@ ciao
 
 \begin{frame}
 \frametitle{\thesection.\thesubsection \ \insertsubsection}
-ciao
+\begin{itemize}
+	% TODO: abbozzo
+	\item Candlestick charts are cool
+	\item Instance 1 is best, 6 is worse
+	\item Average gap around 8\% elsewhere
+	\item Standard deviation relatively small and constant across instances
+	\item Denser instances like 2 and 7 sometimes give ``exceptional'' results (lower minimum)
+	\item Benchmarking script
+\end{itemize}
 \end{frame}
 
 \subsection{The end}
@@ -240,7 +279,7 @@ ciao
 \begin{frame}
 Thanks for listening.
 \vfill
-Our code is avalable on Github: \href{https://github.com/pimack/OMA9}{github.com/pimack/OMA9}
+Our source code is avalable on Github: \href{https://github.com/pimack/OMA9}{github.com/pimack/OMA9}
 \end{frame}
 
 \end{document}
