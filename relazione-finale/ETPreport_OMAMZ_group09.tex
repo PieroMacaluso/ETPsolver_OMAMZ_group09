@@ -198,8 +198,8 @@
 	
 	We used a profiler multiple times to find performance bottlenecks in code. This for example suggested us the idea to add caching in the Greedy algorithm (which reduced its running time from 360 ms to 120 ms, a considerable improvement since it runs hundreds of times) and using \textsc{HashMap}s with low load factors instead of \textsc{TreeMap}s.
 	
-	\paragraph{Running for longer than 30 seconds}
+	\paragraph{Optimal run time}
 	
-	From limited testing, we found that the program yields increasingly better solutions for 2-3 minutes, then usually they stop improving. We haven't tried running  it for more than 5 minutes.
+	From limited testing, we found that the program yields increasingly better solutions for 1-2 minutes depending on the instance, then usually they stop improving. We haven't tried running  it for more than 5 minutes. Most of the experiments we have done were with 30 seconds, which is a reasonable time to obtain ``good'' solutions.
 	
 \end{document}

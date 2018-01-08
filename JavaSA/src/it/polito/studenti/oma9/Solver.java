@@ -27,7 +27,7 @@ public class Solver implements Runnable {
 		// Save it, as a starting point
 		Data.getInstance().compareAndUpdateBest(initial);
 
-		System.out.printf(Thread.currentThread().getName() + " Initial solution: %.6f\n              LS solution: %.6f\n", unoptimizedCost, initial.solutionCost());
+		//System.out.printf(Thread.currentThread().getName() + " Initial solution: %.6f\n              LS solution: %.6f\n", unoptimizedCost, initial.solutionCost());
 
 		// Calculate delta and start SA.
 		delta = unoptimizedCost - initial.solutionCost();

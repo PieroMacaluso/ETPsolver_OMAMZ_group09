@@ -354,9 +354,9 @@ class Solution {
 		while(!done) {
 			neighbor = new Solution(this);
 			done = neighbor.unschedulePercentage(percentage) || neighbor.tryScheduleRemaining();
-			if(!done) {
-				System.out.println(Thread.currentThread().getName() + " retrying neighbor generation...");
-			}
+			//if(!done) {
+				//System.out.println(Thread.currentThread().getName() + " retrying neighbor generation...");
+			//}
 		}
 
 		return neighbor;
