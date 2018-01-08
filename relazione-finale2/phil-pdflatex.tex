@@ -6,9 +6,9 @@
 %% conditions are required by law.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\documentclass[notes]{beamer}       % print frame + notes
+%\documentclass[notes]{beamer}       % print frame + notes
 %\documentclass[notes=only]{beamer}   % only notes
-%\documentclass{beamer} 
+\documentclass{beamer} 
 \usetheme[faculty=phil]{fibeamer}
 \usepackage[utf8]{inputenc}
 \usepackage[
@@ -27,6 +27,8 @@
 \subtitle{Optimization Methods and Algorithms\\Group 9} %% title page.
 \author{s252894 - Piero Macaluso\\s246422 - Ludovico Pavesi\\s254036 - Alberto Romano\\s217189 - Lorenzo Manicone\\s246422 - Donato Tortoriello}
 %% These additional packages are used within the document:
+\usepackage[]{algorithm2e}
+
 \usepackage{ragged2e}  % `\justifying` text
 \usepackage{booktabs}  % Tables
 \usepackage{tabularx}
@@ -36,10 +38,14 @@
 \usepackage{url}       % `\url`s
 \usepackage{listings}  % Code listings
 \frenchspacing
+\hypersetup{pdfpagemode=FullScreen}
 \begin{document}
   \frame{\maketitle
  		\note{\textbf{Piero}: Hi, we are the Group 9 of the course Optimization Methods and Algorthms. This group is composed by me, Piero Macaluso, Ludovico Pavesi, Alberto Romano, Lorenzo Manicone and Donato Tortoriello.}}
-
+	\begin{frame}<beamer>
+	\frametitle{Outline}
+	\tableofcontents
+\end{frame}
   \AtBeginSection[]{% Print an outline at the beginning of sections
     \begin{frame}<beamer>
       \frametitle{Outline}
@@ -63,17 +69,111 @@
    
    \subsection{Scheduling Exams}
 
-	\begin{frame}.
-	  \setbeamertemplate{footline}{} 
+	\begin{frame}
 	   \frametitle{\thesection.\thesubsection \ \insertsubsection}
-	ciao
+	   \framesubtitle{Ordering Exams}
+	   
+	\textbf{Goal:} give a useful \alert{order} to the whole set of exams:
+	\begin{block}{Number of Time Slot Unavailable}
+		This is the number of time slots where there are exams in conflict with the current one. This number could be less than or \alert{equal} to the total number of time slots. This is not a constant value: it changes every time we schedule or unschedule an exam.
+	\end{block}
+	\begin{block}{Number of Conflicts}
+		This is the number of conflicting exams with the current one. This number is a constant and it is given with the data of the problem.
+	\end{block}
 	\end{frame}
+
+\begin{frame}
+\frametitle{\thesection.\thesubsection \ \insertsubsection}
+\framesubtitle{The First Critical Point}
+\begin{alertblock}{No More Feasible Slots}
+	In more complex instances our program gets stuck because the number of unavailable slots of the current exam reaches the maximum.
+	
+	The creation process is \alert{blocked}.
+\end{alertblock}
+\pause
+\begin{block}{Solution}
+	 If the program goes in the tipping point, the software tries to find a way to escape \alert{unscheduling all conflicting exams} and continuing the loop till no exams to be scheduled remain.
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{\thesection.\thesubsection \ \insertsubsection}
+\framesubtitle{The Second Critical Point}
+\begin{alertblock}{Instable situations}
+	In more complex instances, sometimes the program gets in an endless procedure caused by the solution of the previous critical point. It tries to unschedule conflicting exams \alert{without finding the way to conclude} the creation process.
+
+\end{alertblock}
+\pause
+\begin{block}{Solution}
+	\alert{Fixing a maximum number of retries}.
+	
+	If the software reaches this limit, the creation process restart from the initial point.
+\end{block}
+
+\end{frame}
+
+	\begin{frame}
+	\frametitle{\thesection.\thesubsection \ \insertsubsection}
+	\framesubtitle{The Pseudo-Code}
+	\begin{columns}[onlytextwidth]
+	\column{.65\textwidth}
+	\scalebox{.6}{
+	\begin{algorithm}[H]
+		%		$backup \gets \text{current solution (even an empty one)}$\;
+		%		$sol \gets \text{current solution (even an empty one)}$\;
+		$retries \gets 0$\;
+		$list \gets \text{exams to be scheduled sorted}$\;
+		\While{$list$ is not empty}{
+			\If{\textit{retries} > limit}{
+				\Return{\alert{no feasible solution found}}\;
+				%				$sol \gets backup$\;
+				%				restart the alogithm\;
+			}
+			$E \gets \textit{ first element from }list$\;
+			$T \gets \textit{ random available time slot}$\;
+			\eIf{$T$ is valid (not null)}{
+				schedule $E$ in $T$\;
+				remove $E$ from $list$\;
+			}{
+				\ForEach{conflicting exam $C$ of $E$}{
+					unschedule $C$\;
+				}
+				$retries \gets retries + 1$\;
+			}
+			sort $list$ again\;
+		}
+		\Return{\alert{feasible solution found}}\;
+	\end{algorithm}}
+	\column{.35\textwidth}
+\begin{block}{While Loop}
+	This code is in a while loop that continues to loop till the code returns \textbf{true}.
+\end{block}
+\end{columns}
+	\end{frame}
+
+	
 
    \subsection{Local Search}
 
 	\begin{frame}
 	   \frametitle{\thesection.\thesubsection \ \insertsubsection}
-	ciao
+	   \scalebox{.6}{
+	\begin{algorithm}[H]
+		%		$sol \gets \text{current solution (even an empty one)}$\;
+		$list \gets \text{all exams to be scheduled, sorted by }\textit{number of conflicts}$\;
+		\ForEach{exam $E$ in $list$}{
+			$T \gets \text{time slot where }E\text{ is scheduled}$\;
+			$C \gets \text{cost of exam }E\text{ in }T\text{ time slot according to objective function}$\;
+			\ForEach{time slot $T'\neq T$}{
+				$C' \gets \text{cost of exam }E\text{ in }T'\text{ time slot according to objective function}$\;
+				\If{$C'<C$}{
+					schedule $E$ in $T'$\;
+					$C \gets C'$\;
+				}
+			}
+		}
+	\end{algorithm}}
 	\end{frame}
 
 \section{Simulated Mutant Annealing}
@@ -117,3 +217,4 @@ Our code is avalable on Github: \href{https://github.com/pimack/OMA9}{github.com
 \end{frame}
 
 \end{document}
+po
