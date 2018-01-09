@@ -24,8 +24,8 @@
 %% These macros specify information about the presentation
 % TODO: The date
 \title{Examination Timetabling Problem} %% that will be typeset on the
-\subtitle{Optimization Methods and Algorithms\\Group 9} %% title page.
-\author{s252894 - Piero Macaluso\\s246422 - Ludovico Pavesi\\s254036 - Alberto Romano\\s217189 - Lorenzo Manicone\\s246422 - Donato Tortoriello}
+\subtitle{Optimization Methods and Algorithms\\Group 9 - A.Y. 2017/2018} %% title page.
+\author{s252894 - Piero Macaluso\\s246422 - Ludovico Pavesi\\s254036 - Alberto Romano\\s217189 - Lorenzo Manicone\\s205639 - Donato Tortoriello}
 %% These additional packages are used within the document:
 \usepackage[]{algorithm2e}
 
@@ -58,6 +58,7 @@
 	\frametitle{\thesection \ \insertsection}
 	Our algorithm is based on:
 	\begin{itemize}
+		\item Pseudo-Greedy for Initial Solution Generation
 		\item Simulated annealing with mutations
 		\item Local search
 		\item Swapping time slots
@@ -71,7 +72,7 @@
 
 	\begin{frame}
 	   \frametitle{\thesection.\thesubsection \ \insertsubsection}
-	   \framesubtitle{Ordering Exams}
+	   \framesubtitle{Sorting Exams}
 	   
 	\textbf{Goal}: \alert{sort} in a useful way the whole set of exams:
 	\begin{block}{Number of Unavailable Time Slots}
@@ -155,9 +156,10 @@
    
    \begin{frame}
    \frametitle{\thesection.\thesubsection \ \insertsubsection}
-   \framesubtitle{Characteristics of Local Search}
+   \framesubtitle{Characteristics}
    	
    \begin{itemize}
+   	\item Sort exams by number of conflicts
    	\item Try to place every exam in currently best available time slot
    	\item Best Improvement
    	\item Generation of Neighborhood: O($e$)
@@ -197,10 +199,11 @@
 \framesubtitle{Results}
 
 \begin{itemize}
-	\item Provides the initial delta for Simulated Annealing
+	%TODO: check
 	\item Minimum improvement of 10\% works well with given instances (1-2 iterations)
 	\item Stops in around 5 iterations even with 0.001\%
 	\item Minimum improvement depends on temperature % magari si può dire per spiegare il punto di sopra, o vice versa, per non scrivere proprio TUTTO?
+	\item Provides the initial delta for Simulated Annealing
 \end{itemize}
 
 \end{frame}
@@ -214,7 +217,7 @@
 \framesubtitle{Initial Temperature}
 	According to the theory of Simulated Annealing, the probability $p$ of taking a worse solution is described by:
 	\begin{gather}\label{eq:3.1}
-	p = e^{\frac{-(F(x)-F(\tilde{x}))}{T}}\\
+	p = e^{\frac{F(\tilde{x})-F(x)}{T}}\\
 \begin{aligned}
 \text{where } &F(x) \text{ is the solution cost of the current solution}\\
 &F(\tilde{x}) \text{ is the solution cost of the neighbor}\\
@@ -256,8 +259,8 @@ T = \frac{\Delta}{log(0.5)}\\\notag
 \begin{enumerate}
 	% TODO: abbozzo
 	\item Generate a neighbor by \alert{unscheduling a percentage of exams} and rescheduling them
+	\item Apply Time Slot swapping
 	\item Apply local search
-	\item Apply time slot swapping
 	\item Compare with current (thread-local) solution
 	\item If improved, also compare with global best
 \end{enumerate}
@@ -266,9 +269,10 @@ T = \frac{\Delta}{log(0.5)}\\\notag
 \begin{frame}
 \frametitle{\thesection.\thesubsection \ \insertsubsection}
 \framesubtitle{Parameter tuning}
+	Percentages decrease with temperature:
 \begin{itemize}
-	% TODO: abbozzo
-	\item Percentages decrease with temperature % non "linearly" perché unscheduled si ferma a 10% anche se andrebbe sotto, non è lineare
+
+	% TODO: abbozzo  % non "linearly" perché unscheduled si ferma a 10% anche se andrebbe sotto, non è lineare
 	\item Unscheduled exams from 30\% to 10\%
 	\begin{itemize}
 		\item More than 50\% too slow, 10\% mixed results % "below 10% was pointless" si aggiunge a voce
@@ -281,16 +285,28 @@ T = \frac{\Delta}{log(0.5)}\\\notag
 
 \begin{frame}
 \frametitle{\thesection.\thesubsection \ \insertsubsection}
-\
+   \framesubtitle{Characteristics}
+   \begin{exampleblock} {Tries to swap every couple of time slots}
+
+	% TODO: abbozzo
+	
+	Complexity O($t^2$), where $t$ is the number of time slots 
+
+	\end{exampleblock}
+\end{frame}
+\begin{frame}
+\frametitle{\thesection.\thesubsection \ \insertsubsection}
+\framesubtitle{Results}
 \begin{itemize}
 	% TODO: abbozzo
-	\item Try to swap every couple of time slots % sorvoliamo sulla complessità
 	\item Big improvements on most instances
-	\item Local search, then swap
+	\item Time Slot Swap, then Local Search
+	\begin{itemize}
 	\item Other way around didn't work very well on instance 6
+	\end{itemize}
+	
 \end{itemize}
 \end{frame}
-
 \section{Conclusions}
 
 \subsection{Statistics}
@@ -321,7 +337,8 @@ T = \frac{\Delta}{log(0.5)}\\\notag
 \framesubtitle{See more on Github}
 Thanks for listening.
 \vfill
-Our source code is avalable on Github: \href{https://github.com/pimack/OMA9}{\underline{github.com/pimack/OMA9}}
+Our source code is avalable on Github:
+\textbf{pimack/ETPsolver\_OMAMZ\_group09} -  \href{https://goo.gl/VgfKrL}{\underline{goo.gl/VgfKrL}}
 \end{frame}
 
 \end{document}
