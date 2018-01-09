@@ -207,24 +207,55 @@
 
 \section{Simulated Mutant Annealing}
 
-\subsection{Temperature and Probability Calibration}
+\subsection{Parameter Calibration}
 
 \begin{frame}
 \frametitle{\thesection.\thesubsection \ \insertsubsection}
+\framesubtitle{Initial Temperature}
+	According to the theory of Simulated Annealing, the probability $p$ of taking a worse solution is described by:
+	\begin{gather}\label{eq:3.1}
+	p = e^{\frac{-(F(x)-F(\tilde{x}))}{T}}\\
+\begin{aligned}
+\text{where } &F(x) \text{ is the solution cost of the current solution}\\
+&F(\tilde{x}) \text{ is the solution cost of the neighbor}\\
+&T \text{ is the current temperature}
+\end{aligned}\notag
+	\end{gather}
+	
+\vfill
 \begin{itemize}
-	% TODO: abbozzo
-	\item Probability calculated according to standard formula
-	\item Initial temperature to give 50\% initial probability
+	\item The lower is the temperature, the lower is the probability
+	\item The higher is the delta, the lower is the probability
 \end{itemize}
+
+\end{frame}
+\begin{frame}
+\frametitle{\thesection.\thesubsection \ \insertsubsection}
+\framesubtitle{Initial Temperature}
+\begin{itemize}
+	\item Starting Probability 0.5
+	\item $F(\tilde{x})-F(x)$ is the initial delta ($\Delta$)
+\end{itemize}
+\begin{gather}\label{eq:3.2}
+0.5 = e^{\frac{\Delta}{T}}\notag\\
+log(0.5) = \frac{\Delta}{T}\notag\\
+T = \frac{\Delta}{log(0.5)}\\\notag
+\end{gather}
+
+\begin{itemize}
+	\item Different temperature for different instances
+\end{itemize}
+
 \end{frame}
 
 \subsection{Neighbor Generation/Mutation}
 
 \begin{frame}
 \frametitle{\thesection.\thesubsection \ \insertsubsection}
+\framesubtitle{Mutant Neighbor}
 \begin{enumerate}
 	% TODO: abbozzo
-	\item Generate a neighbor by unscheduling a percentage of exams and rescheduling them
+	\item Generate a neighbor by \alert{unscheduling a percentage of exams} and rescheduling them
 	\item Apply local search
 	\item Apply time slot swapping
 	\item Compare with current (thread-local) solution
@@ -235,19 +266,22 @@
 \begin{frame}
 \frametitle{\thesection.\thesubsection \ \insertsubsection}
 \framesubtitle{Parameter tuning}
-\begin{enumerate}
+\begin{itemize}
 	% TODO: abbozzo
 	\item Percentages decrease with temperature % non "linearly" perché unscheduled si ferma a 10% anche se andrebbe sotto, non è lineare
 	\item Unscheduled exams from 30\% to 10\%
-	\item More than 50\% too slow, 10\% mixed results % "below 10% was pointless" si aggiunge a voce
+	\begin{itemize}
+		\item More than 50\% too slow, 10\% mixed results % "below 10% was pointless" si aggiunge a voce
+	\end{itemize}
 	\item Local search minimum improvement from 10\% to almost 0\%
-\end{enumerate}
+\end{itemize}
 \end{frame}
 
 \subsection{Time Slot Swap}
 
 \begin{frame}
 \frametitle{\thesection.\thesubsection \ \insertsubsection}
+\
 \begin{itemize}
 	% TODO: abbozzo
 	\item Try to swap every couple of time slots % sorvoliamo sulla complessità
@@ -263,10 +297,16 @@
 
 \begin{frame}
 \frametitle{\thesection.\thesubsection \ \insertsubsection}
+\framesubtitle{CandleStick Chart of Gaps}
+	\scalebox{0.4}{\includegraphics{resources/candlelight.png}}
+\end{frame}
+
+\begin{frame}
+\frametitle{\thesection.\thesubsection \ \insertsubsection}
+\framesubtitle{Some Considerations}
 \begin{itemize}
 	% TODO: abbozzo
-	\item Candlestick charts are cool
-	\item Instance 1 is best, 6 is worse
+	\item \textit{Instance01} is the \alert{best}, \textit{Instance06} is the \alert{worst}
 	\item Average gap around 8\% elsewhere
 	\item Standard deviation relatively small and constant across instances
 	\item Denser instances like 2 and 7 sometimes give ``exceptional'' results (lower minimum)
@@ -274,12 +314,14 @@
 \end{itemize}
 \end{frame}
 
-\subsection{The end}
+\subsection{Source Code}
 
 \begin{frame}
+\frametitle{\thesection.\thesubsection \ \insertsubsection}
+\framesubtitle{See more on Github}
 Thanks for listening.
 \vfill
-Our source code is avalable on Github: \href{https://github.com/pimack/OMA9}{github.com/pimack/OMA9}
+Our source code is avalable on Github: \href{https://github.com/pimack/OMA9}{\underline{github.com/pimack/OMA9}}
 \end{frame}
 
 \end{document}
