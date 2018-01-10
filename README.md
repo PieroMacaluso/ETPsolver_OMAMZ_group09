@@ -9,4 +9,4 @@ This repo contains:
 - Final report and presentation (presentazione-finale and relazione-finale) about the algorithm
 - JavaGA-old: attempted (and soon abandoned) solver based on genetic algorithm
 - Benchmark scripts (benchmark-script and some files in instances directory)
-- Other mixed bits and bobs (test instances, testing scripts, etc...
+- Other mixed bits and bobs (test instances, testing scripts, etc...)
