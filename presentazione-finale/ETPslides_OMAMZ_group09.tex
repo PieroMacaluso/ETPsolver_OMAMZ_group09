@@ -145,7 +145,7 @@
 	\end{algorithm}}
 	\column{.35\textwidth}
 \begin{block}{While Loop}
-	This code is in a while loop that continues to loop till the code returns \textbf{true}.
+	This code is in a while loop that continues to loop until the code returns \textbf{true}.
 \end{block}
 \end{columns}
 	\end{frame}
@@ -161,7 +161,7 @@
    \begin{itemize}
    	\item Sort exams by number of conflicts
    	\item Try to place every exam in currently best available time slot
-   	\item Best Improvement
+   	\item Best Improvement Approach
    	\item Generation of Neighborhood: O($e$)
    	\item Solution Evaluation: O($e$)
    	\item Real case less than O($e^2$), on average
@@ -170,29 +170,7 @@
  
 \end{frame}
 
-	\begin{frame}
-	   \frametitle{\thesection.\thesubsection \ \insertsubsection}
-	   \framesubtitle{The Pseudo-Code}
-	   	\begin{columns}[onlytextwidth]
-	   		\column{1\textwidth}
-	   \scalebox{.7}{
-	\begin{algorithm}[H]
-		%		$sol \gets \text{current solution (even an empty one)}$\;
-		$list \gets \text{all exams to be scheduled, sorted by }\textit{number of conflicts}$\;
-		\ForEach{exam $E$ in $list$}{
-			$T \gets \text{time slot where }E\text{ is scheduled}$\;
-			$C \gets \text{cost of }E\text{ in }T\text{ according to objective function}$\;
-			\ForEach{time slot $T'\neq T$}{
-				$C' \gets \text{cost of }E\text{ in }T'\text{ according to objective function}$\;
-				\If{$C'<C$}{
-					schedule $E$ in $T'$\;
-					$C \gets C'$\;
-				}
-			}
-		}
-	\end{algorithm}}
-\end{columns}
-	\end{frame}
+	
 
 \begin{frame}
 \frametitle{\thesection.\thesubsection \ \insertsubsection}
@@ -206,6 +184,30 @@
 	\item Provides the initial delta for Simulated Annealing
 \end{itemize}
 
+\end{frame}
+
+\begin{frame}
+\frametitle{\thesection.\thesubsection \ \insertsubsection}
+\framesubtitle{The Pseudo-Code}
+\begin{columns}[onlytextwidth]
+	\column{1\textwidth}
+	\scalebox{.7}{
+		\begin{algorithm}[H]
+			%		$sol \gets \text{current solution (even an empty one)}$\;
+			$list \gets \text{all exams to be scheduled, sorted by }\textit{number of conflicts}$\;
+			\ForEach{exam $E$ in $list$}{
+				$T \gets \text{time slot where }E\text{ is scheduled}$\;
+				$C \gets \text{cost of }E\text{ in }T\text{ according to objective function}$\;
+				\ForEach{available time slot $T'\neq T$}{
+					$C' \gets \text{cost of }E\text{ in }T'\text{ according to objective function}$\;
+					\If{$C'<C$}{
+						schedule $E$ in $T'$\;
+						$C \gets C'$\;
+					}
+				}
+			}
+	\end{algorithm}}
+\end{columns}
 \end{frame}
 
 \section{Simulated Mutant Annealing}
@@ -242,11 +244,11 @@
 \begin{gather}\label{eq:3.2}
 0.5 = e^{\frac{\Delta}{T}}\notag\\
 log(0.5) = \frac{\Delta}{T}\notag\\
-T = \frac{\Delta}{log(0.5)}\\\notag
+T = \frac{\Delta}{log(0.5)}
 \end{gather}
-
 \begin{itemize}
 	\item Different temperature for different instances
+	\item Cooling rate depends on remaining time.
 \end{itemize}
 
 \end{frame}
@@ -258,11 +260,14 @@ T = \frac{\Delta}{log(0.5)}\\\notag
 \framesubtitle{Mutant Neighbor}
 \begin{enumerate}
 	% TODO: abbozzo
-	\item Generate a neighbor by \alert{unscheduling a percentage of exams} and rescheduling them
-	\item Apply Time Slot swapping
-	\item Apply local search
+	\item Generate a neighbor by \alert{unscheduling a percentage of random exams} and randomly rescheduling them
+	\item Apply Time Slot Swap
+	\item Apply Local Search
 	\item Compare with current (thread-local) solution
-	\item If improved, also compare with global best
+	\begin{itemize}
+			\item If improved, also compare with \alert{global best}
+	\end{itemize}
+
 \end{enumerate}
 \end{frame}
 
@@ -293,28 +298,37 @@ T = \frac{\Delta}{log(0.5)}\\\notag
 	Complexity O($t^2$), where $t$ is the number of time slots 
 
 	\end{exampleblock}
-\end{frame}
-\begin{frame}
-\frametitle{\thesection.\thesubsection \ \insertsubsection}
-\framesubtitle{Results}
-\begin{itemize}
-	% TODO: abbozzo
-	\item Big improvements on most instances
-	\item Time Slot Swap, then Local Search
+\begin{block} {Results}
 	\begin{itemize}
-	\item Other way around didn't work very well on instance 6
+		% TODO: abbozzo
+		\item Big improvements on all instances
+		\item Time Slot Swap, then Local Search
+		\begin{itemize}
+			\item Other way around didn't work very well on instance 6
+		\end{itemize}
 	\end{itemize}
-	
-\end{itemize}
+\end{block}
+
+
+
+
 \end{frame}
 \section{Conclusions}
+
+
+
 
 \subsection{Statistics}
 
 \begin{frame}
 \frametitle{\thesection.\thesubsection \ \insertsubsection}
-\framesubtitle{CandleStick Chart of Gaps}
-	\scalebox{0.4}{\includegraphics{resources/candlelight.png}}
+\framesubtitle{Our Benchmarks}
+
+\scalebox{0.8}{\includegraphics{resources/benchmarks.png}}
+\begin{itemize}
+	\item 8 threads
+	\item 30 seconds
+\end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -329,6 +343,14 @@ T = \frac{\Delta}{log(0.5)}\\\notag
 	\item Benchmarking script
 \end{itemize}
 \end{frame}
+
+\begin{frame}
+\frametitle{\thesection.\thesubsection \ \insertsubsection}
+\framesubtitle{CandleStick Chart of Gaps}
+	\scalebox{0.4}{\includegraphics{resources/candlelight.png}}
+\end{frame}
+
+
 
 \subsection{Source Code}
 
